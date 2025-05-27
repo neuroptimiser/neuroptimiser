@@ -29,4 +29,6 @@ dependencies = [
     "tikzpy>=0.0.4",
     "lava-nc>=0.10.0",
     "pyqt5==5.15.11",
+    "seaborn>=0.13.2",
+    "schema>=0.7.7",
 ]

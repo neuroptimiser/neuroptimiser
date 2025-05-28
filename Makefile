@@ -3,11 +3,11 @@
 ## Sync the environment and reinstall editable package
 sync:
 	uv sync
-	pip install -e .
+	uv pip install -e .
 
 ## Install just the editable package
 editable:
-	pip install -e .
+	uv pip install -e .
 
 ## Compile dependencies and lock
 compile:

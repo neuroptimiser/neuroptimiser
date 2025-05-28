@@ -25,6 +25,20 @@ SPK_CORE_OPTIONS = ["TwoDimSpikingCore"]
 
 #%%
 class AbstractPerturbationNHeuristicModel(PyLoihiProcessModel):
+    """
+    Abstract model for a perturbation-based neuro-heuristic process.
+
+    Parameters
+    ----------
+    proc_params : dict
+        Dictionary containing the parameters for the process.
+
+    Attributes
+    ----------
+
+    alpha : float
+    """
+
     s_in:   PyInPort        = LavaPyType(PyInPort.VEC_DENSE, bool)
 
     p_in:   PyInPort        = LavaPyType(PyInPort.VEC_DENSE, _POS_FLOAT_)

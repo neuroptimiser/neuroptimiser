@@ -1,4 +1,5 @@
 import numpy as np
+import time
 from schema import SchemaError
 from lava.magma.core.process.process import AbstractProcess
 from lava.magma.core.process.variable import Var
@@ -88,12 +89,14 @@ class TwoDimSpikingCore(AbstractSpikingCore):
             self.proc_params["coeffs_values"] = _coeffs
 
         # Public Variables
+        seed = core_params.get("seed", int(time.time() * 1000) % (2 ** 32))
+        self.rng = np.random.default_rng(seed)
         self.v1 = Var(
             shape=self.shape,
-            init=np.random.uniform(-1.0, 1.0, size=self.shape))
+            init=self.rng.uniform(-1.0, 1.0, size=self.shape))
         self.v2 = Var(
             shape=self.shape,
-            init=np.random.uniform(-1.0, 1.0, size=self.shape))
+            init=self.rng.uniform(-1.0, 1.0, size=self.shape))
 
     # @staticmethod
     def _process_models_A(self, models_A=None):
@@ -151,8 +154,8 @@ class TwoDimSpikingCore(AbstractSpikingCore):
 
     def reset(self):
         super().reset()
-        self.v1.set(np.random.uniform(-1.0, 1.0, size=self.shape))
-        self.v2.set(np.random.uniform(-1.0, 1.0, size=self.shape))
+        self.v1.set(self.rng.uniform(-1.0, 1.0, size=self.shape))
+        self.v2.set(self.rng.uniform(-1.0, 1.0, size=self.shape))
 
 
 class Selector(AbstractProcess):

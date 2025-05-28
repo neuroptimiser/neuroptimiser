@@ -227,7 +227,7 @@ class AbstractSolver(ABC):
 class NeurOptimiser(AbstractSolver):
     def __init__(self,
                  config_params: dict = None,
-                 core_params: dict = None,
+                 core_params: dict|list[dict] = None,
                  selector_params: dict = None
                  ) -> None:
         super().__init__()
@@ -315,12 +315,24 @@ class NeurOptimiser(AbstractSolver):
         }
 
         if core_params is None:
-            self.core_params = [self.validate_params(core_params_schema, {}) for _ in range(self._config_params['num_agents'])]
-        else:
+            repeated_core_params = [{}] * self._config_params['num_agents']
+        elif isinstance(core_params, dict):
+            repeated_core_params = [core_params] * self._config_params['num_agents']
+        elif isinstance(core_params, list):
             if len(core_params) == self._config_params['num_agents']:
-                self.core_params = [self.validate_params(core_params_schema, sub_core_params) for sub_core_params in core_params]
+                repeated_core_params = core_params
+            elif len(core_params) == 1:
+                repeated_core_params = core_params * self._config_params['num_agents']
             else:
-                raise ValueError("core_params must either be a list of the same length as the number of agents or None")
+                raise ValueError(
+                    "core_params must be a list of the same length as the number of agents, a single dict, or a list with one dictionary to be repeated")
+        else:
+            raise ValueError("core_params must be either None, a dictionary, or a list of dictionaries")
+
+        self.core_params = [
+            self.validate_params(core_params_schema, sub_core_params)
+            for sub_core_params in repeated_core_params
+        ]
 
         # TODO: Verify the selector_params
         if selector_params is None:

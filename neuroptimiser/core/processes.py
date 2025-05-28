@@ -411,7 +411,6 @@ class PositionReceiver(AbstractProcess):
         # Ports inside the bound sending data in the proper shape
         self.p_out = OutPort(shape=internal_shape)
         self.fp_out = OutPort(shape=(internal_shape[0],))
-        # self.ack_out= OutPort(shape=(1,))
 
         # Pass the internal shape to the external shape
         self.proc_params["external_shape"] = external_shape

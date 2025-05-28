@@ -8,7 +8,7 @@ git worktree add /tmp/docs-deploy gh-pages
 
 # Copy built docs
 rm -rf /tmp/docs-deploy/*
-cp -r docs/_build/html/* /tmp/docs-deploy/
+rsync -av docs/_build/html/ /tmp/docs-deploy/
 
 # Commit and push
 cd /tmp/docs-deploy

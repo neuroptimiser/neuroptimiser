@@ -30,4 +30,8 @@ exclude_patterns = []
 
 autosummary_generate = True
 html_theme = 'sphinx_rtd_theme'
-html_static_path = ['_static']
+html_baseurl = "https://jcrvz.github.io/neuroptimiser/"
+html_theme_options = {
+    "navigation_with_keys": True,
+}
+html_static_path = ["_static"]

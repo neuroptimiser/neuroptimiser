@@ -11,7 +11,7 @@ from neuroptimiser.core.models import (
     SPK_CORE_OPTIONS
 )
 from neuroptimiser.utils import (
-    Topology, trs2o, get_arch_matrix, ADJ_MAT_OPTIONS, DYN_MODELS_KIND
+    trs2o, get_arch_matrix, ADJ_MAT_OPTIONS, DYN_MODELS_KIND
 )
 
 from lava.magma.core.run_conditions import RunSteps

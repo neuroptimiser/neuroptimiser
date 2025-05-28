@@ -44,7 +44,7 @@ If you're new to neuromorphic computing or heuristic search, we recommend starti
 API Reference
 =============
 
-.. automodule:: neuroptimiser.models
+.. automodule:: neuroptimiser.core.models
    :members:
    :undoc-members:
    :show-inheritance:

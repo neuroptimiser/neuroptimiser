@@ -3,12 +3,12 @@
 # Build docs
 make -C docs html
 
-# Switch to gh-pages branch
+# Clean and prepare temporary deploy folder
+rm -rf /tmp/docs-deploy/*
 git worktree add /tmp/docs-deploy gh-pages
 
 # Copy built docs
-rm -rf /tmp/docs-deploy/*
-rsync -av docs/_build/html/ /tmp/docs-deploy/
+rsync -av docs/build/html/ /tmp/docs-deploy/
 
 # Commit and push
 cd /tmp/docs-deploy

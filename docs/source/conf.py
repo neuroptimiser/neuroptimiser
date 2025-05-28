@@ -33,5 +33,7 @@ html_theme = 'sphinx_rtd_theme'
 html_baseurl = "https://jcrvz.github.io/neuroptimiser/"
 html_theme_options = {
     "navigation_with_keys": True,
+    "body_max_width": "100%",
 }
 html_static_path = ["_static"]
+html_extra_path = ['.nojekyll']

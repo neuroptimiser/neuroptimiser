@@ -39,8 +39,6 @@ If you're new to neuromorphic computing or heuristic search, we recommend starti
    :maxdepth: 2
    :caption: Contents:
 
-   # modules
-
 API Reference
 =============
 

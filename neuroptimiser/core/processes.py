@@ -21,8 +21,6 @@ class AbstractSpikingCore(AbstractProcess):
         num_dimensions  = kwargs.get("num_dimensions", 2)
         init_position   = kwargs.get("init_position", None)
         num_neighbours  = kwargs.get("num_neighbours", 0)
-        # seed            = kwargs.get("seed", 69)
-        # self.proc_params["seed"] = seed
 
         self.shape = (num_dimensions,)
         shape_fx = (1,)
@@ -33,7 +31,6 @@ class AbstractSpikingCore(AbstractProcess):
         start_position = init_position if init_position is not None else np.random.uniform(-1, 1, self.shape)
 
         # Inports
-        # self.ack_in             = InPort(shape=(1,)) # ack_particular, ack_global, ack_neighbours
         self.s_in = InPort(shape=self.shape)
         self.p_in = InPort(shape=self.shape)
         self.fp_in = InPort(shape=shape_fx)
@@ -76,11 +73,7 @@ class TwoDimSpikingCore(AbstractSpikingCore):
 
         # Read and prepare the specific parameters
         if _name in ["linear", "izhikevich"]:
-            # self.proc_params["core_name"]    = _name
-            # self.proc_params["core_dt"]      = core_params.get("dt", 0.01)
-            # self.proc_params["core_approx"]  = core_params.get("approx", "euler")
             models_coeffs               = core_params.get("coeffs", None)
-            #print(f"[agent:core] {_name}.coeffs: {models_coeffs}")
 
             if _name == "izhikevich":
                 _coeffs = self._process_izh_coeffs(models_coeffs)
@@ -174,7 +167,6 @@ class Selector(AbstractProcess):
         self.proc_params["function"] = function
 
         # Inports
-        # self.ack_in = InPort(shape=(1,))
         self.x_in = InPort(shape=shape)
 
         # Variables
@@ -182,7 +174,6 @@ class Selector(AbstractProcess):
         self.fp = Var(shape=(1,), init=6.9)
 
         # Outports
-        # self.ack_out= OutPort(shape=(1,))
         self.p_out = OutPort(shape=shape)
         self.fp_out = OutPort(shape=(1,))
 
@@ -199,7 +190,6 @@ class HighLevelSelection(AbstractProcess):
         super().__init__(**kwargs)
         shape = (num_agents, num_dimensions)
 
-        # self.ack_in = InPort(shape=(1,))
         self.p_in   = InPort(shape=shape)
         self.fp_in  = InPort(shape=(num_agents,))
 
@@ -210,7 +200,6 @@ class HighLevelSelection(AbstractProcess):
 
         self.g_out  = OutPort(shape=(num_dimensions,))
         self.fg_out = OutPort(shape=(1,))
-        # self.ack_out= OutPort(shape=(1,))
 
         self.proc_params["num_agents"] = num_agents
         self.proc_params["num_dimensions"] = num_dimensions
@@ -241,7 +230,6 @@ class NeuroHeuristicUnit(AbstractProcess):
                  num_neighbours: int = 0,
                  num_agents: int = 10,
                  spiking_core: AbstractProcess = None,
-                 # num_objectives:    int = 1,
                  function=None,
                  core_params=None,
                  selector_params=None,
@@ -340,9 +328,6 @@ class NeighbourhoodManager(AbstractProcess):
         super().__init__(**kwargs)
         shape = kwargs.get("shape", (1, 1))
 
-        # TODO: Revise and implement checks for the weights tensor
-        # self.check_weights(weights)
-
         # Compute the number of neighbours for each neuron
         neighbourhoods = np.sum(weights, axis=1).astype(int)
         max_neighbours = np.max(neighbourhoods)
@@ -364,13 +349,11 @@ class NeighbourhoodManager(AbstractProcess):
         shape_p_out = (max_neighbours, shape[1], shape[0])
         shape_fp_out = (max_neighbours, shape[0])
 
-        # self.ack_in     = InPort(shape=(1,))
         self.p_in = InPort(shape=shape)
         self.fp_in = InPort(shape=(shape[0],))
 
         self.p_out = OutPort(shape=shape_p_out)
         self.fp_out = OutPort(shape=shape_fp_out)
-        # self.ack_out    = OutPort(shape=(1,))
 
     def reset(self):
         # No runtime mutable state to reset here (weights and indices are static)
@@ -402,18 +385,12 @@ class SpikingHandler(AbstractProcess):
 class PositionSender(AbstractProcess):
     def __init__(self, agent_id, internal_shape, external_shape, **kwargs):
         super().__init__(**kwargs)
-        # Agent ID
-        # self.agent_id = Var(shape=(1,), init=agent_id)
-
-        # Ports inside the bound receiving data to be sent
-        # self.ack_in = InPort(shape=(1,))
         self.p_in = InPort(shape=internal_shape)
         self.fp_in = InPort(shape=(1,))  # Future: consider multiple objectives
 
         # Ports outside the bound sending data in the proper shape
         self.p_out = OutPort(shape=external_shape)
         self.fp_out = OutPort(shape=(external_shape[0],))
-        # self.ack_out= OutPort(shape=(1,))
 
         # Pass the internal shape to the external shape
         self.proc_params["external_shape"] = external_shape
@@ -427,11 +404,7 @@ class PositionSender(AbstractProcess):
 class PositionReceiver(AbstractProcess):
     def __init__(self, agent_id, internal_shape, external_shape, **kwargs):
         super().__init__(**kwargs)
-        # Agent ID
-        # self.agent_id = Var(shape=(1,), init=agent_id)
-
         # Ports outside the bound receiving data in the proper shape
-        # self.ack_in = InPort(shape=(1,))
         self.p_in = InPort(shape=external_shape)
         self.fp_in = InPort(shape=(external_shape[0], external_shape[2]))
 

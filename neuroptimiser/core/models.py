@@ -206,10 +206,6 @@ class PyTwoDimSpikingCoreModel(AbstractPerturbationNHeuristicModel):
         # Assumming upsilon is dimensionless
         v_, u_ = upsilon
 
-        # Get the dimensional variables from (0,1)
-        # v = Lv * v_ + vmin
-        # u = Lu * u_ + umin
-
         # Get the dimensional variables from (-1,1)
         v = Lv * (v_ + 1) / 2 + coeffs["vmin"]
         u = Lu * (u_ + 1) / 2 + coeffs["umin"]
@@ -306,31 +302,6 @@ class PyTwoDimSpikingCoreModel(AbstractPerturbationNHeuristicModel):
         return new_var
 
     def _run_core_process(self):
-        # spike_conditions = np.array([
-        #     self._spike_condition(self.v1[dim], self.v2[dim], self.threshold[dim], dim)
-        #     for dim in range(self.num_dimensions)
-        # ])
-        # self.self_fire[:]   = spike_conditions[:]
-        # fire_conditions     = np.logical_or(spike_conditions, self.compulsory_fire)
-        #
-        # self._buffer_v_array[:, 0] = self.v1
-        # self._buffer_v_array[:, 1] = self.v2
-        # new_v_array         = self._buffer_new_v_array
-        #
-        # # Apply HS to neurons that fire, HD otherwise
-        # fire_indices        = np.where(fire_conditions)[0]
-        # nonfire_indices     = np.where(~fire_conditions)[0]
-        #
-        # if fire_indices.size > 0:
-        #     for dim in fire_indices:
-        #         new_v_array[dim] = self._apply_hs(dim, self._buffer_v_array[dim])
-        # if nonfire_indices.size > 0:
-        #     for dim in nonfire_indices:
-        #         new_v_array[dim] = self._apply_hd(dim, self._buffer_v_array[dim])
-        #
-        # self.v1[:] = new_v_array[:, 0]
-        # self.v2[:] = new_v_array[:, 1]
-
         for dim in range(self.num_dimensions):
             # Get the spike condition for this neuron
             self.self_fire[dim]     = self._spike_condition(self.v1[dim], self.v2[dim], self.threshold[dim], dim)
@@ -416,35 +387,6 @@ class PyTwoDimSpikingCoreModel(AbstractPerturbationNHeuristicModel):
         self.threshold = self._threshold_fn(self._base_threshold)
         self.threshold = np.clip(self.threshold, self.thr_min, self.thr_max)
 
-    # def _update_threshold(self):
-    #     # Update the stagnation count
-    #     if np.array_equal(self.prev_p, self.p):
-    #         self.stag_count += 1
-    #     else:
-    #         self.stag_count = 0
-    #         self.v2_best = self.v2.copy()
-    #
-    #     # Update the threshold
-    #     base_threshold = self.thr_alpha * np.ones_like(self.v1)
-    #     if self.thr_mode == "fixed":
-    #         self.threshold = base_threshold
-    #     elif self.thr_mode == "adaptive_time":
-    #         scale = 1.0 / (1.0 + self.thr_k * (self.time_step + 1.0))
-    #         self.threshold = base_threshold * scale
-    #     elif self.thr_mode == "adaptive_stag":
-    #         scale = 1.0 + self.thr_k * self.stag_count
-    #         self.threshold = base_threshold * scale
-    #     elif self.thr_mode == "diff_pg":
-    #         self.threshold = self.thr_alpha * np.abs(self.p - self.g)
-    #     elif self.thr_mode == "diff_pref":
-    #         self.threshold = self.thr_alpha * np.abs(self.x_ref - self.p)
-    #     elif self.thr_mode == "random":
-    #         noise = np.random.normal(0, self.noise_std, size=self.shape)
-    #         self.threshold = base_threshold + self.thr_k * noise
-    #     else:
-    #         raise ValueError(f"Unknown threshold mode: {self.thr_mode}")
-    #     self.threshold = np.clip(self.threshold, self.thr_min, self.thr_max)
-
     # SPIKING CONDITIONS
     def _spike_fixed(self, v1, v2, thr, dim):
         return np.abs(v1) > thr
@@ -490,32 +432,6 @@ class PyTwoDimSpikingCoreModel(AbstractPerturbationNHeuristicModel):
         else:
             raise ValueError(f"Unknown spiking condition: {self.spk_cond}")
 
-    # def _spike_condition(self, v1, v2, threshold, dim):
-    #     if self.spk_cond == "fixed":
-    #         return np.abs(v1) > threshold
-    #     elif self.spk_cond == "l1":
-    #         return np.abs(v1) + np.abs(v2) > threshold
-    #     elif self.spk_cond == "l2":
-    #         return np.linalg.norm([v1, v2]) > threshold
-    #     elif self.spk_cond == "l2_gen":
-    #         return (v1 ** 2 + self.spk_alpha * v2 ** 2) > threshold ** 2
-    #     elif self.spk_cond == "random":
-    #         # Probabilistic spiking with sigmoid probability curve
-    #         magnitude = np.linalg.norm([v1, v2])
-    #         spike_prob = 1.0 / (1.0 + np.exp(-(magnitude - threshold)))
-    #         return np.random.rand() < spike_prob
-    #     elif self.spk_cond == "adaptive":
-    #         min_threshold = 1e-6 #/ self.time_step # TODO: check
-    #         adaptive_threshold = max(min_threshold, self.spk_alpha / (1 + self.time_step / self.max_steps))
-    #         return np.abs(v1) > adaptive_threshold
-    #     elif self.spk_cond == "stable":
-    #         # Fire if system is extremely close to rest (for convergence diagnostics)
-    #         eps = 1e-3 / (1 + self.time_step)
-    #         return np.linalg.norm([v1, v2]) < eps
-    #     else:
-    #         raise ValueError(f"Unknown spiking condition: {self.spk_cond}")
-
-
     def run_spk(self):
         self.prev_p      = self.p.copy()
 
@@ -536,7 +452,6 @@ class PyTwoDimSpikingCoreModel(AbstractPerturbationNHeuristicModel):
             fp_in       = self.fp_in.recv()
             self.xn     = self.xn_in.recv()
             fxn_in      = self.fxn_in.recv()
-            # x_refs      = np.vstack((self.p, xn_in, self.g))
 
             self.compulsory_fire = s_in.astype(bool)
 
@@ -552,7 +467,6 @@ class PyTwoDimSpikingCoreModel(AbstractPerturbationNHeuristicModel):
 @requires(CPU)
 class PySelectorModel(PyLoihiProcessModel):
     # Inputs
-    # ack_in: PyInPort        = LavaPyType(PyInPort.VEC_DENSE, int)
     x_in:   PyInPort        = LavaPyType(PyInPort.VEC_DENSE, _POS_FLOAT_)
 
     # Variables
@@ -560,7 +474,6 @@ class PySelectorModel(PyLoihiProcessModel):
     fp:     np.ndarray      = LavaPyType(np.ndarray, _FIT_FLOAT_)
 
     # Outputs
-    # ack_out:PyOutPort       = LavaPyType(PyOutPort.VEC_DENSE, int)
     p_out:  PyOutPort       = LavaPyType(PyOutPort.VEC_DENSE, _POS_FLOAT_)
     fp_out: PyOutPort       = LavaPyType(PyOutPort.VEC_DENSE, _FIT_FLOAT_)
 
@@ -574,11 +487,6 @@ class PySelectorModel(PyLoihiProcessModel):
         self.initialised = False
 
     def run_spk(self):
-        # Get the spiking signal from the previous layer
-        # ack_in = self.ack_in.recv()
-
-        # if ack_in[0] > 0:
-            # Read the x value
         x = self.x_in.recv()
 
         # Evaluate the function
@@ -599,7 +507,6 @@ class PySelectorModel(PyLoihiProcessModel):
 @requires(CPU)
 class PyHighLevelSelectionModel(PyLoihiProcessModel):
     # Inputs
-    # ack_in: PyInPort        = LavaPyType(PyInPort.VEC_DENSE, int)
     p_in:   PyInPort        = LavaPyType(PyInPort.VEC_DENSE, _POS_FLOAT_)
     fp_in:  PyInPort        = LavaPyType(PyInPort.VEC_DENSE, _FIT_FLOAT_)
 
@@ -612,7 +519,6 @@ class PyHighLevelSelectionModel(PyLoihiProcessModel):
     # Outputs
     g_out:  PyOutPort       = LavaPyType(PyOutPort.VEC_DENSE, _POS_FLOAT_)
     fg_out: PyOutPort       = LavaPyType(PyOutPort.VEC_DENSE, _FIT_FLOAT_)
-    # ack_out:PyOutPort       = LavaPyType(PyOutPort.VEC_DENSE, int)
 
     def __init__(self, proc_params):
         super().__init__(proc_params)
@@ -853,8 +759,6 @@ class PyNeighbourhoodManagerModel(PyLoihiProcessModel):
 @implements(proc=SpikingHandler, protocol=LoihiProtocol)
 @requires(CPU)
 class PySpikingHandlerModel(PyLoihiProcessModel):
-    # agent_id: int       = LavaPyType(int, int)
-
     s_in:   PyInPort    = LavaPyType(PyInPort.VEC_DENSE, bool)
     a_out:  PyOutPort   = LavaPyType(PyOutPort.VEC_DENSE, bool)
 
@@ -887,8 +791,6 @@ class PySpikingHandlerModel(PyLoihiProcessModel):
         # Extract the incoming spikes
         self.a_vector[:] = a_matrix[self.agent_id, :]
 
-        # print(f"\nAgent {self.agent_id} received spikes: {self.a_vector}")
-
         # Send the output spikes
         self.s_out.send(self.s_matrix)
         self.a_out.send(self.a_vector)
@@ -897,15 +799,11 @@ class PySpikingHandlerModel(PyLoihiProcessModel):
 @implements(proc=PositionSender, protocol=LoihiProtocol)
 @requires(CPU)
 class PyPositionSenderModel(PyLoihiProcessModel):
-    # agent_id: int       = LavaPyType(int, int)
-
-    # ack_in: PyInPort    = LavaPyType(PyInPort.VEC_DENSE, int)
     p_in:   PyInPort    = LavaPyType(PyInPort.VEC_DENSE, _POS_FLOAT_)
     fp_in:  PyInPort    = LavaPyType(PyInPort.VEC_DENSE, _FIT_FLOAT_)
 
     p_out:  PyOutPort   = LavaPyType(PyOutPort.VEC_DENSE, _POS_FLOAT_)
     fp_out: PyOutPort   = LavaPyType(PyOutPort.VEC_DENSE, _FIT_FLOAT_)
-    # ack_out:PyOutPort   = LavaPyType(PyOutPort.VEC_DENSE, int)
 
     def __init__(self, proc_params):
         super().__init__(proc_params)
@@ -933,19 +831,16 @@ class PyPositionSenderModel(PyLoihiProcessModel):
 @implements(proc=PositionReceiver, protocol=LoihiProtocol)
 @requires(CPU)
 class PyPositionReceiverModel(PyLoihiProcessModel):
-    # agent_id: int       = LavaPyType(int, int)
-
-    # ack_in: PyInPort    = LavaPyType(PyInPort.VEC_DENSE, int)
     p_in:   PyInPort    = LavaPyType(PyInPort.VEC_DENSE, _POS_FLOAT_)
     fp_in:  PyInPort    = LavaPyType(PyInPort.VEC_DENSE, _FIT_FLOAT_)
 
     p_out:  PyOutPort   = LavaPyType(PyOutPort.VEC_DENSE, _POS_FLOAT_)
     fp_out: PyOutPort   = LavaPyType(PyOutPort.VEC_DENSE, _FIT_FLOAT_)
-    # ack_out:PyOutPort   = LavaPyType(PyOutPort.VEC_DENSE, int)
 
     def __init__(self, proc_params):
         super().__init__(proc_params)
         self.agent_id = proc_params["agent_id"]
+
         # Define the template matrix
         self.p_matrix = np.zeros(
             shape=proc_params["external_shape"]).astype(float)

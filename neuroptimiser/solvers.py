@@ -47,7 +47,6 @@ class AbstractSolver(ABC):
     def config_params(self) -> dict:
         return self._config_params
 
-    # setter method for config_params
     @config_params.setter
     def config_params(self, new_config_params: dict) -> None:
         self._set_config_params(new_config_params)
@@ -99,11 +98,8 @@ class AbstractSolver(ABC):
 
     @staticmethod
     def generate_experiment_name(prefix="Exp") -> str:
-        # Get the current date and time
         current_time = datetime.now()
-        # Format the time as "YYYY-MM-DD_HH-MM-SS"
         formatted_time = current_time.strftime("%Y-%m-%d_%H-%M-%S")
-        # Combine the prefix with the formatted time
         experiment_name = f"{prefix}_{formatted_time}"
         return experiment_name
 
@@ -111,7 +107,6 @@ class AbstractSolver(ABC):
         return self.solve(problem, exp_name, num_iterations)
 
     def _check_config_params(self, obj_func, exp_name, num_iterations, search_space):
-        # Check if any of the parameters are provided and change the configuration accordingly
         if num_iterations is not None:
             self._config_params["num_iterations"] = num_iterations
 
@@ -155,7 +150,6 @@ class AbstractSolver(ABC):
         self._num_agents        = self._config_params["num_agents"]
         self._num_neighbours    = self._config_params["num_neighbours"]
         self._search_space      = self._config_params["search_space"]
-        # self._obj_func          = self._config_params["function"]
 
     @staticmethod
     def validate_params(schema: dict, params: dict) -> dict:
@@ -189,13 +183,6 @@ class AbstractSolver(ABC):
             Optional("seed", default=69):
                 And(int, lambda n: n > 0,
                     error="seed must be greater than 0"),
-            # Optional("budget_multiplier", default=0):
-            #     And(lambda n: isinstance(n, (int, float)),
-            #         error="budget_multiplier must be an integer or float greater than 0"),
-            # Optional("core_params", default=dict()):
-            #     And(dict, error="core_params must be a dictionary"),
-            # Optional("selector_params", default={}):
-            #     And(dict, error="selector_params must be a dictionary"),
         }
         self._params_schema = self._base_params_schema
         self._params_schema.update(self._additional_params_schema)
@@ -210,12 +197,6 @@ class AbstractSolver(ABC):
 
         elif config_params["search_space"].shape[0] != config_params["num_dimensions"]:
             raise ValueError("search_space must have the same number of rows as num_dimensions")
-
-        # Update the number of iterations if the budget is provided
-        # if config_params["budget_multiplier"] > 0:
-        #     If the budget is provided, then the number of iterations is calculated based on the budget
-            # config_params["num_iterations"] = ((config_params["budget_multiplier"] * config_params["num_dimensions"])
-            #                                    // config_params["num_agents"])
 
         return config_params
 
@@ -494,19 +475,14 @@ class NeurOptimiser(AbstractSolver):
         t = 0
         current_fg = None
         for t in range(self._num_iterations):
-            # for i in range(self._num_agents):
-            #     # Run the nheuristic unit
-            #     nhus[i].run(condition=RunSteps(num_steps=1), run_cfg=rcfg)
             self.selection.run(condition=RunSteps(num_steps=1), run_cfg=self.rcfg)
-            # neuralnet.run(condition=RunSteps(num_steps=1), run_cfg=rcfg)
-            # neighbourhood.run(condition=RunSteps(num_steps=1), run_cfg=rcfg)
 
             current_fg = self.selection.fg.get()[0]
             if t % (self._num_iterations // 10) == 0 or t == self._num_iterations - 1:
                 print(f"... step: {t}, best fitness: {current_fg}")
-        # print(f"... step:
-        # {t}, best fitness: {current_fg}")
-        print("[neuropt:log] Simulation completed. Fetching monitor data...", end=" ")
+
+        print("[neuropt:log] Simulation completed. Fetching monitor data...",
+              end=" ")
         # STEP 5: Read data
         p_data = monitor_p.get_data()
         g_data = monitor_g.get_data()
@@ -585,15 +561,6 @@ class NeurOptimiser(AbstractSolver):
 
         # Build the model only if it hasn't been built already
         self._build_model()
-        # if not hasattr(self, "nhus") or not self.nhus:
-        #     self._build_model()
-        # else:
-        #     self._reset_processes()
-
-        # Profiling
-        # self._profiler = Profiler.init(rcfg)
-        # self._profiler.energy_probe(num_steps=self._num_iterations)
-        # self._profiler.execution_time_probe(num_steps=self._num_iterations)
 
         if self.debug_mode:
             p, fp, g, fg, v1, v2, spikes = self._run_debug_mode()

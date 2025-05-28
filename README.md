@@ -17,6 +17,9 @@ This framework enables fully event-driven, low-power optimisation by integrating
 
 ---
 
+## 📖 Documentation
+For detailed documentation, examples, and API reference, please visit the [Neuroptimiser Documentation](https://jcrvz.github.io/neuroptimiser/).
+
 ## 📦 Installation
 
 ```bash

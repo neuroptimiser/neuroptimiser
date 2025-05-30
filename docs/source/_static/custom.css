@@ -1,0 +1,4 @@
+/* Resize logo in Sphinx header */
+.wy-nav-content {
+    max-width: 75% !important;
+}

@@ -35,4 +35,5 @@ dependencies = [
     "sphinx-autodoc-typehints>=3.0.1",
     "sphinx-rtd-theme>=3.0.2",
     "sphinxcontrib-napoleon>=0.7",
+    "furo>=2024.8.6",
 ]

@@ -3,7 +3,7 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to neurOptimiser's Documentation
+NeurOptimiser's Reference
 ========================================
 
 **neurOptimiser** is a neuromorphic optimisation framework built upon spiking neural dynamics and heuristic search principles. It enables the design and evaluation of decentralised, asynchronous metaheuristic processes inspired by biological computation.

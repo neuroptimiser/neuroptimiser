@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from datetime import datetime
 from copy import deepcopy
 from types import NoneType
+from typing import List, Dict, Tuple
 
 from schema import And, Optional, Schema, SchemaError
 
@@ -18,9 +19,13 @@ from lava.magma.core.run_conditions import RunSteps
 from lava.magma.core.run_configs import Loihi2SimCfg
 from lava.proc.monitor.process import Monitor
 
-
-
 class AbstractSolver(ABC):
+    """
+    Abstract base class for any solver in the Neuro Optimiser framework.
+    This class defines the basic structure and methods that any solver should implement.
+    It includes methods for setting up the problem, validating configuration parameters,
+    and running the optimisation process.
+    """
     _INVALID_VALUE = 1e9
     _experiment_name: str
     _num_dimensions: int
@@ -39,9 +44,6 @@ class AbstractSolver(ABC):
 
     def __init__(self) -> None:
         super().__init__()
-
-        # Instantiate the topology manager
-        self._topology = Topology()
 
     @property
     def config_params(self) -> dict:
@@ -72,6 +74,10 @@ class AbstractSolver(ABC):
         return trs2o(position, lb, ub)
 
     def get_default_config(self) -> dict:
+        """
+        Returns the default configuration parameters for the solver.
+        """
+
         config = self.validate_config_params(dict())
         config["search_space"] = config["search_space"][0,:].reshape(1, 2)
         return config
@@ -82,6 +88,9 @@ class AbstractSolver(ABC):
         self._config_params = self.validate_config_params(config_params)
 
     def reset_random_seed(self, seed: int = None) -> None:
+        """
+        Resets the random seed for reproducibility.
+        """
         if seed is None:
             seed = self._config_params["seed"]
         np.random.seed(seed)
@@ -98,6 +107,9 @@ class AbstractSolver(ABC):
 
     @staticmethod
     def generate_experiment_name(prefix="Exp") -> str:
+        """
+        Generates a unique experiment name based on the current date and time.
+        """
         current_time = datetime.now()
         formatted_time = current_time.strftime("%Y-%m-%d_%H-%M-%S")
         experiment_name = f"{prefix}_{formatted_time}"
@@ -153,6 +165,17 @@ class AbstractSolver(ABC):
 
     @staticmethod
     def validate_params(schema: dict, params: dict) -> dict:
+        """
+        Validates the parameters against the provided schema.
+
+        Args:
+            schema (dict): The schema to validate against.
+            params (dict): The parameters to validate.
+
+        Returns:
+            The validated parameters.
+
+        """
         schema = Schema(schema)
         try:
             params = schema.validate(params)
@@ -161,6 +184,12 @@ class AbstractSolver(ABC):
         return params
 
     def validate_config_params(self, config_params: dict) -> dict:
+        """
+        Validates the configuration parameters for the solver.
+
+        Args:
+            config_params (dict): The configuration parameters to validate.
+        """
         self._base_params_schema = {
             Optional("search_space", default=np.array([[-1, 1]])):
                 And(np.ndarray, lambda n: n.shape[1] > 1,
@@ -187,7 +216,6 @@ class AbstractSolver(ABC):
         self._params_schema = self._base_params_schema
         self._params_schema.update(self._additional_params_schema)
 
-        # Validation using schema and returning the validated parameters
         config_params = self.validate_params(schema=self._params_schema, params=config_params)
 
         # Validation for the search space
@@ -203,14 +231,27 @@ class AbstractSolver(ABC):
     @abstractmethod
     def solve(self, obj_func, exp_name: str, num_iterations: int = None,
               search_space: np.ndarray = None) -> tuple[float, np.ndarray]:
+        """
+        Abstract method to solve the optimisation problem.
+        """
         pass
 
 class NeurOptimiser(AbstractSolver):
+    """
+    Neuro Optimiser is the main class for the Neuro Optimiser framework.
+    It inherits from the AbstractSolver class and implements the solve method, and sets up the model for the optimisation process.
+
+    Args:
+        config_params (dict): Configuration parameters for the Neuro Optimiser.
+        core_params (dict|list[dict]): Parameters for the spiking core of the nheuristic units.
+        selector_params (dict): Parameters for the high-level selection unit.
+    """
     def __init__(self,
                  config_params: dict = None,
                  core_params: dict|list[dict] = None,
                  selector_params: dict = None
                  ) -> None:
+
         super().__init__()
 
         # Add the additional parameters for the Neuro Optimiser
@@ -320,7 +361,26 @@ class NeurOptimiser(AbstractSolver):
             selector_params = {}
         self.selector_params = selector_params
 
-    def get_default_params(self) -> tuple[list, dict]:
+    def get_default_params(self) -> Tuple[List[dict], Dict]:
+        """
+        Returns the default parameters for the Neuro Optimiser.
+
+        Returns:
+            tuple[list[dict], dict]:
+            A tuple containing:
+            - A list of dictionaries, each representing the parameters of a Neuromorphic Heuristic Unit (NHU).
+            - A dictionary for the high-level selector parameters (currently not implemented).
+
+        Example:
+            >>> solver = NeurOptimiser()
+            >>> core_params, selector_params = solver.get_default_params()
+            >>> print(core_params)
+            >>> # Output:
+            >>> # [{'noise_std': 0.1, 'thr_k': 0.05, 'thr_min': 1e-06, 'coeffs': 'random', 'thr_alpha': 1.0, 'name': 'linear', 'is_bounded': False, 'hs_operator': 'fixed', 'max_steps': 100, 'spk_alpha': 0.25, 'spk_cond': 'fixed', 'thr_max': 1.0, 'ref_mode': 'pg', 'thr_mode': 'diff_pg', 'seed': None, 'hs_variant': 'fixed', 'approx': 'rk4', 'alpha': 1.0, 'dt': 0.01}]
+            >>> print(selector_params)
+            >>> # Output:
+            >>> # {}
+        """
         return [self.core_params[0]], self.selector_params
 
 
@@ -550,7 +610,19 @@ class NeurOptimiser(AbstractSolver):
               exp_name: str = None,
               num_iterations: int = None,
               search_space: np.ndarray = None,
-              debug_mode: bool = False) -> tuple[float, np.ndarray]:
+              debug_mode: bool = False) -> Tuple[float, np.ndarray]:
+        """
+        Solve the optimisation problem using the Neuro Optimiser framework.
+
+        Args:
+            obj_func (callable): The objective function to be optimised.
+            exp_name (str, optional): Name of the experiment. Defaults to None.
+            num_iterations (int, optional): Number of iterations for the optimisation process. Defaults to None.
+            search_space (np.ndarray, optional): Search space for the optimisation. Defaults to None.
+            debug_mode (bool, optional): If True, enables debug mode with additional logging and monitoring. Defaults to False.
+        Returns:
+            Tuple[float, np.ndarray]: A tuple containing the best position found and its corresponding fitness value.
+        """
 
         if debug_mode:
             print("[neuropt:log] Debug mode is enabled. Monitoring will be activated.")

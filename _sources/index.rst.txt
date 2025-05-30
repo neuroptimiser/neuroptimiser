@@ -34,16 +34,12 @@ To begin using neurOptimiser:
 
 If you're new to neuromorphic computing or heuristic search, we recommend starting with the Examples section once it's available.
 
-
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+   :maxdepth: 1
+   :caption: Contents
 
-API Reference
-=============
-
-.. automodule:: neuroptimiser.core.models
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
+   installation
+   usage
+   architecture
+   api
+   contributing

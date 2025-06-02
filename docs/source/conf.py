@@ -19,15 +19,24 @@ extensions = [
     "sphinx.ext.napoleon",
     "sphinx.ext.autosummary",
     "sphinx_autodoc_typehints",
+    # "myst_nb",
 ]
+add_module_names = False
 
+autoclass_content = 'class'
+autosummary_generate = True
+autodoc_default_options = {
+    'members': True,
+    'undoc-members': True,
+    'show-inheritance': True,
+}
+autodoc_class_signature = 'separated'
 templates_path = ['_templates']
 exclude_patterns = []
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-autosummary_generate = True
 # html_theme = 'sphinx_rtd_theme'
 # html_logo = "_pics/neuropty.png"
 html_theme = "furo"
@@ -65,3 +74,8 @@ html_theme_options = {
         "color-sidebar-link-background--active": "#333333",  # active link background
     }
 }
+
+napoleon_use_param = True
+napoleon_use_rtype = True
+
+

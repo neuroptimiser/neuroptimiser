@@ -361,7 +361,7 @@ class NeurOptimiser(AbstractSolver):
             selector_params = {}
         self.selector_params = selector_params
 
-    def get_default_params(self) -> Tuple[List[dict], Dict]:
+    def get_default_params(self) -> tuple[list[dict], dict]:
         """
         Returns the default parameters for the Neuro Optimiser.
 

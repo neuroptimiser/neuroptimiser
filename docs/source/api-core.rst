@@ -1,12 +1,9 @@
 Core
 ====
 
-.. automodule:: neuroptimiser.core.models
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. toctree::
+    :maxdepth: 2
+    :caption: Core Submodules
 
-.. automodule:: neuroptimiser.core.processes
-   :members:
-   :undoc-members:
-   :show-inheritance:
+    api-core-models
+    api-core-processes

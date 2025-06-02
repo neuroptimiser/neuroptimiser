@@ -4,8 +4,8 @@ Solvers
 .. currentmodule:: neuroptimiser.solvers
 
 
-NeurOptimiser Solver
----------------------
+NeurOptimiser
+-------------
 
 .. autoclass:: NeurOptimiser
    :members:

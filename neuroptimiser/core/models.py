@@ -1,3 +1,16 @@
+"""Neuroptimiser Core Models
+
+This module contains the core process models for the Neuroptimiser framework based on Lava.
+"""
+__author__ = "Jorge M. Cruz-Duarte"
+__email__ = "jorge.cruz-duarte@univ-lille.fr"
+__version__ = "1.0.0"
+__all__ = ["AbstractPerturbationNHeuristicModel", "PyTwoDimSpikingCoreModel",
+           "PySelectorModel", "PyHighLevelSelectionModel",
+           "SubNeuroHeuristicUnitModel", "PyTensorContractionLayerModel",
+           "PyNeighbourhoodManagerModel", "PySpikingHandlerModel",
+           "PyPositionReceiverModel", "PyPositionReceiverModel"]
+
 import numpy as np
 from functools import partial
 from lava.magma.core.model.py.model import PyLoihiProcessModel
@@ -20,27 +33,19 @@ from neuroptimiser.core.processes import (
 _INVALID_VALUE = 1e9
 _POS_FLOAT_ = np.float32
 _FIT_FLOAT_ = np.float32
-SPK_CORE_OPTIONS = ["TwoDimSpikingCore"]
+SPK_CORE_OPTIONS = ["TwoDimSpikingCore"]  # To be extended with more options
 
-
-#%%
 class AbstractPerturbationNHeuristicModel(PyLoihiProcessModel):
+    """Abstract model for a perturbation-based nheuristic process model
+
+    This model serves as a base for implementing various perturbation-based process models.
+
+    See Also
+    --------
+    :py:class:`neuroptimiser.core.processes.AbstractSpikingCore`
     """
-    Abstract model for a perturbation-based neuro-heuristic process.
-
-    Parameters
-    ----------
-    proc_params : dict
-        Dictionary containing the parameters for the process.
-
-    Attributes
-    ----------
-
-    alpha : float
-    """
-
+    # Inports
     s_in:   PyInPort        = LavaPyType(PyInPort.VEC_DENSE, bool)
-
     p_in:   PyInPort        = LavaPyType(PyInPort.VEC_DENSE, _POS_FLOAT_)
     fp_in:  PyInPort        = LavaPyType(PyInPort.VEC_DENSE, _FIT_FLOAT_)
     g_in:   PyInPort        = LavaPyType(PyInPort.VEC_DENSE, _POS_FLOAT_)
@@ -48,13 +53,26 @@ class AbstractPerturbationNHeuristicModel(PyLoihiProcessModel):
     xn_in:  PyInPort        = LavaPyType(PyInPort.VEC_DENSE, _POS_FLOAT_)
     fxn_in: PyInPort        = LavaPyType(PyInPort.VEC_DENSE, _FIT_FLOAT_)
 
+    # Variables
     x:      np.ndarray      = LavaPyType(np.ndarray, float)
 
+    # Outports
     s_out:  PyOutPort       = LavaPyType(PyOutPort.VEC_DENSE, bool)
     x_out:  PyOutPort       = LavaPyType(PyOutPort.VEC_DENSE, _POS_FLOAT_)
 
     def __init__(self, proc_params):
+        """Initialises the process model with the given parameters.
+
+        Arguments
+        ---------
+            proc_params : dict
+                A dictionary containing the parameters for the process model. It should include:
+                    - ``seed``: int, random seed for reproducibility
+                    - ``num_dimensions``: int, number of dimensions for the perturbation
+                    - ``num_neighbours``: int, number of neighbours for the perturbation
+        """
         super().__init__(proc_params)
+
         self.initialised       = False
         self.seed              = proc_params["seed"]
         self.num_dimensions    = proc_params['num_dimensions']
@@ -68,15 +86,47 @@ class AbstractPerturbationNHeuristicModel(PyLoihiProcessModel):
 
         np.random.default_rng(seed=int(self.seed))
 
-
-
 @implements(proc=TwoDimSpikingCore, protocol=LoihiProtocol)
 @requires(CPU)
 class PyTwoDimSpikingCoreModel(AbstractPerturbationNHeuristicModel):
+    """Two-dimensional spiking core model for perturbation-based nheuristics
+
+    This model implements a two-dimensional spiking core for perturbation-based nheuristics, allowing for various dynamic systems and approximation methods.
+
+    See Also
+    --------
+    :py:class:`neuroptimiser.core.processes.TwoDimSpikingCore`
+    """
+    # Variables
     v1       : np.ndarray = LavaPyType(np.ndarray, float)
     v2       : np.ndarray = LavaPyType(np.ndarray, float)
 
     def __init__(self, proc_params):
+        """Initialises the two-dimensional spiking core model with the given parameters.
+
+        Arguments
+        ---------
+            proc_params : dict
+                A dictionary containing the parameters for the process model. It should include:
+                    - ``alpha``: float, scaling factor for the perturbation
+                    - ``max_steps``: int, maximum number of steps for the dynamic system
+                    - ``noise_std``: float, standard deviation of the noise added to the perturbation
+                    - ``name``: str, name of the dynamic system (e.g., "linear", "izhikevich")
+                    - ``approx``: str, approximation method for the dynamic system (e.g., "euler", "rk4")
+                    - ``dt``: float, time step for the approximation
+                    - ``ref_mode``: str, reference model for the perturbation (e.g., "p", "g", "pg", "pgn")
+                    - ``thr_mode``: str, threshold mode for the spiking condition (e.g., "fixed", "adaptive_time", "adaptive_stag", "diff_pg", "diff_pref", "random")
+                    - ``thr_alpha``: float, scaling factor for the threshold
+                    - ``thr_min``: float, minimum threshold value
+                    - ``thr_max``: float, maximum threshold value
+                    - ``thr_k``: float, scaling factor for the threshold
+                    - ``spk_cond``: str, spiking condition (e.g., "fixed", "l1", "l2", "l2_gen", "random", "adaptive", "stable")
+                    - ``spk_alpha``: float, scaling factor for the spiking condition
+                    - ``hs_operator``: str, heuristic search operator (e.g., "fixed", "random", "directional", "differential")
+                    - ``hs_variant``: str, variant of the heuristic search operator (e.g., "current-to-rand", "best-to-rand", "rand", "current-to-best")
+                    - ``is_bounded``: bool, whether the perturbation is bounded (default: True)
+
+        """
         super().__init__(proc_params)
         self.alpha      = proc_params['alpha']
         self.max_steps  = proc_params['max_steps']
@@ -152,27 +202,28 @@ class PyTwoDimSpikingCoreModel(AbstractPerturbationNHeuristicModel):
         self.v1_best            = np.zeros(self.shape).astype(float)
         self.v2_best            = np.zeros(self.shape).astype(float)
 
-        self.v_bounds  = np.zeros((2,self.shape[0])).astype(float)
-        self.x_ref      = np.zeros(self.shape).astype(float)
-        self.xn         = np.zeros(
-            shape=(self.num_neighbours, self.num_dimensions)
-        ).astype(float)
-        self.vn         = np.zeros(
-            shape=(self.num_neighbours, self.num_dimensions)
-        ).astype(float)
-        self.ref_point  = np.zeros(self.shape).astype(float)
-        self.prev_p     = np.zeros(self.shape).astype(float)
-        self.stag_count = 0
+        self.v_bounds           = np.zeros((2,self.shape[0])).astype(float)
+        self.x_ref              = np.zeros(self.shape).astype(float)
+        self.xn                 = np.zeros(
+            shape=(self.num_neighbours, self.num_dimensions)).astype(float)
+        self.vn                 = np.zeros(
+            shape=(self.num_neighbours, self.num_dimensions)).astype(float)
+        self.ref_point          = np.zeros(self.shape).astype(float)
+        self.prev_p             = np.zeros(self.shape).astype(float)
+        self.stag_count         = 0
 
     # TRANSFORMATION METHODS
     def _linear_transform(self, x):
+        """Linear transformation of the input variable to the range [-1, 1]."""
         var = self.alpha * (x - self.x_ref)
         return var
 
     def _linear_transform_inv(self, var):
+        """Inverse linear transformation of the variable from the range [-1, 1] to the original range."""
         return var / self.alpha + self.x_ref
 
     def _check_vbounds(self):
+        """Check and update the bounds of the variables v1 and v2."""
         # Update the bounds
         self.v_bounds[0,:] = self._linear_transform(-1.0*np.ones(self.shape))
         self.v_bounds[1,:] = self._linear_transform(np.ones(self.shape))
@@ -182,6 +233,7 @@ class PyTwoDimSpikingCoreModel(AbstractPerturbationNHeuristicModel):
         self.v2 = np.clip(self.v2, self.v_bounds[0,:], self.v_bounds[1,:])
 
     def _send_to_ports(self):
+        """Send the current state of the process to the output ports."""
         # Inverse transformation to send
         self.x  = self._linear_transform_inv(self.v1)
 
@@ -191,15 +243,11 @@ class PyTwoDimSpikingCoreModel(AbstractPerturbationNHeuristicModel):
 
     # APPROXIMATION METHODS
     def _euler_approximation(self, model, var, **kwargs):
-        """
-        Euler approximation of the system of equations
-        """
+        """Euler approximation of the system of equations."""
         return var + model(var) * self.dt
 
     def _rk4_approximation(self, model, var, **kwargs):
-        """
-        Runge-Kutta 4th order approximation of the system of equations
-        """
+        """Runge-Kutta 4th order approximation of the system of equations."""
         k1 = model(var)
         k2 = model(var + k1/2 * self.dt)
         k3 = model(var + k2/2 * self.dt)
@@ -209,6 +257,7 @@ class PyTwoDimSpikingCoreModel(AbstractPerturbationNHeuristicModel):
 
     # 2D MODELS
     def _izhikevich_system(self, upsilon, dim, **kwargs):
+        """Izhikevich model for two-dimensional spiking neurons."""
         # Read coefficients
         coeffs = self.models_coeffs[dim] if len(self.stable) > 1 else self.models_coeffs[0]
 
@@ -240,12 +289,14 @@ class PyTwoDimSpikingCoreModel(AbstractPerturbationNHeuristicModel):
         return np.array([dv_, du_])
 
     def _two_dim_linear_system(self, upsilon, dim, **kwargs):
+        """Two-dimensional linear system of equations."""
         system_matrix = self.models_coeffs[dim] \
             if len(self.stable) > 1 else self.models_coeffs[0]
         deriv_upsilon = system_matrix @ upsilon
         return deriv_upsilon
 
     def _hs_fixed(self, dim, var):
+        """Fixed heuristic search operator for perturbation-based nheuristics."""
         new_var_1 = self.v1_best[dim]
         new_var_2 = self.v2_best[dim]
 
@@ -253,6 +304,7 @@ class PyTwoDimSpikingCoreModel(AbstractPerturbationNHeuristicModel):
         return new_var
 
     def _hs_random(self, dim, var):
+        """Random heuristic search operator for perturbation-based nheuristics."""
         new_var_1 = np.random.normal(0.0, 1)
         new_var_2 = np.random.normal(0.0, 1)
 
@@ -260,6 +312,7 @@ class PyTwoDimSpikingCoreModel(AbstractPerturbationNHeuristicModel):
         return new_var
 
     def _hs_directional(self, dim, var):
+        """Directional heuristic search operator for perturbation-based nheuristics."""
         dir1 = self.v1_best[dim] - var[0]
         dir2 = self.v2_best[dim] - var[1]
         scale = self.alpha * np.random.randn() * self.noise_std
@@ -268,9 +321,11 @@ class PyTwoDimSpikingCoreModel(AbstractPerturbationNHeuristicModel):
 
     @staticmethod
     def _get_F():
+        """Returns a random scaling factor for the heuristic search operator, particularly for the differential variant."""
         return np.random.normal(0.5, 0.1)
 
     def _hs_differential(self, dim, var):
+        """Differential heuristic search operator for perturbation-based nheuristics."""
         if self.hs_variant in ["rand", "current-to-rand", "best-to-rand"]:
             # Get from neighbours
             if self.num_neighbours > 3:
@@ -305,17 +360,14 @@ class PyTwoDimSpikingCoreModel(AbstractPerturbationNHeuristicModel):
     # DYNAMIC HEURISTIC
     def _apply_hd(self, dim, var):
         """Applies the selected approximation to the dynamic system for a given dimension."""
-        # Prepare the model
-        # model = partial(self.model, dim=dim)
-
         # Apply the model using an approximation, if so
         new_var = self.approx_method(self.models[dim], var, dt=self.dt)
 
         # Post-processing
-        # new_var += np.exp(-self.time_step / self.max_steps) * np.random.normal(0, self.noise_std, 2)
         return new_var
 
     def _run_core_process(self):
+        """Runs the core process of the two-dimensional spiking core model."""
         for dim in range(self.num_dimensions):
             # Get the spike condition for this neuron
             self.self_fire[dim]     = self._spike_condition(self.v1[dim], self.v2[dim], self.threshold[dim], dim)
@@ -333,6 +385,7 @@ class PyTwoDimSpikingCoreModel(AbstractPerturbationNHeuristicModel):
             self._check_vbounds()
 
     def _transform_variables(self):
+        """Transforms the variables to the appropriate range and prepares the reference point."""
         if not self.initialised:
             x_refs = np.vstack((self.p, self.g))
         else:
@@ -361,27 +414,34 @@ class PyTwoDimSpikingCoreModel(AbstractPerturbationNHeuristicModel):
 
     # Threshold determination
     def _threshold_fixed(self, base_threshold):
+        """Returns a fixed threshold value."""
         return base_threshold
 
     def _threshold_adaptive_time(self, base_threshold):
+        """Returns an adaptive threshold based on the time step."""
         scale = 1.0 / (1.0 + self.thr_k * (self.time_step + 1.0))
         return base_threshold * scale
 
     def _threshold_adaptive_stag(self, base_threshold):
+        """Returns an adaptive threshold based on the stagnation count."""
         scale = 1.0 + self.thr_k * self.stag_count
         return base_threshold * scale
 
     def _threshold_diff_pg(self, base_threshold=None):
+        """Returns a threshold based on the difference between the current position and the global best."""
         return self.thr_alpha * np.abs(self.p - self.g)
 
     def _threshold_diff_pref(self, base_threshold=None):
+        """Returns a threshold based on the difference between the current position and the reference point."""
         return self.thr_alpha * np.abs(self.x_ref - self.p)
 
     def _threshold_random(self, base_threshold):
+        """Returns a random threshold value based on a normal distribution."""
         noise = np.random.normal(0, self.noise_std, size=self.shape)
         return base_threshold + self.thr_k * noise
 
     def _init_threshold_fn(self):
+        """Initialises the threshold function based on the specified threshold mode."""
         if self.thr_mode == "fixed":
             return self._threshold_fixed
         elif self.thr_mode == "adaptive_time":
@@ -398,37 +458,46 @@ class PyTwoDimSpikingCoreModel(AbstractPerturbationNHeuristicModel):
             raise ValueError(f"Unknown threshold mode: {self.thr_mode}")
 
     def _update_threshold(self):
+        """Updates the threshold based on the current time step and the base threshold."""
         self.threshold = self._threshold_fn(self._base_threshold)
         self.threshold = np.clip(self.threshold, self.thr_min, self.thr_max)
 
     # SPIKING CONDITIONS
     def _spike_fixed(self, v1, v2, thr, dim):
+        """Fixed spiking condition based on a threshold."""
         return np.abs(v1) > thr
 
     def _spike_l1(self, v1, v2, thr, dim):
+        """L1 norm spiking condition based on a threshold."""
         return np.abs(v1) + np.abs(v2) > thr
 
     def _spike_l2(self, v1, v2, thr, dim):
+        """L2 norm spiking condition based on a threshold."""
         return np.linalg.norm([v1, v2]) > thr
 
     def _spike_l2_gen(self, v1, v2, thr, dim):
+        """Generalised L2 norm spiking condition based on a threshold."""
         return (v1 ** 2 + self.spk_alpha * v2 ** 2) > thr ** 2
 
     def _spike_random(self, v1, v2, thr, dim):
+        """Random spiking condition based on a threshold."""
         magnitude = np.linalg.norm([v1, v2])
         spike_prob = 1.0 / (1.0 + np.exp(-(magnitude - thr)))
         return np.random.rand() < spike_prob
 
     def _spike_adaptive(self, v1, v2, thr, dim):
+        """Adaptive spiking condition based on the spiking alpha and time step."""
         min_threshold = 1e-6
         adaptive_threshold = max(min_threshold, self.spk_alpha / (1 + self.time_step / self.max_steps))
         return np.abs(v1) > adaptive_threshold
 
     def _spike_stable(self, v1, v2, thr, dim):
+        """Stable spiking condition based on the stability of the system."""
         eps = 1e-3 / (1 + self.time_step)
         return np.linalg.norm([v1, v2]) < eps
 
     def _init_spike_condition(self):
+        """Initialises the spiking condition based on the specified spiking condition type."""
         if self.spk_cond == "fixed":
             return self._spike_fixed
         elif self.spk_cond == "l1":
@@ -447,6 +516,7 @@ class PyTwoDimSpikingCoreModel(AbstractPerturbationNHeuristicModel):
             raise ValueError(f"Unknown spiking condition: {self.spk_cond}")
 
     def run_spk(self):
+        """Runs the spiking core process model."""
         self.prev_p      = self.p.copy()
 
         # Read the inputs

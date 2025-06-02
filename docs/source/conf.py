@@ -19,9 +19,10 @@ extensions = [
     "sphinx.ext.napoleon",
     "sphinx.ext.autosummary",
     "sphinx_autodoc_typehints",
-    # "myst_nb",
+    "myst_nb",
 ]
 add_module_names = False
+nb_execution_mode = "off"
 
 autoclass_content = 'class'
 autosummary_generate = True

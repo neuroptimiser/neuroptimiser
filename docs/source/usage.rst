@@ -7,3 +7,13 @@ Usage
 
 
 (TODO: Add usage instructions here)
+
+
+Examples
+--------
+
+.. toctree::
+    :maxdepth: 1
+
+    examples/Example1
+    examples/Example2

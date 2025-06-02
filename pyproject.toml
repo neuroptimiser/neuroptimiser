@@ -36,4 +36,5 @@ dependencies = [
     "sphinx-rtd-theme>=3.0.2",
     "sphinxcontrib-napoleon>=0.7",
     "furo>=2024.8.6",
+    "myst-nb>=1.2.0",
 ]

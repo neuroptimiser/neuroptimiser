@@ -1,0 +1,13 @@
+﻿PyPositionReceiverModel
+=======================
+
+.. rubric:: Full Name
+
+neuroptimiser.core.models.PyPositionReceiverModel
+
+.. rubric:: Description
+
+.. autoclass:: neuroptimiser.core.models.PyPositionReceiverModel
+   :members:
+   :undoc-members:
+   :show-inheritance:

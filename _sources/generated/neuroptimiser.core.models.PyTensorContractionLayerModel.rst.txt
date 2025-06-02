@@ -1,0 +1,13 @@
+﻿PyTensorContractionLayerModel
+=============================
+
+.. rubric:: Full Name
+
+neuroptimiser.core.models.PyTensorContractionLayerModel
+
+.. rubric:: Description
+
+.. autoclass:: neuroptimiser.core.models.PyTensorContractionLayerModel
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -1,0 +1,13 @@
+﻿NeuroHeuristicUnit
+==================
+
+.. rubric:: Full Name
+
+neuroptimiser.core.processes.NeuroHeuristicUnit
+
+.. rubric:: Description
+
+.. autoclass:: neuroptimiser.core.processes.NeuroHeuristicUnit
+   :members:
+   :undoc-members:
+   :show-inheritance:

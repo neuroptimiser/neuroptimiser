@@ -1,0 +1,13 @@
+﻿PyPositionSenderModel
+=====================
+
+.. rubric:: Full Name
+
+neuroptimiser.core.models.PyPositionSenderModel
+
+.. rubric:: Description
+
+.. autoclass:: neuroptimiser.core.models.PyPositionSenderModel
+   :members:
+   :undoc-members:
+   :show-inheritance:

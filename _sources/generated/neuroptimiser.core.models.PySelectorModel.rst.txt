@@ -1,0 +1,13 @@
+﻿PySelectorModel
+===============
+
+.. rubric:: Full Name
+
+neuroptimiser.core.models.PySelectorModel
+
+.. rubric:: Description
+
+.. autoclass:: neuroptimiser.core.models.PySelectorModel
+   :members:
+   :undoc-members:
+   :show-inheritance:

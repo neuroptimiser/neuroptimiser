@@ -1,0 +1,13 @@
+﻿TensorContractionLayer
+======================
+
+.. rubric:: Full Name
+
+neuroptimiser.core.processes.TensorContractionLayer
+
+.. rubric:: Description
+
+.. autoclass:: neuroptimiser.core.processes.TensorContractionLayer
+   :members:
+   :undoc-members:
+   :show-inheritance:

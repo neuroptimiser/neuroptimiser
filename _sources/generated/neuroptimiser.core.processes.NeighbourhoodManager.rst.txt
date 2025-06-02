@@ -1,0 +1,13 @@
+﻿NeighbourhoodManager
+====================
+
+.. rubric:: Full Name
+
+neuroptimiser.core.processes.NeighbourhoodManager
+
+.. rubric:: Description
+
+.. autoclass:: neuroptimiser.core.processes.NeighbourhoodManager
+   :members:
+   :undoc-members:
+   :show-inheritance:

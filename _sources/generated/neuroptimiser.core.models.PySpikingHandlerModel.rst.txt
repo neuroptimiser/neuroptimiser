@@ -1,0 +1,13 @@
+﻿PySpikingHandlerModel
+=====================
+
+.. rubric:: Full Name
+
+neuroptimiser.core.models.PySpikingHandlerModel
+
+.. rubric:: Description
+
+.. autoclass:: neuroptimiser.core.models.PySpikingHandlerModel
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -243,7 +243,35 @@
 <li class="toctree-l1 current has-children"><a class="reference internal" href="api.html">API Reference</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of API Reference</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
 <li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Solvers</a></li>
 <li class="toctree-l2"><a class="reference internal" href="api-utils.html">Utils</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api-core.html">Core</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="api-core.html">Core</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle navigation of Core</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="api-core-models.html">Models</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><div class="visually-hidden">Toggle navigation of Models</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="generated/neuroptimiser.core.models.AbstractPerturbationNHeuristicModel.html">AbstractPerturbationNHeuristicModel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="generated/neuroptimiser.core.models.SubNeuroHeuristicUnitModel.html">SubNeuroHeuristicUnitModel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="generated/neuroptimiser.core.models.PyTwoDimSpikingCoreModel.html">PyTwoDimSpikingCoreModel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="generated/neuroptimiser.core.models.PySelectorModel.html">PySelectorModel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="generated/neuroptimiser.core.models.PyHighLevelSelectionModel.html">PyHighLevelSelectionModel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="generated/neuroptimiser.core.models.PyTensorContractionLayerModel.html">PyTensorContractionLayerModel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="generated/neuroptimiser.core.models.PyNeighbourhoodManagerModel.html">PyNeighbourhoodManagerModel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="generated/neuroptimiser.core.models.PySpikingHandlerModel.html">PySpikingHandlerModel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="generated/neuroptimiser.core.models.PyPositionSenderModel.html">PyPositionSenderModel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="generated/neuroptimiser.core.models.PyPositionReceiverModel.html">PyPositionReceiverModel</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="api-core-processes.html">Processes</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><div class="visually-hidden">Toggle navigation of Processes</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="generated/neuroptimiser.core.processes.AbstractSpikingCore.html">AbstractSpikingCore</a></li>
+<li class="toctree-l4"><a class="reference internal" href="generated/neuroptimiser.core.processes.NeuroHeuristicUnit.html">NeuroHeuristicUnit</a></li>
+<li class="toctree-l4"><a class="reference internal" href="generated/neuroptimiser.core.processes.TwoDimSpikingCore.html">TwoDimSpikingCore</a></li>
+<li class="toctree-l4"><a class="reference internal" href="generated/neuroptimiser.core.processes.Selector.html">Selector</a></li>
+<li class="toctree-l4"><a class="reference internal" href="generated/neuroptimiser.core.processes.HighLevelSelection.html">HighLevelSelection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="generated/neuroptimiser.core.processes.TensorContractionLayer.html">TensorContractionLayer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="generated/neuroptimiser.core.processes.NeighbourhoodManager.html">NeighbourhoodManager</a></li>
+<li class="toctree-l4"><a class="reference internal" href="generated/neuroptimiser.core.processes.SpikingHandler.html">SpikingHandler</a></li>
+<li class="toctree-l4"><a class="reference internal" href="generated/neuroptimiser.core.processes.PositionSender.html">PositionSender</a></li>
+<li class="toctree-l4"><a class="reference internal" href="generated/neuroptimiser.core.processes.PositionReceiver.html">PositionReceiver</a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
@@ -289,11 +317,11 @@
         <article role="main" id="furo-main-content">
           <section id="solvers">
 <h1>Solvers<a class="headerlink" href="#solvers" title="Link to this heading">¶</a></h1>
-<section id="neuroptimiser-solver">
-<h2>NeurOptimiser Solver<a class="headerlink" href="#neuroptimiser-solver" title="Link to this heading">¶</a></h2>
+<section id="neuroptimiser">
+<h2>NeurOptimiser<a class="headerlink" href="#neuroptimiser" title="Link to this heading">¶</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="neuroptimiser.solvers.NeurOptimiser">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">neuroptimiser.solvers.</span></span><span class="sig-name descname"><span class="pre">NeurOptimiser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config_params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">core_params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selector_params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#neuroptimiser.solvers.NeurOptimiser" title="Link to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">NeurOptimiser</span></span><a class="headerlink" href="#neuroptimiser.solvers.NeurOptimiser" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#neuroptimiser.solvers.AbstractSolver" title="neuroptimiser.solvers.AbstractSolver"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbstractSolver</span></code></a></p>
 <p>Neuro Optimiser is the main class for the Neuro Optimiser framework.
 It inherits from the AbstractSolver class and implements the solve method, and sets up the model for the optimisation process.</p>
@@ -306,6 +334,11 @@ It inherits from the AbstractSolver class and implements the solve method, and s
 </ul>
 </dd>
 </dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="neuroptimiser.solvers.NeurOptimiser.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config_params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">core_params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selector_params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#neuroptimiser.solvers.NeurOptimiser.__init__" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="neuroptimiser.solvers.NeurOptimiser.get_default_params">
 <span class="sig-name descname"><span class="pre">get_default_params</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#neuroptimiser.solvers.NeurOptimiser.get_default_params" title="Link to this definition">¶</a></dt>
@@ -363,12 +396,17 @@ It inherits from the AbstractSolver class and implements the solve method, and s
 <h2>Abstract Solver<a class="headerlink" href="#abstract-solver" title="Link to this heading">¶</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="neuroptimiser.solvers.AbstractSolver">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">neuroptimiser.solvers.</span></span><span class="sig-name descname"><span class="pre">AbstractSolver</span></span><a class="headerlink" href="#neuroptimiser.solvers.AbstractSolver" title="Link to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AbstractSolver</span></span><a class="headerlink" href="#neuroptimiser.solvers.AbstractSolver" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
 <p>Abstract base class for any solver in the Neuro Optimiser framework.
 This class defines the basic structure and methods that any solver should implement.
 It includes methods for setting up the problem, validating configuration parameters,
 and running the optimisation process.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="neuroptimiser.solvers.AbstractSolver.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#neuroptimiser.solvers.AbstractSolver.__init__" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="neuroptimiser.solvers.AbstractSolver.config_params">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">config_params</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span></em><a class="headerlink" href="#neuroptimiser.solvers.AbstractSolver.config_params" title="Link to this definition">¶</a></dt>
@@ -518,8 +556,9 @@ and running the optimisation process.</p>
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">Solvers</a><ul>
-<li><a class="reference internal" href="#neuroptimiser-solver">NeurOptimiser Solver</a><ul>
+<li><a class="reference internal" href="#neuroptimiser">NeurOptimiser</a><ul>
 <li><a class="reference internal" href="#neuroptimiser.solvers.NeurOptimiser"><code class="docutils literal notranslate"><span class="pre">NeurOptimiser</span></code></a><ul>
+<li><a class="reference internal" href="#neuroptimiser.solvers.NeurOptimiser.__init__"><code class="docutils literal notranslate"><span class="pre">NeurOptimiser.__init__()</span></code></a></li>
 <li><a class="reference internal" href="#neuroptimiser.solvers.NeurOptimiser.get_default_params"><code class="docutils literal notranslate"><span class="pre">NeurOptimiser.get_default_params()</span></code></a></li>
 <li><a class="reference internal" href="#neuroptimiser.solvers.NeurOptimiser.solve"><code class="docutils literal notranslate"><span class="pre">NeurOptimiser.solve()</span></code></a></li>
 </ul>
@@ -528,6 +567,7 @@ and running the optimisation process.</p>
 </li>
 <li><a class="reference internal" href="#abstract-solver">Abstract Solver</a><ul>
 <li><a class="reference internal" href="#neuroptimiser.solvers.AbstractSolver"><code class="docutils literal notranslate"><span class="pre">AbstractSolver</span></code></a><ul>
+<li><a class="reference internal" href="#neuroptimiser.solvers.AbstractSolver.__init__"><code class="docutils literal notranslate"><span class="pre">AbstractSolver.__init__()</span></code></a></li>
 <li><a class="reference internal" href="#neuroptimiser.solvers.AbstractSolver.config_params"><code class="docutils literal notranslate"><span class="pre">AbstractSolver.config_params</span></code></a></li>
 <li><a class="reference internal" href="#neuroptimiser.solvers.AbstractSolver.generate_experiment_name"><code class="docutils literal notranslate"><span class="pre">AbstractSolver.generate_experiment_name()</span></code></a></li>
 <li><a class="reference internal" href="#neuroptimiser.solvers.AbstractSolver.get_default_config"><code class="docutils literal notranslate"><span class="pre">AbstractSolver.get_default_config()</span></code></a></li>

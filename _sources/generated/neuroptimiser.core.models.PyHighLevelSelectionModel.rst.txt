@@ -1,0 +1,13 @@
+﻿PyHighLevelSelectionModel
+=========================
+
+.. rubric:: Full Name
+
+neuroptimiser.core.models.PyHighLevelSelectionModel
+
+.. rubric:: Description
+
+.. autoclass:: neuroptimiser.core.models.PyHighLevelSelectionModel
+   :members:
+   :undoc-members:
+   :show-inheritance:

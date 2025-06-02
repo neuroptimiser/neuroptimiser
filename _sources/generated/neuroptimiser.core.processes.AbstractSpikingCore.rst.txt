@@ -1,0 +1,13 @@
+﻿AbstractSpikingCore
+===================
+
+.. rubric:: Full Name
+
+neuroptimiser.core.processes.AbstractSpikingCore
+
+.. rubric:: Description
+
+.. autoclass:: neuroptimiser.core.processes.AbstractSpikingCore
+   :members:
+   :undoc-members:
+   :show-inheritance:

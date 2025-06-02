@@ -1,0 +1,13 @@
+﻿PyNeighbourhoodManagerModel
+===========================
+
+.. rubric:: Full Name
+
+neuroptimiser.core.models.PyNeighbourhoodManagerModel
+
+.. rubric:: Description
+
+.. autoclass:: neuroptimiser.core.models.PyNeighbourhoodManagerModel
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -1,0 +1,13 @@
+﻿SubNeuroHeuristicUnitModel
+==========================
+
+.. rubric:: Full Name
+
+neuroptimiser.core.models.SubNeuroHeuristicUnitModel
+
+.. rubric:: Description
+
+.. autoclass:: neuroptimiser.core.models.SubNeuroHeuristicUnitModel
+   :members:
+   :undoc-members:
+   :show-inheritance:

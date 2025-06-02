@@ -1,0 +1,13 @@
+﻿TwoDimSpikingCore
+=================
+
+.. rubric:: Full Name
+
+neuroptimiser.core.processes.TwoDimSpikingCore
+
+.. rubric:: Description
+
+.. autoclass:: neuroptimiser.core.processes.TwoDimSpikingCore
+   :members:
+   :undoc-members:
+   :show-inheritance:

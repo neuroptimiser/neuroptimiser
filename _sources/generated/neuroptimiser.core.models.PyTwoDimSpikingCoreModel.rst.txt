@@ -1,0 +1,13 @@
+﻿PyTwoDimSpikingCoreModel
+========================
+
+.. rubric:: Full Name
+
+neuroptimiser.core.models.PyTwoDimSpikingCoreModel
+
+.. rubric:: Description
+
+.. autoclass:: neuroptimiser.core.models.PyTwoDimSpikingCoreModel
+   :members:
+   :undoc-members:
+   :show-inheritance:

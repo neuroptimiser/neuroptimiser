@@ -1,0 +1,13 @@
+﻿Selector
+========
+
+.. rubric:: Full Name
+
+neuroptimiser.core.processes.Selector
+
+.. rubric:: Description
+
+.. autoclass:: neuroptimiser.core.processes.Selector
+   :members:
+   :undoc-members:
+   :show-inheritance:

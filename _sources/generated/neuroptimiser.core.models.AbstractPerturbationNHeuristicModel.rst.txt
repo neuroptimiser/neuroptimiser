@@ -1,0 +1,13 @@
+﻿AbstractPerturbationNHeuristicModel
+===================================
+
+.. rubric:: Full Name
+
+neuroptimiser.core.models.AbstractPerturbationNHeuristicModel
+
+.. rubric:: Description
+
+.. autoclass:: neuroptimiser.core.models.AbstractPerturbationNHeuristicModel
+   :members:
+   :undoc-members:
+   :show-inheritance:

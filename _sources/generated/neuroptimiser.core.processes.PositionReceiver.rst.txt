@@ -1,0 +1,13 @@
+﻿PositionReceiver
+================
+
+.. rubric:: Full Name
+
+neuroptimiser.core.processes.PositionReceiver
+
+.. rubric:: Description
+
+.. autoclass:: neuroptimiser.core.processes.PositionReceiver
+   :members:
+   :undoc-members:
+   :show-inheritance:

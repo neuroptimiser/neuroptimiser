@@ -1,0 +1,13 @@
+﻿HighLevelSelection
+==================
+
+.. rubric:: Full Name
+
+neuroptimiser.core.processes.HighLevelSelection
+
+.. rubric:: Description
+
+.. autoclass:: neuroptimiser.core.processes.HighLevelSelection
+   :members:
+   :undoc-members:
+   :show-inheritance:

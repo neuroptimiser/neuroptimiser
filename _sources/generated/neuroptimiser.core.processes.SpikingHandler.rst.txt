@@ -1,0 +1,13 @@
+﻿SpikingHandler
+==============
+
+.. rubric:: Full Name
+
+neuroptimiser.core.processes.SpikingHandler
+
+.. rubric:: Description
+
+.. autoclass:: neuroptimiser.core.processes.SpikingHandler
+   :members:
+   :undoc-members:
+   :show-inheritance:

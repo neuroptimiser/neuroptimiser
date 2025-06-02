@@ -1,0 +1,13 @@
+﻿PositionSender
+==============
+
+.. rubric:: Full Name
+
+neuroptimiser.core.processes.PositionSender
+
+.. rubric:: Description
+
+.. autoclass:: neuroptimiser.core.processes.PositionSender
+   :members:
+   :undoc-members:
+   :show-inheritance:

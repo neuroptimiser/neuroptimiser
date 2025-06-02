@@ -1,0 +1,1649 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Example 2: A Hybrid Neuroptimiser with a problem from COCO" href="Example2.html" /><link rel="prev" title="Usage" href="../usage.html" />
+        <link rel="canonical" href="https://jcrvz.github.io/neuroptimiser/examples/Example1.html" />
+
+    <link rel="shortcut icon" href="../_static/neuropty-Light-small.png"/><!-- Generated with Sphinx 8.1.3 and Furo 2024.08.06 -->
+        <title>Example 1: A Simple Neuroptimiser with a problem from IOH - Neuroptimiser</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=354aac6f" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=302659d7" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  --color-brand-primary: #3B4CCA;
+  --color-brand-content: #1A1A1A;
+  --color-background-primary: #FFFFFF;
+  --color-background-secondary: #F7F7F7;
+  --color-sidebar-background: #F0F0F0;
+  --color-sidebar-link-text: #333333;
+  --color-sidebar-link-text--top-level: #1A1A1A;
+  --color-sidebar-link-background--active: #E6E6E6;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  --color-brand-primary: #7DA2FF;
+  --color-brand-content: #E0E0E0;
+  --color-background-primary: #181818;
+  --color-background-secondary: #242424;
+  --color-sidebar-background: #202020;
+  --color-sidebar-link-text: #CCCCCC;
+  --color-sidebar-link-text--top-level: #FFFFFF;
+  --color-sidebar-link-background--active: #333333;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  --color-brand-primary: #7DA2FF;
+  --color-brand-content: #E0E0E0;
+  --color-background-primary: #181818;
+  --color-background-secondary: #242424;
+  --color-sidebar-background: #202020;
+  --color-sidebar-link-text: #CCCCCC;
+  --color-sidebar-link-text--top-level: #FFFFFF;
+  --color-sidebar-link-background--active: #333333;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+<div class="announcement">
+  <aside class="announcement-content">
+     This is a WIP project, and the documentation is under construction. 
+  </aside>
+</div>
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../index.html"><div class="brand">Neuroptimiser</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+  
+  <div class="sidebar-logo-container">
+    <img class="sidebar-logo only-light" src="../_static/neuropty-Light2x.png" alt="Light Logo"/>
+    <img class="sidebar-logo only-dark" src="../_static/neuropty-Dark2x.png" alt="Dark Logo"/>
+  </div>
+  
+  <span class="sidebar-brand-text">Neuroptimiser</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1 current has-children"><a class="reference internal" href="../usage.html">Usage</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Usage</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Example 1: A Simple Neuroptimiser with a problem from IOH</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Example2.html">Example 2: A Hybrid Neuroptimiser with a problem from COCO</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../architecture.html">Architecture</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of Architecture</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="simple">
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../api.html">API Reference</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of API Reference</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../api-solvers.html">Solvers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api-utils.html">Utils</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../api-core.html">Core</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle navigation of Core</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../api-core-models.html">Models</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><div class="visually-hidden">Toggle navigation of Models</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../generated/neuroptimiser.core.models.AbstractPerturbationNHeuristicModel.html">AbstractPerturbationNHeuristicModel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../generated/neuroptimiser.core.models.SubNeuroHeuristicUnitModel.html">SubNeuroHeuristicUnitModel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../generated/neuroptimiser.core.models.PyTwoDimSpikingCoreModel.html">PyTwoDimSpikingCoreModel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../generated/neuroptimiser.core.models.PySelectorModel.html">PySelectorModel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../generated/neuroptimiser.core.models.PyHighLevelSelectionModel.html">PyHighLevelSelectionModel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../generated/neuroptimiser.core.models.PyTensorContractionLayerModel.html">PyTensorContractionLayerModel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../generated/neuroptimiser.core.models.PyNeighbourhoodManagerModel.html">PyNeighbourhoodManagerModel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../generated/neuroptimiser.core.models.PySpikingHandlerModel.html">PySpikingHandlerModel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../generated/neuroptimiser.core.models.PyPositionSenderModel.html">PyPositionSenderModel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../generated/neuroptimiser.core.models.PyPositionReceiverModel.html">PyPositionReceiverModel</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../api-core-processes.html">Processes</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><div class="visually-hidden">Toggle navigation of Processes</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../generated/neuroptimiser.core.processes.AbstractSpikingCore.html">AbstractSpikingCore</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../generated/neuroptimiser.core.processes.NeuroHeuristicUnit.html">NeuroHeuristicUnit</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../generated/neuroptimiser.core.processes.TwoDimSpikingCore.html">TwoDimSpikingCore</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../generated/neuroptimiser.core.processes.Selector.html">Selector</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../generated/neuroptimiser.core.processes.HighLevelSelection.html">HighLevelSelection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../generated/neuroptimiser.core.processes.TensorContractionLayer.html">TensorContractionLayer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../generated/neuroptimiser.core.processes.NeighbourhoodManager.html">NeighbourhoodManager</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../generated/neuroptimiser.core.processes.SpikingHandler.html">SpikingHandler</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../generated/neuroptimiser.core.processes.PositionSender.html">PositionSender</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../generated/neuroptimiser.core.processes.PositionReceiver.html">PositionReceiver</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contributing</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="../_sources/examples/Example1.ipynb.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="example-1-a-simple-neuroptimiser-with-a-problem-from-ioh">
+<h1>Example 1: A Simple Neuroptimiser with a problem from IOH<a class="headerlink" href="#example-1-a-simple-neuroptimiser-with-a-problem-from-ioh" title="Link to this heading">¶</a></h1>
+<p>This example demonstrates how to use the Neuroptimiser library to solve an optimisation problem from the IOH framework. The problem is defined by its ID and instance, and the Neuroptimiser is configured with a set of parameters for the agents.</p>
+<section id="setup">
+<h2>1. Setup<a class="headerlink" href="#setup" title="Link to this heading">¶</a></h2>
+<p>Import necessary libraries and set up the environment for plotting.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Import necessary libraries</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">shutil</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">copy</span><span class="w"> </span><span class="kn">import</span> <span class="n">deepcopy</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">random</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">seaborn</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sns</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mpl_toolkits.mplot3d</span><span class="w"> </span><span class="kn">import</span> <span class="n">Axes3D</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib.colors</span><span class="w"> </span><span class="kn">import</span> <span class="n">ListedColormap</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">neuroptimiser</span><span class="w"> </span><span class="kn">import</span> <span class="n">NeurOptimiser</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ioh</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_problem</span>
+
+<span class="c1"># Set up the plotting style and parameters</span>
+<span class="n">width</span> <span class="o">=</span> <span class="mf">6.5</span>
+<span class="n">height</span> <span class="o">=</span> <span class="n">width</span> <span class="o">*</span> <span class="mf">0.618</span>
+<span class="n">res_dpi</span> <span class="o">=</span> <span class="mi">333</span>
+
+<span class="n">seed</span> <span class="o">=</span> <span class="mi">42</span>
+<span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+<span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+
+<span class="n">root_figures</span> <span class="o">=</span> <span class="s2">&quot;./figures/&quot;</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">context</span><span class="p">(</span><span class="s1">&#39;paper&#39;</span><span class="p">)</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">set_style</span><span class="p">(</span><span class="s2">&quot;ticks&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;font.family&#39;</span><span class="p">]</span>         <span class="o">=</span> <span class="s1">&#39;serif&#39;</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;axes.labelsize&#39;</span><span class="p">]</span>      <span class="o">=</span> <span class="mi">11</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;xtick.labelsize&#39;</span><span class="p">]</span>     <span class="o">=</span> <span class="mi">11</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;ytick.labelsize&#39;</span><span class="p">]</span>     <span class="o">=</span> <span class="mi">11</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;legend.fontsize&#39;</span><span class="p">]</span>     <span class="o">=</span> <span class="mi">11</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;axes.grid&#39;</span><span class="p">]</span>           <span class="o">=</span> <span class="kc">False</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;axes.spines.top&#39;</span><span class="p">]</span>     <span class="o">=</span> <span class="kc">True</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;axes.spines.right&#39;</span><span class="p">]</span>   <span class="o">=</span> <span class="kc">True</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;axes.edgecolor&#39;</span><span class="p">]</span>      <span class="o">=</span> <span class="s1">&#39;black&#39;</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;xtick.color&#39;</span><span class="p">]</span>         <span class="o">=</span> <span class="s1">&#39;black&#39;</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;ytick.color&#39;</span><span class="p">]</span>         <span class="o">=</span> <span class="s1">&#39;black&#39;</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;axes.labelcolor&#39;</span><span class="p">]</span>     <span class="o">=</span> <span class="s1">&#39;black&#39;</span>
+
+<span class="k">if</span> <span class="n">shutil</span><span class="o">.</span><span class="n">which</span><span class="p">(</span><span class="s2">&quot;pdflatex&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;text.usetex&#39;</span><span class="p">]</span>     <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;font.serif&#39;</span><span class="p">]</span>      <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Computer Modern Roman&#39;</span><span class="p">]</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;text.usetex&#39;</span><span class="p">]</span>     <span class="o">=</span> <span class="kc">False</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">save_this</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">_in</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">is_saving</span><span class="p">:</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">root_figures</span><span class="si">}</span><span class="s2">/&quot;</span> <span class="o">+</span> <span class="n">_in</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">root_figures</span> <span class="o">+</span> <span class="n">_in</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="n">prefix_filename</span> <span class="o">+</span> <span class="s2">&quot;.png&quot;</span><span class="p">,</span> <span class="n">transparent</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="n">res_dpi</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s2">&quot;tight&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="parameter-definition">
+<h2>2. Parameter definition<a class="headerlink" href="#parameter-definition" title="Link to this heading">¶</a></h2>
+<p>In this section, we define the problem parameters, including the number of steps, problem ID, instance, dimensions. In addition, we set the custom parameters for the Neuroptimiser, which will replace the default parameters of the spiking core.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Define the problem parameters</span>
+<span class="n">num_steps</span>       <span class="o">=</span> <span class="mi">100</span>       <span class="c1"># Number of iterations</span>
+<span class="n">problem_id</span>      <span class="o">=</span> <span class="mi">1</span>         <span class="c1"># Problem ID from the IOH framework</span>
+<span class="n">problem_ins</span>     <span class="o">=</span> <span class="mi">1</span>         <span class="c1"># Problem instance</span>
+<span class="n">num_dimensions</span>  <span class="o">=</span> <span class="mi">2</span>         <span class="c1"># Number of dimensions for the problem</span>
+<span class="n">num_agents</span>      <span class="o">=</span> <span class="mi">30</span>        <span class="c1"># Number of agents/units in the Neuroptimiser</span>
+<span class="n">num_neighbours</span>  <span class="o">=</span> <span class="mi">10</span>        <span class="c1"># Number of neighbours for each agent/unit</span>
+
+<span class="c1"># Define the Neuroptimiser parameters</span>
+<span class="n">neuropt_name</span>    <span class="o">=</span> <span class="s2">&quot;neuropt_Ex1-LinRand&quot;</span>
+
+<span class="n">config_params</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+    <span class="n">num_iterations</span>  <span class="o">=</span> <span class="n">num_steps</span><span class="p">,</span>
+    <span class="n">num_agents</span>      <span class="o">=</span> <span class="n">num_agents</span><span class="p">,</span>
+    <span class="n">spiking_core</span>    <span class="o">=</span> <span class="s2">&quot;TwoDimSpikingCore&quot;</span><span class="p">,</span>
+    <span class="n">num_neighbours</span>  <span class="o">=</span> <span class="n">num_neighbours</span><span class="p">,</span>
+    <span class="n">neuron_topology</span> <span class="o">=</span> <span class="s2">&quot;2dr&quot;</span><span class="p">,</span>
+    <span class="n">unit_topology</span>   <span class="o">=</span> <span class="s2">&quot;random&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">core_params</span> <span class="o">=</span> <span class="p">[</span>   <span class="c1"># Specify the custom parameters for the spiking core</span>
+    <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;izhikevich&quot;</span><span class="p">,</span>
+     <span class="s2">&quot;coeffs&quot;</span><span class="p">:</span> <span class="s2">&quot;random&quot;</span><span class="p">,</span>
+     <span class="s2">&quot;spk_cond&quot;</span><span class="p">:</span> <span class="s2">&quot;fixed&quot;</span><span class="p">,</span>
+     <span class="s2">&quot;hs_operator&quot;</span><span class="p">:</span> <span class="s2">&quot;differential&quot;</span><span class="p">,</span>
+     <span class="s2">&quot;hs_variant&quot;</span><span class="p">:</span> <span class="s2">&quot;current-to-rand&quot;</span><span class="p">,</span>
+     <span class="p">},</span>
+<span class="p">]</span>
+
+<span class="c1"># Additional parameters</span>
+<span class="n">is_saving</span>       <span class="o">=</span> <span class="kc">True</span>      <span class="c1"># Whether to save the figures or not</span>
+<span class="n">prefix_filename</span> <span class="o">=</span> <span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">neuropt_name</span><span class="si">}</span><span class="s2">_&quot;</span>
+                   <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">problem_id</span><span class="si">}</span><span class="s2">p_&quot;</span>
+                   <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">problem_ins</span><span class="si">}</span><span class="s2">i_&quot;</span>
+                   <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">num_dimensions</span><span class="si">}</span><span class="s2">d_&quot;</span>
+                   <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">num_steps</span><span class="si">}</span><span class="s2">s_&quot;</span>
+                   <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">num_agents</span><span class="si">}</span><span class="s2">u&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+<span class="k">if</span> <span class="n">is_saving</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;prefix_filename: &#39;</span><span class="si">{</span><span class="n">prefix_filename</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>prefix_filename: &#39;neuropt_Ex1-LinRand_1p_1i_2d_100s_30u&#39;
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="problem-setup-and-optimisation">
+<h2>3. Problem setup and optimisation<a class="headerlink" href="#problem-setup-and-optimisation" title="Link to this heading">¶</a></h2>
+<p>We first retrieve the problem from the IOH framework.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Get the problem from the IOH framework</span>
+<span class="n">problem</span> <span class="o">=</span> <span class="n">get_problem</span><span class="p">(</span><span class="n">fid</span><span class="o">=</span><span class="n">problem_id</span><span class="p">,</span>
+                      <span class="n">instance</span><span class="o">=</span><span class="n">problem_ins</span><span class="p">,</span>
+                      <span class="n">dimension</span><span class="o">=</span><span class="n">num_dimensions</span><span class="p">,</span>
+                      <span class="p">)</span>
+<span class="n">problem</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">problem</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;RealSingleObjectiveProblem 1. Sphere (iid=1 dim=2)&gt;
+</pre></div>
+</div>
+</div>
+</div>
+<p>Then, we instantiate the Neuroptimiser with the defined parameters and solve the problem. The <code class="docutils literal notranslate"><span class="pre">debug_mode</span></code> is set to <code class="docutils literal notranslate"><span class="pre">True</span></code> to enable detailed logging of the optimisation process.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Instantiation</span>
+<span class="n">optimiser</span> <span class="o">=</span> <span class="n">NeurOptimiser</span><span class="p">(</span><span class="n">config_params</span><span class="p">,</span> <span class="n">core_params</span><span class="p">)</span>
+
+<span class="c1"># Solve the problem</span>
+<span class="n">optimiser</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">problem</span><span class="p">,</span> <span class="n">debug_mode</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[neuropt:log] Debug mode is enabled. Monitoring will be activated.
+[neuropt:log] Parameters are set up.
+[neuropt:log] Initial positions and topologies are set up.
+[neuropt:log] Tensor contraction layer, neighbourhood manager, and high-level selection unit are created.
+[neuropt:log] Population of nheuristic units is created.
+[neuropt:log] Connections between nheuristic units and auxiliary processes are established.
+[neuropt:log] Monitors are set up.
+[neuropt:log] Starting simulation with 100 iterations...
+... step: 0, best fitness: 81.21773529052734
+... step: 10, best fitness: 79.9868392944336
+... step: 20, best fitness: 79.52970123291016
+... step: 30, best fitness: 79.52970123291016
+... step: 40, best fitness: 79.52970123291016
+... step: 50, best fitness: 79.52970123291016
+... step: 60, best fitness: 79.4903564453125
+... step: 70, best fitness: 79.48014831542969
+... step: 80, best fitness: 79.48001098632812
+... step: 90, best fitness: 79.48001098632812
+... step: 99, best fitness: 79.48001098632812
+[neuropt:log] Simulation completed. Fetching monitor data... done
+</pre></div>
+</div>
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(array([ 0.25548838, -1.15485579]), array([79.48001099]))
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Show the overall configuration parameters of the optimiser</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">optimiser</span><span class="o">.</span><span class="n">config_params</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>{&#39;num_iterations&#39;: 100, &#39;num_agents&#39;: 30, &#39;spiking_core&#39;: &#39;TwoDimSpikingCore&#39;, &#39;num_neighbours&#39;: 10, &#39;neuron_topology&#39;: &#39;2dr&#39;, &#39;unit_topology&#39;: &#39;random&#39;, &#39;function&#39;: &lt;function AbstractSolver._rescale_problem.&lt;locals&gt;.scaled_problem at 0x1341b6d40&gt;, &#39;search_space&#39;: array([[-5.,  5.],
+       [-5.,  5.]]), &#39;seed&#39;: 69, &#39;num_dimensions&#39;: 2, &#39;core_params&#39;: {}}
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Show the core parameters used in the optimisation</span>
+<span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">optimiser</span><span class="o">.</span><span class="n">core_params</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>name</th>
+      <th>coeffs</th>
+      <th>spk_cond</th>
+      <th>hs_operator</th>
+      <th>hs_variant</th>
+      <th>is_bounded</th>
+      <th>thr_alpha</th>
+      <th>alpha</th>
+      <th>max_steps</th>
+      <th>seed</th>
+      <th>ref_mode</th>
+      <th>dt</th>
+      <th>thr_mode</th>
+      <th>approx</th>
+      <th>spk_alpha</th>
+      <th>thr_k</th>
+      <th>thr_max</th>
+      <th>noise_std</th>
+      <th>thr_min</th>
+      <th>init_position</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>izhikevich</td>
+      <td>random</td>
+      <td>fixed</td>
+      <td>differential</td>
+      <td>current-to-rand</td>
+      <td>False</td>
+      <td>1.0</td>
+      <td>1.0</td>
+      <td>100</td>
+      <td>69</td>
+      <td>pg</td>
+      <td>0.01</td>
+      <td>diff_pg</td>
+      <td>rk4</td>
+      <td>0.25</td>
+      <td>0.05</td>
+      <td>1.0</td>
+      <td>0.1</td>
+      <td>0.000001</td>
+      <td>[-0.250919762305275, 0.9014286128198323]</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>izhikevich</td>
+      <td>random</td>
+      <td>fixed</td>
+      <td>differential</td>
+      <td>current-to-rand</td>
+      <td>False</td>
+      <td>1.0</td>
+      <td>1.0</td>
+      <td>100</td>
+      <td>70</td>
+      <td>pg</td>
+      <td>0.01</td>
+      <td>diff_pg</td>
+      <td>rk4</td>
+      <td>0.25</td>
+      <td>0.05</td>
+      <td>1.0</td>
+      <td>0.1</td>
+      <td>0.000001</td>
+      <td>[0.4639878836228102, 0.1973169683940732]</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>izhikevich</td>
+      <td>random</td>
+      <td>fixed</td>
+      <td>differential</td>
+      <td>current-to-rand</td>
+      <td>False</td>
+      <td>1.0</td>
+      <td>1.0</td>
+      <td>100</td>
+      <td>71</td>
+      <td>pg</td>
+      <td>0.01</td>
+      <td>diff_pg</td>
+      <td>rk4</td>
+      <td>0.25</td>
+      <td>0.05</td>
+      <td>1.0</td>
+      <td>0.1</td>
+      <td>0.000001</td>
+      <td>[-0.687962719115127, -0.6880109593275947]</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>izhikevich</td>
+      <td>random</td>
+      <td>fixed</td>
+      <td>differential</td>
+      <td>current-to-rand</td>
+      <td>False</td>
+      <td>1.0</td>
+      <td>1.0</td>
+      <td>100</td>
+      <td>72</td>
+      <td>pg</td>
+      <td>0.01</td>
+      <td>diff_pg</td>
+      <td>rk4</td>
+      <td>0.25</td>
+      <td>0.05</td>
+      <td>1.0</td>
+      <td>0.1</td>
+      <td>0.000001</td>
+      <td>[-0.8838327756636011, 0.7323522915498704]</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>izhikevich</td>
+      <td>random</td>
+      <td>fixed</td>
+      <td>differential</td>
+      <td>current-to-rand</td>
+      <td>False</td>
+      <td>1.0</td>
+      <td>1.0</td>
+      <td>100</td>
+      <td>73</td>
+      <td>pg</td>
+      <td>0.01</td>
+      <td>diff_pg</td>
+      <td>rk4</td>
+      <td>0.25</td>
+      <td>0.05</td>
+      <td>1.0</td>
+      <td>0.1</td>
+      <td>0.000001</td>
+      <td>[0.2022300234864176, 0.416145155592091]</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>izhikevich</td>
+      <td>random</td>
+      <td>fixed</td>
+      <td>differential</td>
+      <td>current-to-rand</td>
+      <td>False</td>
+      <td>1.0</td>
+      <td>1.0</td>
+      <td>100</td>
+      <td>74</td>
+      <td>pg</td>
+      <td>0.01</td>
+      <td>diff_pg</td>
+      <td>rk4</td>
+      <td>0.25</td>
+      <td>0.05</td>
+      <td>1.0</td>
+      <td>0.1</td>
+      <td>0.000001</td>
+      <td>[-0.9588310114083951, 0.9398197043239886]</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>izhikevich</td>
+      <td>random</td>
+      <td>fixed</td>
+      <td>differential</td>
+      <td>current-to-rand</td>
+      <td>False</td>
+      <td>1.0</td>
+      <td>1.0</td>
+      <td>100</td>
+      <td>75</td>
+      <td>pg</td>
+      <td>0.01</td>
+      <td>diff_pg</td>
+      <td>rk4</td>
+      <td>0.25</td>
+      <td>0.05</td>
+      <td>1.0</td>
+      <td>0.1</td>
+      <td>0.000001</td>
+      <td>[0.6648852816008435, -0.5753217786434477]</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>izhikevich</td>
+      <td>random</td>
+      <td>fixed</td>
+      <td>differential</td>
+      <td>current-to-rand</td>
+      <td>False</td>
+      <td>1.0</td>
+      <td>1.0</td>
+      <td>100</td>
+      <td>76</td>
+      <td>pg</td>
+      <td>0.01</td>
+      <td>diff_pg</td>
+      <td>rk4</td>
+      <td>0.25</td>
+      <td>0.05</td>
+      <td>1.0</td>
+      <td>0.1</td>
+      <td>0.000001</td>
+      <td>[-0.6363500655857988, -0.6331909802931324]</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>izhikevich</td>
+      <td>random</td>
+      <td>fixed</td>
+      <td>differential</td>
+      <td>current-to-rand</td>
+      <td>False</td>
+      <td>1.0</td>
+      <td>1.0</td>
+      <td>100</td>
+      <td>77</td>
+      <td>pg</td>
+      <td>0.01</td>
+      <td>diff_pg</td>
+      <td>rk4</td>
+      <td>0.25</td>
+      <td>0.05</td>
+      <td>1.0</td>
+      <td>0.1</td>
+      <td>0.000001</td>
+      <td>[-0.39151551408092455, 0.04951286326447568]</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>izhikevich</td>
+      <td>random</td>
+      <td>fixed</td>
+      <td>differential</td>
+      <td>current-to-rand</td>
+      <td>False</td>
+      <td>1.0</td>
+      <td>1.0</td>
+      <td>100</td>
+      <td>78</td>
+      <td>pg</td>
+      <td>0.01</td>
+      <td>diff_pg</td>
+      <td>rk4</td>
+      <td>0.25</td>
+      <td>0.05</td>
+      <td>1.0</td>
+      <td>0.1</td>
+      <td>0.000001</td>
+      <td>[-0.13610996271576847, -0.4175417196039162]</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>izhikevich</td>
+      <td>random</td>
+      <td>fixed</td>
+      <td>differential</td>
+      <td>current-to-rand</td>
+      <td>False</td>
+      <td>1.0</td>
+      <td>1.0</td>
+      <td>100</td>
+      <td>79</td>
+      <td>pg</td>
+      <td>0.01</td>
+      <td>diff_pg</td>
+      <td>rk4</td>
+      <td>0.25</td>
+      <td>0.05</td>
+      <td>1.0</td>
+      <td>0.1</td>
+      <td>0.000001</td>
+      <td>[0.22370578944475894, -0.7210122786959163]</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>izhikevich</td>
+      <td>random</td>
+      <td>fixed</td>
+      <td>differential</td>
+      <td>current-to-rand</td>
+      <td>False</td>
+      <td>1.0</td>
+      <td>1.0</td>
+      <td>100</td>
+      <td>80</td>
+      <td>pg</td>
+      <td>0.01</td>
+      <td>diff_pg</td>
+      <td>rk4</td>
+      <td>0.25</td>
+      <td>0.05</td>
+      <td>1.0</td>
+      <td>0.1</td>
+      <td>0.000001</td>
+      <td>[-0.4157107029295637, -0.2672763134126166]</td>
+    </tr>
+    <tr>
+      <th>12</th>
+      <td>izhikevich</td>
+      <td>random</td>
+      <td>fixed</td>
+      <td>differential</td>
+      <td>current-to-rand</td>
+      <td>False</td>
+      <td>1.0</td>
+      <td>1.0</td>
+      <td>100</td>
+      <td>81</td>
+      <td>pg</td>
+      <td>0.01</td>
+      <td>diff_pg</td>
+      <td>rk4</td>
+      <td>0.25</td>
+      <td>0.05</td>
+      <td>1.0</td>
+      <td>0.1</td>
+      <td>0.000001</td>
+      <td>[-0.08786003156592814, 0.5703519227860272]</td>
+    </tr>
+    <tr>
+      <th>13</th>
+      <td>izhikevich</td>
+      <td>random</td>
+      <td>fixed</td>
+      <td>differential</td>
+      <td>current-to-rand</td>
+      <td>False</td>
+      <td>1.0</td>
+      <td>1.0</td>
+      <td>100</td>
+      <td>82</td>
+      <td>pg</td>
+      <td>0.01</td>
+      <td>diff_pg</td>
+      <td>rk4</td>
+      <td>0.25</td>
+      <td>0.05</td>
+      <td>1.0</td>
+      <td>0.1</td>
+      <td>0.000001</td>
+      <td>[-0.6006524356832805, 0.02846887682722321]</td>
+    </tr>
+    <tr>
+      <th>14</th>
+      <td>izhikevich</td>
+      <td>random</td>
+      <td>fixed</td>
+      <td>differential</td>
+      <td>current-to-rand</td>
+      <td>False</td>
+      <td>1.0</td>
+      <td>1.0</td>
+      <td>100</td>
+      <td>83</td>
+      <td>pg</td>
+      <td>0.01</td>
+      <td>diff_pg</td>
+      <td>rk4</td>
+      <td>0.25</td>
+      <td>0.05</td>
+      <td>1.0</td>
+      <td>0.1</td>
+      <td>0.000001</td>
+      <td>[0.18482913772408494, -0.9070991745600046]</td>
+    </tr>
+    <tr>
+      <th>15</th>
+      <td>izhikevich</td>
+      <td>random</td>
+      <td>fixed</td>
+      <td>differential</td>
+      <td>current-to-rand</td>
+      <td>False</td>
+      <td>1.0</td>
+      <td>1.0</td>
+      <td>100</td>
+      <td>84</td>
+      <td>pg</td>
+      <td>0.01</td>
+      <td>diff_pg</td>
+      <td>rk4</td>
+      <td>0.25</td>
+      <td>0.05</td>
+      <td>1.0</td>
+      <td>0.1</td>
+      <td>0.000001</td>
+      <td>[0.21508970380287673, -0.6589517526254169]</td>
+    </tr>
+    <tr>
+      <th>16</th>
+      <td>izhikevich</td>
+      <td>random</td>
+      <td>fixed</td>
+      <td>differential</td>
+      <td>current-to-rand</td>
+      <td>False</td>
+      <td>1.0</td>
+      <td>1.0</td>
+      <td>100</td>
+      <td>85</td>
+      <td>pg</td>
+      <td>0.01</td>
+      <td>diff_pg</td>
+      <td>rk4</td>
+      <td>0.25</td>
+      <td>0.05</td>
+      <td>1.0</td>
+      <td>0.1</td>
+      <td>0.000001</td>
+      <td>[-0.869896814029441, 0.8977710745066665]</td>
+    </tr>
+    <tr>
+      <th>17</th>
+      <td>izhikevich</td>
+      <td>random</td>
+      <td>fixed</td>
+      <td>differential</td>
+      <td>current-to-rand</td>
+      <td>False</td>
+      <td>1.0</td>
+      <td>1.0</td>
+      <td>100</td>
+      <td>86</td>
+      <td>pg</td>
+      <td>0.01</td>
+      <td>diff_pg</td>
+      <td>rk4</td>
+      <td>0.25</td>
+      <td>0.05</td>
+      <td>1.0</td>
+      <td>0.1</td>
+      <td>0.000001</td>
+      <td>[0.9312640661491187, 0.6167946962329223]</td>
+    </tr>
+    <tr>
+      <th>18</th>
+      <td>izhikevich</td>
+      <td>random</td>
+      <td>fixed</td>
+      <td>differential</td>
+      <td>current-to-rand</td>
+      <td>False</td>
+      <td>1.0</td>
+      <td>1.0</td>
+      <td>100</td>
+      <td>87</td>
+      <td>pg</td>
+      <td>0.01</td>
+      <td>diff_pg</td>
+      <td>rk4</td>
+      <td>0.25</td>
+      <td>0.05</td>
+      <td>1.0</td>
+      <td>0.1</td>
+      <td>0.000001</td>
+      <td>[-0.39077246165325863, -0.8046557719872323]</td>
+    </tr>
+    <tr>
+      <th>19</th>
+      <td>izhikevich</td>
+      <td>random</td>
+      <td>fixed</td>
+      <td>differential</td>
+      <td>current-to-rand</td>
+      <td>False</td>
+      <td>1.0</td>
+      <td>1.0</td>
+      <td>100</td>
+      <td>88</td>
+      <td>pg</td>
+      <td>0.01</td>
+      <td>diff_pg</td>
+      <td>rk4</td>
+      <td>0.25</td>
+      <td>0.05</td>
+      <td>1.0</td>
+      <td>0.1</td>
+      <td>0.000001</td>
+      <td>[0.3684660530243138, -0.1196950125207974]</td>
+    </tr>
+    <tr>
+      <th>20</th>
+      <td>izhikevich</td>
+      <td>random</td>
+      <td>fixed</td>
+      <td>differential</td>
+      <td>current-to-rand</td>
+      <td>False</td>
+      <td>1.0</td>
+      <td>1.0</td>
+      <td>100</td>
+      <td>89</td>
+      <td>pg</td>
+      <td>0.01</td>
+      <td>diff_pg</td>
+      <td>rk4</td>
+      <td>0.25</td>
+      <td>0.05</td>
+      <td>1.0</td>
+      <td>0.1</td>
+      <td>0.000001</td>
+      <td>[-0.7559235303104423, -0.00964617977745963]</td>
+    </tr>
+    <tr>
+      <th>21</th>
+      <td>izhikevich</td>
+      <td>random</td>
+      <td>fixed</td>
+      <td>differential</td>
+      <td>current-to-rand</td>
+      <td>False</td>
+      <td>1.0</td>
+      <td>1.0</td>
+      <td>100</td>
+      <td>90</td>
+      <td>pg</td>
+      <td>0.01</td>
+      <td>diff_pg</td>
+      <td>rk4</td>
+      <td>0.25</td>
+      <td>0.05</td>
+      <td>1.0</td>
+      <td>0.1</td>
+      <td>0.000001</td>
+      <td>[-0.9312229577695632, 0.8186408041575641]</td>
+    </tr>
+    <tr>
+      <th>22</th>
+      <td>izhikevich</td>
+      <td>random</td>
+      <td>fixed</td>
+      <td>differential</td>
+      <td>current-to-rand</td>
+      <td>False</td>
+      <td>1.0</td>
+      <td>1.0</td>
+      <td>100</td>
+      <td>91</td>
+      <td>pg</td>
+      <td>0.01</td>
+      <td>diff_pg</td>
+      <td>rk4</td>
+      <td>0.25</td>
+      <td>0.05</td>
+      <td>1.0</td>
+      <td>0.1</td>
+      <td>0.000001</td>
+      <td>[-0.48244003679996617, 0.32504456870796394]</td>
+    </tr>
+    <tr>
+      <th>23</th>
+      <td>izhikevich</td>
+      <td>random</td>
+      <td>fixed</td>
+      <td>differential</td>
+      <td>current-to-rand</td>
+      <td>False</td>
+      <td>1.0</td>
+      <td>1.0</td>
+      <td>100</td>
+      <td>92</td>
+      <td>pg</td>
+      <td>0.01</td>
+      <td>diff_pg</td>
+      <td>rk4</td>
+      <td>0.25</td>
+      <td>0.05</td>
+      <td>1.0</td>
+      <td>0.1</td>
+      <td>0.000001</td>
+      <td>[-0.3765778478211781, 0.040136042355621626]</td>
+    </tr>
+    <tr>
+      <th>24</th>
+      <td>izhikevich</td>
+      <td>random</td>
+      <td>fixed</td>
+      <td>differential</td>
+      <td>current-to-rand</td>
+      <td>False</td>
+      <td>1.0</td>
+      <td>1.0</td>
+      <td>100</td>
+      <td>93</td>
+      <td>pg</td>
+      <td>0.01</td>
+      <td>diff_pg</td>
+      <td>rk4</td>
+      <td>0.25</td>
+      <td>0.05</td>
+      <td>1.0</td>
+      <td>0.1</td>
+      <td>0.000001</td>
+      <td>[0.0934205586865593, -0.6302910889489459]</td>
+    </tr>
+    <tr>
+      <th>25</th>
+      <td>izhikevich</td>
+      <td>random</td>
+      <td>fixed</td>
+      <td>differential</td>
+      <td>current-to-rand</td>
+      <td>False</td>
+      <td>1.0</td>
+      <td>1.0</td>
+      <td>100</td>
+      <td>94</td>
+      <td>pg</td>
+      <td>0.01</td>
+      <td>diff_pg</td>
+      <td>rk4</td>
+      <td>0.25</td>
+      <td>0.05</td>
+      <td>1.0</td>
+      <td>0.1</td>
+      <td>0.000001</td>
+      <td>[0.9391692555291171, 0.5502656467222291]</td>
+    </tr>
+    <tr>
+      <th>26</th>
+      <td>izhikevich</td>
+      <td>random</td>
+      <td>fixed</td>
+      <td>differential</td>
+      <td>current-to-rand</td>
+      <td>False</td>
+      <td>1.0</td>
+      <td>1.0</td>
+      <td>100</td>
+      <td>95</td>
+      <td>pg</td>
+      <td>0.01</td>
+      <td>diff_pg</td>
+      <td>rk4</td>
+      <td>0.25</td>
+      <td>0.05</td>
+      <td>1.0</td>
+      <td>0.1</td>
+      <td>0.000001</td>
+      <td>[0.8789978831283782, 0.7896547008552977]</td>
+    </tr>
+    <tr>
+      <th>27</th>
+      <td>izhikevich</td>
+      <td>random</td>
+      <td>fixed</td>
+      <td>differential</td>
+      <td>current-to-rand</td>
+      <td>False</td>
+      <td>1.0</td>
+      <td>1.0</td>
+      <td>100</td>
+      <td>96</td>
+      <td>pg</td>
+      <td>0.01</td>
+      <td>diff_pg</td>
+      <td>rk4</td>
+      <td>0.25</td>
+      <td>0.05</td>
+      <td>1.0</td>
+      <td>0.1</td>
+      <td>0.000001</td>
+      <td>[0.19579995762217028, 0.8437484700462337]</td>
+    </tr>
+    <tr>
+      <th>28</th>
+      <td>izhikevich</td>
+      <td>random</td>
+      <td>fixed</td>
+      <td>differential</td>
+      <td>current-to-rand</td>
+      <td>False</td>
+      <td>1.0</td>
+      <td>1.0</td>
+      <td>100</td>
+      <td>97</td>
+      <td>pg</td>
+      <td>0.01</td>
+      <td>diff_pg</td>
+      <td>rk4</td>
+      <td>0.25</td>
+      <td>0.05</td>
+      <td>1.0</td>
+      <td>0.1</td>
+      <td>0.000001</td>
+      <td>[-0.823014995896161, -0.6080342751617096]</td>
+    </tr>
+    <tr>
+      <th>29</th>
+      <td>izhikevich</td>
+      <td>random</td>
+      <td>fixed</td>
+      <td>differential</td>
+      <td>current-to-rand</td>
+      <td>False</td>
+      <td>1.0</td>
+      <td>1.0</td>
+      <td>100</td>
+      <td>98</td>
+      <td>pg</td>
+      <td>0.01</td>
+      <td>diff_pg</td>
+      <td>rk4</td>
+      <td>0.25</td>
+      <td>0.05</td>
+      <td>1.0</td>
+      <td>0.1</td>
+      <td>0.000001</td>
+      <td>[-0.9095454221789239, -0.3493393384734713]</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></div>
+</div>
+</section>
+<section id="results-processing-and-visualisation">
+<h2>4. Results processing and visualisation<a class="headerlink" href="#results-processing-and-visualisation" title="Link to this heading">¶</a></h2>
+<p>In this section, we process the results of the optimisation and visualise them using various plots. The results include the fitness values, agent positions, and phase portraits.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Recover the results from the optimiser</span>
+<span class="n">fp</span>              <span class="o">=</span> <span class="n">optimiser</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="s2">&quot;fp&quot;</span><span class="p">]</span>
+<span class="n">fg</span>              <span class="o">=</span> <span class="n">optimiser</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="s2">&quot;fg&quot;</span><span class="p">]</span>
+<span class="n">positions</span>       <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">optimiser</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="s2">&quot;p&quot;</span><span class="p">])</span>
+<span class="n">best_position</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">optimiser</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="s2">&quot;g&quot;</span><span class="p">])</span>
+<span class="n">v1</span>              <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">optimiser</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="s2">&quot;v1&quot;</span><span class="p">])</span>
+<span class="n">v2</span>              <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">optimiser</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="s2">&quot;v2&quot;</span><span class="p">])</span>
+
+<span class="c1"># Calculate the absolute error in fitness values</span>
+<span class="n">efp</span>             <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">fp</span><span class="p">)</span> <span class="o">-</span> <span class="n">problem</span><span class="o">.</span><span class="n">optimum</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
+<span class="n">efg</span>             <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">fg</span><span class="p">)</span> <span class="o">-</span> <span class="n">problem</span><span class="o">.</span><span class="n">optimum</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
+
+<span class="c1"># Convert the spikes to integer type</span>
+<span class="n">spikes</span>          <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">optimiser</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="s2">&quot;s&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+
+<span class="c1"># Print some minimal information about the results</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;fg: </span><span class="si">{</span><span class="n">fg</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">, f*: </span><span class="si">{</span><span class="n">problem</span><span class="o">.</span><span class="n">optimum</span><span class="o">.</span><span class="n">y</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">, error: </span><span class="si">{</span><span class="n">efg</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">.4e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;norm2(g - x*): </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">best_position</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">problem</span><span class="o">.</span><span class="n">optimum</span><span class="o">.</span><span class="n">x</span><span class="p">)</span><span class="si">:</span><span class="s2">.4e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">v1</span><span class="o">.</span><span class="n">min</span><span class="p">()</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2"> &lt;= v1 &lt;= </span><span class="si">{</span><span class="n">v1</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">v2</span><span class="o">.</span><span class="n">min</span><span class="p">()</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2"> &lt;= v2 &lt;= </span><span class="si">{</span><span class="n">v2</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>fg: 79.4800, f*: 79.4800, error: 1.0986e-05
+norm2(g - x*): 3.3177e-03
+-2.1086 &lt;= v1 &lt;= 2.4561
+-1.1892 &lt;= v2 &lt;= 1.4185
+</pre></div>
+</div>
+</div>
+</div>
+<section id="error-convergence">
+<h3>Error convergence<a class="headerlink" href="#error-convergence" title="Link to this heading">¶</a></h3>
+<p>This plot shows the convergence of the absolute error in fitness values over the iterations of the optimisation process.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="n">width</span><span class="o">*</span><span class="mf">0.9</span><span class="p">,</span> <span class="n">height</span><span class="o">/</span><span class="mf">1.8</span><span class="p">))</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">efp</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;silver&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">efp</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;Max.&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">average</span><span class="p">(</span><span class="n">efp</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;Mean&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">efp</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;blue&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;Median&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">efg</span><span class="p">,</span> <span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;green&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;Min.&quot;</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;Step, $t$&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;Abs. Error, $\varepsilon_f$&quot;</span><span class="p">)</span>
+
+<span class="n">lgd</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">ncol</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="s2">&quot;lower left&quot;</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">xscale</span><span class="p">(</span><span class="s2">&quot;log&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">yscale</span><span class="p">(</span><span class="s2">&quot;log&quot;</span><span class="p">)</span>
+
+<span class="n">ax</span><span class="o">.</span><span class="n">patch</span><span class="o">.</span><span class="n">set_alpha</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+
+<span class="n">save_this</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">_in</span><span class="o">=</span><span class="s2">&quot;fitness&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/b031c8729aaa5b0b68433a7c139d8c79e30c4d268c4f057124478b1b5a623a89.png" src="../_images/b031c8729aaa5b0b68433a7c139d8c79e30c4d268c4f057124478b1b5a623a89.png" />
+</div>
+</div>
+</section>
+<section id="position-evolution-in-2d">
+<h3>Position evolution in 2D<a class="headerlink" href="#position-evolution-in-2d" title="Link to this heading">¶</a></h3>
+<p>This plot shows the evolution of the unit positions in the 2D space over the iterations of the optimisation process.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="n">width</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">width</span><span class="o">/</span><span class="mi">2</span><span class="p">))</span>
+
+<span class="n">cmap</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="s1">&#39;viridis&#39;</span><span class="p">,</span> <span class="n">num_agents</span><span class="p">)</span>
+<span class="n">color</span> <span class="o">=</span> <span class="n">cmap</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">num_agents</span><span class="p">))</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">problem</span><span class="o">.</span><span class="n">optimum</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">problem</span><span class="o">.</span><span class="n">optimum</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="s2">&quot;*&quot;</span><span class="p">,</span>
+         <span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span> <span class="n">markeredgecolor</span><span class="o">=</span><span class="s2">&quot;cyan&quot;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Optimum&quot;</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">agent</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">color</span><span class="p">):</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">positions</span><span class="p">[:,</span> <span class="n">agent</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">positions</span><span class="p">[:,</span><span class="n">agent</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="s2">&quot;--o&quot;</span><span class="p">,</span>
+             <span class="n">color</span><span class="o">=</span><span class="n">c</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+             <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Agent </span><span class="si">{</span><span class="n">agent</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">best_position</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">best_position</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="s2">&quot;--*&quot;</span><span class="p">,</span>
+         <span class="n">color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Best position&quot;</span><span class="p">)</span>
+
+<span class="c1"># plt.legend()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$x_1$&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$x_2$&quot;</span><span class="p">)</span>
+
+<span class="n">ax</span><span class="o">.</span><span class="n">patch</span><span class="o">.</span><span class="n">set_alpha</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+
+<span class="n">save_this</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">_in</span><span class="o">=</span><span class="s2">&quot;positions_2d&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/deaeae94d30a03a77e206187d4dc6d557cb1e7c58b2221bf66fac8d74168f91a.png" src="../_images/deaeae94d30a03a77e206187d4dc6d557cb1e7c58b2221bf66fac8d74168f91a.png" />
+</div>
+</div>
+</section>
+<section id="position-evolution-in-3d">
+<h3>Position evolution in 3D<a class="headerlink" href="#position-evolution-in-3d" title="Link to this heading">¶</a></h3>
+<p>This plot shows the evolution of the unit positions in the 3D space over the iterations of the optimisation process.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="n">width</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">width</span><span class="o">/</span><span class="mi">2</span><span class="p">))</span>
+
+<span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="s1">&#39;3d&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_proj_type</span><span class="p">(</span><span class="s1">&#39;ortho&#39;</span><span class="p">)</span>
+
+<span class="n">cmap</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="s1">&#39;viridis&#39;</span><span class="p">,</span> <span class="n">num_agents</span><span class="p">)</span>
+<span class="n">color</span> <span class="o">=</span> <span class="n">cmap</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">num_agents</span><span class="p">))</span>
+
+<span class="n">steps</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">optimiser</span><span class="o">.</span><span class="n">_num_iterations</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+
+<span class="k">for</span> <span class="n">agent</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">color</span><span class="p">):</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot3D</span><span class="p">(</span><span class="n">positions</span><span class="p">[:,</span> <span class="n">agent</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">positions</span><span class="p">[:,</span> <span class="n">agent</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">steps</span><span class="p">,</span>
+              <span class="s2">&quot;--o&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">c</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+              <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Agent </span><span class="si">{</span><span class="n">agent</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="n">ax</span><span class="o">.</span><span class="n">plot3D</span><span class="p">(</span><span class="n">best_position</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">best_position</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">steps</span><span class="p">,</span>
+          <span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>  <span class="n">linewidth</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span>
+          <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Best position&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot3D</span><span class="p">(</span><span class="n">problem</span><span class="o">.</span><span class="n">optimum</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">problem</span><span class="o">.</span><span class="n">optimum</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">steps</span><span class="p">,</span>
+          <span class="s2">&quot;:&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>  <span class="n">linewidth</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span>
+          <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Optimum&quot;</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">axis</span> <span class="ow">in</span> <span class="p">[</span><span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="p">,</span> <span class="n">ax</span><span class="o">.</span><span class="n">yaxis</span><span class="p">,</span> <span class="n">ax</span><span class="o">.</span><span class="n">zaxis</span><span class="p">]:</span>
+    <span class="n">axis</span><span class="o">.</span><span class="n">pane</span><span class="o">.</span><span class="n">set_edgecolor</span><span class="p">(</span><span class="s1">&#39;black&#39;</span><span class="p">)</span>
+    <span class="n">axis</span><span class="o">.</span><span class="n">pane</span><span class="o">.</span><span class="n">set_linewidth</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
+
+<span class="c1"># ax.viewfig, _init(elev=35, azim=135)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">view_init</span><span class="p">(</span><span class="n">elev</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">azim</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+<span class="c1"># ax.legend()</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$x_1$&quot;</span><span class="p">,</span> <span class="n">labelpad</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$x_2$&quot;</span><span class="p">,</span> <span class="n">labelpad</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_zlabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$t$&quot;</span><span class="p">,</span> <span class="n">labelpad</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_box_aspect</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">])</span>
+
+<span class="n">ax</span><span class="o">.</span><span class="n">set_zlim</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">num_steps</span><span class="p">)</span>
+
+<span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">pane</span><span class="o">.</span><span class="n">fill</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">pane</span><span class="o">.</span><span class="n">fill</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">zaxis</span><span class="o">.</span><span class="n">pane</span><span class="o">.</span><span class="n">fill</span> <span class="o">=</span> <span class="kc">False</span>
+
+<span class="n">ax</span><span class="o">.</span><span class="n">patch</span><span class="o">.</span><span class="n">set_alpha</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">subplots_adjust</span><span class="p">(</span><span class="n">left</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">right</span><span class="o">=</span><span class="mf">0.95</span><span class="p">,</span> <span class="n">top</span><span class="o">=</span><span class="mf">0.95</span><span class="p">,</span> <span class="n">bottom</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+<span class="c1"># fig.tight_layout()</span>
+
+<span class="n">save_this</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">_in</span><span class="o">=</span><span class="s2">&quot;positions_3d&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/8c83bd5836f0963c4301189f7c24b2dc78e232924653fdb837eb0d5f9dfc219d.png" src="../_images/8c83bd5836f0963c4301189f7c24b2dc78e232924653fdb837eb0d5f9dfc219d.png" />
+</div>
+</div>
+</section>
+<section id="phase-portrait">
+<h3>Phase portrait<a class="headerlink" href="#phase-portrait" title="Link to this heading">¶</a></h3>
+<p>This section visualises the phase portrait of the optimisation process in 2D. The phase portrait shows the trajectory of each agent in the 2D space over the iterations.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">axs</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">nrows</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">num_dimensions</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">),</span>
+                        <span class="n">ncols</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="n">width</span><span class="p">,</span> <span class="n">width</span><span class="o">/</span><span class="mi">2</span><span class="p">))</span>
+
+<span class="n">steps</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">optimiser</span><span class="o">.</span><span class="n">_num_iterations</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+<span class="n">cmap</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="s1">&#39;Spectral&#39;</span><span class="p">,</span> <span class="n">num_agents</span><span class="p">)</span>
+<span class="n">color</span> <span class="o">=</span> <span class="n">cmap</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">num_agents</span><span class="p">))</span>
+
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">ax</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">axs</span><span class="o">.</span><span class="n">flatten</span><span class="p">()):</span>
+
+    <span class="k">for</span> <span class="n">agent</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">color</span><span class="p">):</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">v1</span><span class="p">[</span><span class="n">agent</span><span class="p">,</span> <span class="p">:,</span> <span class="n">i</span><span class="p">],</span> <span class="n">v2</span><span class="p">[</span><span class="n">agent</span><span class="p">,</span> <span class="p">:,</span> <span class="n">i</span><span class="p">],</span> <span class="s2">&quot;-o&quot;</span><span class="p">,</span>
+                <span class="n">color</span><span class="o">=</span><span class="n">c</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Agent </span><span class="si">{</span><span class="n">agent</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">v1</span><span class="p">[</span><span class="n">agent</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">i</span><span class="p">],</span> <span class="n">v2</span><span class="p">[</span><span class="n">agent</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">i</span><span class="p">],</span> <span class="s2">&quot;-s&quot;</span><span class="p">,</span>
+                <span class="n">color</span><span class="o">=</span><span class="n">c</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Agent </span><span class="si">{</span><span class="n">agent</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$v_</span><span class="si">{}</span><span class="s2">$&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;{1,&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;}&quot;</span><span class="p">))</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$v_</span><span class="si">{}</span><span class="s2">$&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;{2,&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;}&quot;</span><span class="p">))</span>
+
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">v1</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">v1</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="n">v2</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">v2</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+
+    <span class="n">ax</span><span class="o">.</span><span class="n">patch</span><span class="o">.</span><span class="n">set_alpha</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+
+<span class="n">save_this</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">_in</span><span class="o">=</span><span class="s2">&quot;portrait_2d&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/e51d891a146e9e039c14c1976a72fb56e0767463a60ad233058cd350a56fe055.png" src="../_images/e51d891a146e9e039c14c1976a72fb56e0767463a60ad233058cd350a56fe055.png" />
+</div>
+</div>
+</section>
+<section id="phase-portrait-in-3d">
+<h3>Phase portrait in 3D<a class="headerlink" href="#phase-portrait-in-3d" title="Link to this heading">¶</a></h3>
+<p>This section visualises the phase portrait of the optimisation process in 3D. The phase portrait shows the trajectory of each agent in the 3D space over the iterations.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="n">width</span><span class="p">,</span> <span class="n">width</span><span class="o">/</span><span class="mi">2</span><span class="p">))</span>
+
+<span class="n">num_rows</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">num_dimensions</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+<span class="n">num_cols</span> <span class="o">=</span> <span class="mi">2</span>
+
+<span class="n">axs</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span>
+        <span class="n">num_rows</span><span class="p">,</span> <span class="n">num_cols</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="s1">&#39;3d&#39;</span>
+    <span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_dimensions</span><span class="p">)</span>
+<span class="p">]</span>
+
+<span class="n">steps</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">optimiser</span><span class="o">.</span><span class="n">_num_iterations</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+<span class="n">cmap</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="s1">&#39;Spectral&#39;</span><span class="p">,</span> <span class="n">num_agents</span><span class="p">)</span>
+<span class="n">color</span> <span class="o">=</span> <span class="n">cmap</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">num_agents</span><span class="p">))</span>
+
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">ax</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">axs</span><span class="p">):</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_proj_type</span><span class="p">(</span><span class="s1">&#39;ortho&#39;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_box_aspect</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">])</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">view_init</span><span class="p">(</span><span class="n">elev</span><span class="o">=</span><span class="mi">35</span><span class="p">,</span> <span class="n">azim</span><span class="o">=</span><span class="mi">110</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">agent</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">color</span><span class="p">):</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">plot3D</span><span class="p">(</span><span class="n">v1</span><span class="p">[</span><span class="n">agent</span><span class="p">,</span> <span class="p">:,</span> <span class="n">i</span><span class="p">],</span> <span class="n">v2</span><span class="p">[</span><span class="n">agent</span><span class="p">,</span> <span class="p">:,</span> <span class="n">i</span><span class="p">],</span> <span class="n">steps</span><span class="p">,</span> <span class="s2">&quot;-&quot;</span><span class="p">,</span>
+                  <span class="n">color</span><span class="o">=</span><span class="n">c</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span>
+                  <span class="n">markersize</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                  <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Agent </span><span class="si">{</span><span class="n">agent</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="n">ax</span><span class="o">.</span><span class="n">plot3D</span><span class="p">(</span><span class="n">v1</span><span class="p">[</span><span class="n">agent</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">i</span><span class="p">],</span> <span class="n">v2</span><span class="p">[</span><span class="n">agent</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">i</span><span class="p">],</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;-s&quot;</span><span class="p">,</span>
+                  <span class="n">color</span><span class="o">=</span><span class="n">c</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span>
+                  <span class="n">markersize</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                  <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Agent </span><span class="si">{</span><span class="n">agent</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$v_</span><span class="si">{}</span><span class="s2">$&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;{&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;,1}&quot;</span><span class="p">))</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$v_</span><span class="si">{}</span><span class="s2">$&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;{&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;,2}&quot;</span><span class="p">))</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_zlabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$t$&quot;</span><span class="p">,</span> <span class="n">labelpad</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">v1</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">v1</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="n">v2</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">v2</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+
+    <span class="k">for</span> <span class="n">axis</span> <span class="ow">in</span> <span class="p">[</span><span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="p">,</span> <span class="n">ax</span><span class="o">.</span><span class="n">yaxis</span><span class="p">,</span> <span class="n">ax</span><span class="o">.</span><span class="n">zaxis</span><span class="p">]:</span>
+        <span class="n">axis</span><span class="o">.</span><span class="n">pane</span><span class="o">.</span><span class="n">set_edgecolor</span><span class="p">(</span><span class="s1">&#39;black&#39;</span><span class="p">)</span>
+        <span class="n">axis</span><span class="o">.</span><span class="n">pane</span><span class="o">.</span><span class="n">set_linewidth</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
+
+    <span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">pane</span><span class="o">.</span><span class="n">fill</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">pane</span><span class="o">.</span><span class="n">fill</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">zaxis</span><span class="o">.</span><span class="n">pane</span><span class="o">.</span><span class="n">fill</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">patch</span><span class="o">.</span><span class="n">set_alpha</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+
+<span class="n">save_this</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">_in</span><span class="o">=</span><span class="s2">&quot;portrait_3d&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/5dd4e10db3a7417567c2cf1b7ccdee098382f792ac7c255ab8d0afc4ef2435a9.png" src="../_images/5dd4e10db3a7417567c2cf1b7ccdee098382f792ac7c255ab8d0afc4ef2435a9.png" />
+</div>
+</div>
+</section>
+<section id="spike-activity-heatmap">
+<h3>Spike activity heatmap<a class="headerlink" href="#spike-activity-heatmap" title="Link to this heading">¶</a></h3>
+<p>This section visualises the spike activity of the agents over the iterations of the optimisation process. The heatmap shows the summed spike counts across all dimensions for each agent at each step.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="n">width</span><span class="o">*</span><span class="mf">0.9</span><span class="p">,</span> <span class="n">height</span> <span class="o">*</span> <span class="mf">0.6</span><span class="p">))</span>
+
+<span class="n">spikes_sum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">spikes</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">cmap</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="s2">&quot;YlGnBu_r&quot;</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+<span class="n">im</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">spikes_sum</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">aspect</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="s1">&#39;lower&#39;</span><span class="p">,</span>
+               <span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;Step, $t$&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;Agent index, $i$&quot;</span><span class="p">)</span>
+
+<span class="n">cbar</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">im</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">pad</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span> <span class="n">ticks</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
+<span class="n">cbar</span><span class="o">.</span><span class="n">set_label</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;Spike count, $s_</span><span class="si">{1}</span><span class="s2">+s_</span><span class="si">{2}</span><span class="s2">$&quot;</span><span class="p">)</span>
+
+<span class="n">ax</span><span class="o">.</span><span class="n">patch</span><span class="o">.</span><span class="n">set_alpha</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+
+<span class="n">save_this</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">_in</span><span class="o">=</span><span class="s2">&quot;spikes_hm&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/921254a13baff6f1e97151cde58ca7f55da52828ff27f82e6ecc98ea01ec9d4c.png" src="../_images/921254a13baff6f1e97151cde58ca7f55da52828ff27f82e6ecc98ea01ec9d4c.png" />
+</div>
+</div>
+</section>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="Example2.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Example 2: A Hybrid Neuroptimiser with a problem from COCO</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="../usage.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Usage</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2025, Jorge M. Cruz-Duarte (jorge-mario.cruz-duarte@inria.fr)
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Example 1: A Simple Neuroptimiser with a problem from IOH</a><ul>
+<li><a class="reference internal" href="#setup">1. Setup</a></li>
+<li><a class="reference internal" href="#parameter-definition">2. Parameter definition</a></li>
+<li><a class="reference internal" href="#problem-setup-and-optimisation">3. Problem setup and optimisation</a></li>
+<li><a class="reference internal" href="#results-processing-and-visualisation">4. Results processing and visualisation</a><ul>
+<li><a class="reference internal" href="#error-convergence">Error convergence</a></li>
+<li><a class="reference internal" href="#position-evolution-in-2d">Position evolution in 2D</a></li>
+<li><a class="reference internal" href="#position-evolution-in-3d">Position evolution in 3D</a></li>
+<li><a class="reference internal" href="#phase-portrait">Phase portrait</a></li>
+<li><a class="reference internal" href="#phase-portrait-in-3d">Phase portrait in 3D</a></li>
+<li><a class="reference internal" href="#spike-activity-heatmap">Spike activity heatmap</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../_static/documentation_options.js?v=4ebf8126"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/scripts/furo.js?v=5fa4622c"></script>
+    </body>
+</html>

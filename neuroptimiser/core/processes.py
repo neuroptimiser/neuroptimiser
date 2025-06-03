@@ -159,6 +159,11 @@ class TwoDimSpikingCore(AbstractSpikingCore):
                 Output port for the spiking activity.
             x_out : OutPort
                 Output port for the new current position of the spiking core.
+
+    See Also
+    --------
+    AbstractSpikingCore : Base class for spiking cores.
+    :py:class:`neuroptimiser.core.models.PyTwoDimSpikingCoreModel` : Model implementation of the TwoDimSpikingCore process.
     """
     def __init__(self, **core_params):
         """
@@ -303,6 +308,9 @@ class Selector(AbstractProcess):
             fp_out : OutPort
                 Output port for the fitness variable.
 
+    See Also
+    --------
+    :py:class:`neuroptimiser.core.models.PySelectorModel` : Model implementation of the Selector process.
     """
     def __init__(self,
                  agent_id: int = 0,
@@ -380,6 +388,9 @@ class HighLevelSelection(AbstractProcess):
             fg_out : OutPort
                 Output port for the global best fitness.
 
+    See Also
+    --------
+    :py:class:`neuroptimiser.core.models.PyHighLevelSelectorModel` : Model implementation of the HighLevelSelection process.
     """
     def __init__(self,
                  num_dimensions: int = 2,
@@ -460,6 +471,10 @@ class NeuroHeuristicUnit(AbstractProcess):
                 Output port for the current position of the unit.
             fp_out : OutPort
                 Output port for the fitness of the unit.
+
+    See Also
+    --------
+    :py:class:`neuroptimiser.core.models.PyNeuroHeuristicUnitModel` : Model implementation of the NeuroHeuristicUnit process.
     """
     def __init__(self,
                  agent_id: int = 0,
@@ -568,6 +583,10 @@ class TensorContractionLayer(AbstractProcess):
         Outports
             a_out : OutPort
                 Output port for the output tensor after the contraction.
+
+    See Also
+    --------
+    :py:class:`neuroptimiser.core.models.PyTensorContractionLayerModel` : Model implementation of the TensorContractionLayer process.
     """
     def __init__(self, weights, **kwargs):
         """Initialise the TensorContractionLayer with the given parameters.
@@ -625,6 +644,9 @@ class NeighbourhoodManager(AbstractProcess):
             fp_out : OutPort
                 Output port for the fitness tensor of neighbours.
 
+    See Also
+    --------
+    :py:class:`neuroptimiser.core.models.PyNeighbourhoodManagerModel` : Model implementation of the NeighbourhoodManager process.
     """
     def __init__(self, weights, **kwargs):
         """Initialise the NeighbourhoodManager with the given parameters.
@@ -696,6 +718,10 @@ class SpikingHandler(AbstractProcess):
                 Output port for the spiking activity to outside the bounds.
             s_out : OutPort
                 Output port for the spiking activity to inside the bounds.
+
+    See Also
+    --------
+    :py:class:`neuroptimiser.core.models.PySpikingHandlerModel` : Model implementation of the SpikingHandler process.
     """
     def __init__(self, agent_id, internal_shape, external_shape, **kwargs):
         """Initialise the SpikingHandler with the given parameters.
@@ -753,6 +779,10 @@ class PositionSender(AbstractProcess):
                 Output port for the position tensor to outside the bounds.
             fp_out : OutPort
                 Output port for the fitness tensor to outside the bounds.
+
+    See Also
+    --------
+    :py:class:`neuroptimiser.core.models.PyPositionSenderModel` : Model implementation of the PositionSender process.
     """
     def __init__(self, agent_id, internal_shape, external_shape, **kwargs):
         """Initialise the PositionSender with the given parameters.
@@ -807,6 +837,10 @@ class PositionReceiver(AbstractProcess):
                 Output port for the position tensor to inside the bounds.
             fp_out : OutPort
                 Output port for the fitness tensor to inside the bounds.
+
+    See Also
+    --------
+    :py:class:`neuroptimiser.core.models.PyPositionReceiverModel` : Model implementation of the PositionReceiver process.
     """
     def __init__(self, agent_id, internal_shape, external_shape, **kwargs):
         """Initialise the PositionReceiver with the given parameters.

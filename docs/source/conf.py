@@ -41,10 +41,10 @@ exclude_patterns = []
 # html_theme = 'sphinx_rtd_theme'
 # html_logo = "_pics/neuropty.png"
 html_theme = "furo"
-html_title = "Neuroptimiser"
+html_title = "NeurOptimiser"
 html_favicon = '_static/neuropty-Light-small.png'
 html_static_path = ["_static"]
-# html_css_files = ['custom.css']
+html_css_files = ['custom.css']
 html_extra_path = ['.nojekyll']
 html_baseurl = "https://jcrvz.github.io/neuroptimiser/"
 
@@ -52,8 +52,8 @@ html_theme_options = {
     "navigation_with_keys": True,
     "announcement": "This is a WIP project, and the documentation is under construction.",
     "body_max_width": "100%",
-    "light_logo": "neuropty-Light2x.png",
-    "dark_logo": "neuropty-Dark2x.png",
+    "light_logo": "neuropty-Light-small.png",
+    "dark_logo": "neuropty-Dark-small.png",
     "light_css_variables": {
         "color-brand-primary": "#3B4CCA",    # sober blue accent
         "color-brand-content": "#1A1A1A",    # dark grey for text
@@ -73,7 +73,21 @@ html_theme_options = {
         "color-sidebar-link-text": "#CCCCCC",
         "color-sidebar-link-text--top-level": "#FFFFFF",
         "color-sidebar-link-background--active": "#333333",  # active link background
-    }
+    },
+    "footer_icons": [
+        {
+            "name": "GitHub",
+            "url": "https://github.com/jcrvz/neuroptimiser",
+            "html": """
+                <svg stroke="currentColor" fill="currentColor" stroke-width="0"
+                     viewBox="0 0 1024 1024" height="1.2em" width="1.2em"
+                     xmlns="http://www.w3.org/2000/svg">
+                    <path d="M511.6 76C262.2 76 64 274.2 64 523.6c0 197.6 128 365 305.4 424.2 22.4 4.2 30.6-9.8 30.6-21.8v-76.2c-124.2 27-150.2-59.8-150.2-59.8-20.4-52-49.8-65.8-49.8-65.8-40.8-27.8 3-27.2 3-27.2 45 3.2 68.6 46.2 68.6 46.2 40 68.4 104.8 48.6 130.4 37.2 4-29 15.6-48.6 28.4-59.8-99-11.2-202.8-49.6-202.8-220.6 0-48.6 17.2-88.4 45.4-119.6-4.6-11.2-19.6-56.4 4.4-117.4 0 0 37-11.8 121.2 45 35.2-9.8 72.8-14.8 110.2-14.8s75 5 110.2 14.8c84.2-56.8 121.2-45 121.2-45 24 61 9 106.2 4.4 117.4 28.4 31.2 45.4 71 45.4 119.6 0 171.6-103.8 209.4-202.8 220.4 16 13.8 30.4 41 30.4 82.6v122.2c0 12 8 26.2 30.8 21.8C832 888.4 960 720.8 960 523.6 960 274.2 761.8 76 511.6 76z"></path>
+                </svg>
+            """,
+            "class": "",  # optional css class
+        },
+    ],
 }
 
 napoleon_use_param = True

@@ -42,8 +42,10 @@ class AbstractPerturbationNHeuristicModel(PyLoihiProcessModel):
 
     See Also
     --------
-    :py:class:`neuroptimiser.core.processes.AbstractSpikingCore`
+    :py:class:`neuroptimiser.core.processes.AbstractSpikingCore`:
+        Abstract process that implements a spiking core for perturbation-based nheuristics.
     """
+
     # Inports
     s_in:   PyInPort        = LavaPyType(PyInPort.VEC_DENSE, bool)
     p_in:   PyInPort        = LavaPyType(PyInPort.VEC_DENSE, _POS_FLOAT_)
@@ -95,8 +97,10 @@ class PyTwoDimSpikingCoreModel(AbstractPerturbationNHeuristicModel):
 
     See Also
     --------
-    :py:class:`neuroptimiser.core.processes.TwoDimSpikingCore`
+    :py:class:`neuroptimiser.core.processes.TwoDimSpikingCore`:
+        Process that implements a two-dimensional spiking core for perturbation-based nheuristics.
     """
+
     # Variables
     v1       : np.ndarray = LavaPyType(np.ndarray, float)
     v2       : np.ndarray = LavaPyType(np.ndarray, float)
@@ -516,7 +520,16 @@ class PyTwoDimSpikingCoreModel(AbstractPerturbationNHeuristicModel):
             raise ValueError(f"Unknown spiking condition: {self.spk_cond}")
 
     def run_spk(self):
-        """Runs the spiking core process model."""
+        """Runs the spiking core process model.
+
+        The process is summarised as follows:
+            1. If the process is not initialised, it generates random values for `p` and `g`, transforms them, and sets the initial state.
+            2. If the process is initialised, it reads the inputs from the inports, transforms the variables, updates the threshold, and runs the core process. This core process involves:
+                - Applying the heuristic search operator if the neuron fires or if it is compulsory to fire.
+                - Applying the dynamic system model to update the state of the neuron.
+                - Checking the bounds of the variables. (Only if `is_bounded` is True)
+            3. Finally, it sends the updated state to the outports.
+        """
         self.prev_p      = self.p.copy()
 
         # Read the inputs
@@ -538,9 +551,7 @@ class PyTwoDimSpikingCoreModel(AbstractPerturbationNHeuristicModel):
             fxn_in      = self.fxn_in.recv()
 
             self.compulsory_fire = s_in.astype(bool)
-
             self._transform_variables()
-
             self._update_threshold()
             self._run_core_process()
 
@@ -550,6 +561,16 @@ class PyTwoDimSpikingCoreModel(AbstractPerturbationNHeuristicModel):
 @implements(proc=Selector, protocol=LoihiProtocol)
 @requires(CPU)
 class PySelectorModel(PyLoihiProcessModel):
+    """Selector model for low-level selection in perturbation-based nheuristics
+
+    This model implements a selector process that evaluates the fitness of positions and selects the best one based on a given function. This is intended to be used in conjunction with a perturbation-based nheuristic process inside a NeuroHeuristicUnit.
+
+    See Also
+    --------
+    :py:class:`neuroptimiser.core.processes.Selector`:
+        Process that selects the best position based on a fitness function.
+    """
+
     # Inputs
     x_in:   PyInPort        = LavaPyType(PyInPort.VEC_DENSE, _POS_FLOAT_)
 
@@ -562,6 +583,16 @@ class PySelectorModel(PyLoihiProcessModel):
     fp_out: PyOutPort       = LavaPyType(PyOutPort.VEC_DENSE, _FIT_FLOAT_)
 
     def __init__(self, proc_params):
+        """Initialises the selector model with the given parameters.
+
+        Arguments
+        ---------
+            proc_params : dict
+                A dictionary containing the parameters for the process model. It should include:
+                    - ``agent_id``: int, identifier of the agent
+                    - ``num_agents``: int, number of agents in the system
+                    - ``function``: callable, function to evaluate the fitness of a position
+        """
         super().__init__(proc_params)
         self.agent_id   = proc_params['agent_id']
         self.num_agents = proc_params['num_agents']
@@ -571,16 +602,25 @@ class PySelectorModel(PyLoihiProcessModel):
         self.initialised = False
 
     def run_spk(self):
-        x = self.x_in.recv()
+        """Runs the selector process model.
+
+        The process is summarised as follows:
+            1. Receives the input position `x` from the inport.
+            2. Evaluates the fitness of the position using the provided function.
+            3. If the fitness is better than the current best fitness or if the process is not initialised, updates the best position and fitness.
+            4. Sends the updated-best position and fitness to the outports.
+        """
+        # Read the input position
+        x       = self.x_in.recv()
 
         # Evaluate the function
-        fx  = self.funct(x.flatten())
+        fx      = self.funct(x.flatten())
 
         # Update the particular position
-        if fx < self.fp[0] or not self.initialised:
-            self.initialised = True
-            self.p[:] = x
-            self.fp[:] = fx
+        if not self.initialised or fx < self.fp[0]:
+            self.initialised    = True
+            self.p[:]           = x
+            self.fp[:]          = fx
 
         # Send the updated position
         self.p_out.send(self.p)
@@ -590,6 +630,16 @@ class PySelectorModel(PyLoihiProcessModel):
 @implements(proc=HighLevelSelection, protocol=LoihiProtocol)
 @requires(CPU)
 class PyHighLevelSelectionModel(PyLoihiProcessModel):
+    """High-level selection model for perturbation-based nheuristics
+
+    This model implements a high-level selection process that aggregates the best positions from multiple NeuroHeuristicUnit and selects the overall best position based on a fitness function.
+
+    See Also
+    --------
+    :py:class:`neuroptimiser.core.processes.HighLevelSelection`:
+        Process that performs high-level selection of the best position from multiple NeuroHeuristicUnit processes.
+    """
+
     # Inputs
     p_in:   PyInPort        = LavaPyType(PyInPort.VEC_DENSE, _POS_FLOAT_)
     fp_in:  PyInPort        = LavaPyType(PyInPort.VEC_DENSE, _FIT_FLOAT_)
@@ -605,13 +655,30 @@ class PyHighLevelSelectionModel(PyLoihiProcessModel):
     fg_out: PyOutPort       = LavaPyType(PyOutPort.VEC_DENSE, _FIT_FLOAT_)
 
     def __init__(self, proc_params):
+        """Initialises the high-level selection model with the given parameters.
+
+        Arguments
+        ---------
+            proc_params : dict
+                A dictionary containing the parameters for the process model. It must include:
+                    - ``num_agents``: int, number of agents in the system
+        """
         super().__init__(proc_params)
-        self.num_agents = proc_params['num_agents']
-        self.accumulated_ack = 0
-        self.initialised = False
+        self.num_agents     = proc_params['num_agents']
+        self.initialised    = False
 
 
     def run_spk(self):
+        """Runs the high-level selection process model.
+
+        The process is summarised as follows:
+            1. Receives the candidate positions and their fitness values from the inports.
+            2. Saves these candidates in the internal variables `p` and `fp`.
+            3. Searches for the best candidate based on the fitness values.
+            4. If the new candidate is better than the current global best or if the process is not initialised, updates the global best position and fitness.
+            5. Sends the global best position and fitness to the outports.
+        """
+
         # Read the inputs
         g_candidates        = self.p_in.recv()
         fg_candidates       = self.fp_in.recv()
@@ -629,9 +696,9 @@ class PyHighLevelSelectionModel(PyLoihiProcessModel):
 
         # Compare and update the global best
         if new_fg < self.fg[0] or not self.initialised:
-            self.initialised = True
-            self.g[:] = new_g
-            self.fg[:] = new_fg
+            self.initialised    = True
+            self.g[:]           = new_g
+            self.fg[:]          = new_fg
 
         # Send the global best
         self.g_out.send(self.g)
@@ -640,36 +707,71 @@ class PyHighLevelSelectionModel(PyLoihiProcessModel):
 
 @implements(proc=NeuroHeuristicUnit, protocol=LoihiProtocol)
 class SubNeuroHeuristicUnitModel(AbstractSubProcessModel):
+    """Sub-process model for NeuroHeuristicUnit
+
+    This model implements the sub-process structure of a NeuroHeuristicUnit, which includes a spiking core, a selector for position evaluation, and handlers for spiking signals and positions. It connects these components to form a complete perturbation-based nheuristic process.
+
+    See Also
+    --------
+    :py:class:`neuroptimiser.core.processes.NeuroHeuristicUnit`:
+        Process that implements a NeuroHeuristicUnit for perturbation-based nheuristics.
+    :py:class:`neuroptimiser.core.processes.TwoDimSpikingCore`:
+        Process that implements a two-dimensional spiking core for perturbation-based nheuristics.
+    :py:class:`neuroptimiser.core.processes.Selector`:
+        Process that selects the best position based on a fitness function.
+    :py:class:`neuroptimiser.core.processes.SpikingHandler`:
+        Process that handles spiking signals in the NeuroHeuristicUnit.
+    :py:class:`neuroptimiser.core.processes.PositionSender`:
+        Process that sends the position of the agent in the NeuroHeuristicUnit.
+    :py:class:`neuroptimiser.core.processes.PositionReceiver`:
+        Process that receives the positions of neighbouring agents in the NeuroHeuristicUnit.
+    """
+
     def __init__(self, proc: NeuroHeuristicUnit): # noqa
-        """Builds sub Process structure of the Process."""
+        """Builds sub Process structure of the Process.
 
+        Arguments
+        ---------
+            proc : NeuroHeuristicUnit
+                The process to build the sub-process structure for.
+            proc.proc_params : dict
+                A dictionary containing the parameters for the process model. It must include:
+                    - ``agent_id``: int, identifier of the agent
+                    - ``num_dimensions``: int, number of dimensions in the problem space
+                    - ``num_agents``: int, number of agents in the system
+                    - ``num_neighbours``: int, number of neighbouring agents (default: 0)
+                    - ``spiking_core``: str, type of spiking core to use (default: "TwoDimSpikingCore")
+                    - ``function``: callable, function to evaluate the fitness of a position
+                    - ``core_params``: dict, parameters for the spiking core
+                    - ``selector_params``: dict, parameters for the selector
+        """
+
+        # PARAMETERS
         # Get the parameters of the Processes
-        agent_id            = proc.proc_params.get("agent_id", 0)
-        num_dimensions      = proc.proc_params.get("num_dimensions", 2)
-        num_agents          = proc.proc_params.get("num_agents", 1)
-        num_neighbours      = proc.proc_params.get("num_neighbours", 0)
-        # num_objectives      = proc.proc_params.get("num_objectives", 1)
+        agent_id        = proc.proc_params.get("agent_id", 0)
+        num_dimensions  = proc.proc_params.get("num_dimensions", 2)
+        num_agents      = proc.proc_params.get("num_agents", 1)
+        num_neighbours  = proc.proc_params.get("num_neighbours", 0)
 
-        spk_core_str         = proc.proc_params.get("spiking_core",
-                                                    TwoDimSpikingCore)
+        spk_core_str    = proc.proc_params.get("spiking_core",                                                      TwoDimSpikingCore)
         if spk_core_str == "TwoDimSpikingCore":
             SpikingCore = TwoDimSpikingCore
         else:
             raise NotImplementedError("This method is not implemented (yet?)")
 
-        internal_shape = (num_dimensions,)
-        external_shape = (num_agents, num_dimensions)
+        internal_shape              = (num_dimensions,)
+        external_shape              = (num_agents, num_dimensions)
 
-        internal_shape_neighbours = (num_neighbours, num_dimensions)
-        external_shape_neighbours = (num_neighbours, num_dimensions, num_agents)
+        internal_shape_neighbours   = (num_neighbours, num_dimensions)
+        external_shape_neighbours   = (num_neighbours, num_dimensions, num_agents)
 
-        function            = proc.proc_params.get("function", lambda x: np.linalg.norm(x))
+        function        = proc.proc_params.get("function", lambda x: np.linalg.norm(x))
 
-        core_params          = proc.proc_params.get("core_params", {})
-        selector_params      = proc.proc_params.get("selector_params", {})
+        core_params     = proc.proc_params.get("core_params", {})
+        selector_params = proc.proc_params.get("selector_params", {})
 
-        # PerturbationNHeuristic
-        # TODO: Implement a way to inject a custom perturbation
+        # BUILDING BLOCKS
+        # Spiking Core or PerturbationNHeuristic
         self.perturbator = SpikingCore(
             num_dimensions=num_dimensions,
             num_neighbours=num_neighbours,
@@ -709,7 +811,6 @@ class SubNeuroHeuristicUnitModel(AbstractSubProcessModel):
                 external_shape=external_shape_neighbours
             )
 
-        # ================================
         # INTERNAL CONNECTIONS
         self.perturbator.out_ports.x_out.connect(
             self.selector.in_ports.x_in)
@@ -735,8 +836,6 @@ class SubNeuroHeuristicUnitModel(AbstractSubProcessModel):
             self.position_receiver.out_ports.fp_out.connect(
                 self.perturbator.in_ports.fxn_in)
 
-
-        # ================================
         # EXTERNAL CONNECTIONS
         # Connect to parent ports to the spiking handler
         self.spiking_handler.out_ports.s_out.connect(
@@ -768,46 +867,101 @@ class SubNeuroHeuristicUnitModel(AbstractSubProcessModel):
         proc.vars.v1.alias(self.perturbator.vars.v1)
         proc.vars.v2.alias(self.perturbator.vars.v2)
 
-
-
 @implements(proc=TensorContractionLayer, protocol=LoihiProtocol)
 @requires(CPU)
 class PyTensorContractionLayerModel(PyLoihiProcessModel):
+    """Tensor contraction layer model for Loihi-based perturbation-based nheuristics
+
+    This model implements a tensor contraction layer that performs a contraction operation on the input spikes and weights, producing an output activation matrix.
+
+    See Also
+    --------
+    :py:class:`neuroptimiser.core.processes.TensorContractionLayer`:
+        Process that implements a tensor contraction layer for perturbation-based nheuristics.
+    """
+    # Inports
     s_in:           PyInPort    = LavaPyType(PyInPort.VEC_DENSE, bool)
-    a_out:          PyOutPort   = LavaPyType(PyOutPort.VEC_DENSE, bool, precision=1)
+
+    # Variables
     weight_matrix:  np.ndarray  = LavaPyType(np.ndarray, float)
-    s_matrix:      np.ndarray  = LavaPyType(np.ndarray, bool)
+    s_matrix:       np.ndarray  = LavaPyType(np.ndarray, bool)
+
+    # Outports
+    a_out:          PyOutPort   = LavaPyType(PyOutPort.VEC_DENSE, bool, precision=1)
 
     def __init__(self, proc_params):
+        """Initialises the tensor contraction layer model with the given parameters.
+
+        Arguments
+        ---------
+            proc_params : dict
+                A dictionary containing additional parameters for the process model.
+        """
         super().__init__(proc_params)
         self.weight_tensor = None  # None for the first iteration
 
     def run_spk(self):
+        """Runs the tensor contraction layer process model.
+
+        The process is summarised as follows:
+            1. Receives the input spikes from the inport.
+            2. If the weight tensor is not initialised, it sets it to the weight matrix with an additional dimension.
+            3. Performs the contraction operation using `np.einsum` to compute the output activation matrix.
+            4. Sends the output activation matrix to the outport.
+        """
+
+        # Check if the weight tensor is initialised
         if self.weight_tensor is None:
             self.weight_tensor = self.weight_matrix[..., np.newaxis]
 
+        # Read the input spikes
         self.s_matrix[:] = self.s_in.recv()
         a_matrix = np.einsum('ikj,kj->ij', self.weight_tensor, self.s_matrix)
 
+        # Send the output activation matrix
         self.a_out.send(a_matrix.astype(bool))
 
 
 @implements(proc=NeighbourhoodManager, protocol=LoihiProtocol)
 @requires(CPU)
 class PyNeighbourhoodManagerModel(PyLoihiProcessModel):
-    # ack_in:         PyInPort    = LavaPyType(PyInPort.VEC_DENSE, int)
-    p_in:           PyInPort    = LavaPyType(PyInPort.VEC_DENSE, _POS_FLOAT_)
-    fp_in:          PyInPort    = LavaPyType(PyInPort.VEC_DENSE, _FIT_FLOAT_)
+    """Neighbourhood manager model for Loihi-based perturbation-based nheuristics
 
-    p_out:          PyOutPort   = LavaPyType(PyOutPort.VEC_DENSE, _POS_FLOAT_)
-    fp_out:         PyOutPort   = LavaPyType(PyOutPort.VEC_DENSE, _FIT_FLOAT_)
-    # ack_out:        PyOutPort   = LavaPyType(PyOutPort.VEC_DENSE, int)
+    This model manages the neighbourhood of agents/units in a neuroptimiser architecture, allowing them to access the positions and fitness values of their neighbours.
 
-    weight_matrix:  np.ndarray      = LavaPyType(np.ndarray, float)
-    neighbour_indices: np.ndarray   = LavaPyType(np.ndarray, int)
+    See Also
+    --------
+    :py:class:`neuroptimiser.core.processes.NeighbourhoodManager`:
+        Process that manages the neighbourhood of agents/units in a neuroptimiser architecture.
+    """
+
+    # Inports
+    p_in:               PyInPort    = LavaPyType(PyInPort.VEC_DENSE, _POS_FLOAT_)
+    fp_in:              PyInPort    = LavaPyType(PyInPort.VEC_DENSE, _FIT_FLOAT_)
+
+    # Variables
+    weight_matrix:      np.ndarray  = LavaPyType(np.ndarray, float)
+    neighbour_indices:  np.ndarray  = LavaPyType(np.ndarray, int)
+
+    # Outports
+    p_out:              PyOutPort   = LavaPyType(PyOutPort.VEC_DENSE, _POS_FLOAT_)
+    fp_out:             PyOutPort   = LavaPyType(PyOutPort.VEC_DENSE, _FIT_FLOAT_)
+
 
     def __init__(self, proc_params):
+        """Initialises the neighbourhood manager model with the given parameters.
+
+        Arguments
+            proc_params : dict
+                A dictionary containing the parameters for the process model. It must include:
+                    - ``num_agents``: int, number of agents in the system
+                    - ``num_dimensions``: int, number of dimensions in the problem space
+                    - ``num_neighbours``: int, number of neighbouring agents
+
+        """
         super().__init__(proc_params)
+
+        # Get the parameters of the Process
         self.neighbourhood_p_tensor = None
         self.neighbourhood_fp_tensor = None
 
@@ -816,11 +970,17 @@ class PyNeighbourhoodManagerModel(PyLoihiProcessModel):
         self.num_dimensions = proc_params.get("num_dimensions", -1)
         self.num_neighbours = proc_params.get("num_neighbours", -1)
 
-        # self.num_objectives = proc_params.get("num_objectives", -1)
-        self.accumulated_ack = 0
         self.initialised = False
 
     def run_spk(self):
+        """Runs the neighbourhood manager process model.
+
+        The process is summarised as follows:
+            1. If the process is not initialised, it creates tensors to store the neighbourhood positions and fitness values.
+            2. Receives the input position and fitness matrices from the inports.
+            3. For each agent/unit, retrieves the positions and fitness values of its neighbours based on the pre-defined indices.
+            4. Sends the neighbourhood position and fitness tensors to the outports.
+        """
         if not self.initialised:
             self.neighbourhood_p_tensor = np.full(
                 shape=self.p_out.shape, fill_value=-1.0)
@@ -828,14 +988,17 @@ class PyNeighbourhoodManagerModel(PyLoihiProcessModel):
                 shape=self.fp_out.shape, fill_value=-1.0)
             self.initialised = True
 
+        # Read the input position and fitness matrices
         p_matrix    = self.p_in.recv()
-        fp_matrix   = self.fp_in.recv()  # FUTURE: Add support to multiple objectives
+        fp_matrix   = self.fp_in.recv()
 
+        # Populate the neighbourhood tensors
         for i in range(self.num_agents):
-            neighbour_indices = self.neighbour_indices[i]
+            neighbour_indices                       = self.neighbour_indices[i]
             self.neighbourhood_p_tensor[:, :, i]    = p_matrix[neighbour_indices]
             self.neighbourhood_fp_tensor[:, i]      = fp_matrix[neighbour_indices]
 
+        # Send the neighbourhood position and fitness tensors to the outports
         self.p_out.send(self.neighbourhood_p_tensor)
         self.fp_out.send(self.neighbourhood_fp_tensor)
 
@@ -843,37 +1006,68 @@ class PyNeighbourhoodManagerModel(PyLoihiProcessModel):
 @implements(proc=SpikingHandler, protocol=LoihiProtocol)
 @requires(CPU)
 class PySpikingHandlerModel(PyLoihiProcessModel):
+    """Spiking handler model for Loihi-based perturbation-based nheuristics
+
+    This model handles the spiking signals in a nheuristic process, allowing the spiking core read and write spikes to the input and output ports to the external world.
+
+    See Also
+    --------
+    :py:class:`neuroptimiser.core.processes.SpikingHandler`:
+        Process that handles spiking signals in a NeuroHeuristicUnit.
+    """
+
+    # Inports
     s_in:   PyInPort    = LavaPyType(PyInPort.VEC_DENSE, bool)
     a_out:  PyOutPort   = LavaPyType(PyOutPort.VEC_DENSE, bool)
 
+    # Outports
     a_in:   PyInPort    = LavaPyType(PyInPort.VEC_DENSE, bool)
     s_out:  PyOutPort   = LavaPyType(PyOutPort.VEC_DENSE, bool)
 
     def __init__(self, proc_params):
+        """Initialises the spiking handler model with the given parameters.
+
+        Arguments
+            proc_params : dict
+                Dictionary containing the parameters for the process model. It must include:
+                    - ``agent_id``: int, identifier of the agent
+                    - ``internal_shape``: tuple, shape of the internal state (e.g., number of dimensions)
+                    - ``external_shape``: tuple, shape of the external state (e.g., number of agents and dimensions)
+        """
         super().__init__(proc_params)
-        self.agent_id = proc_params["agent_id"]
+
         # Define the template matrix
         self.s_matrix = np.zeros(
             shape=proc_params["external_shape"]).astype(bool)
         self.a_vector = np.zeros(
             shape=proc_params["internal_shape"]).astype(bool)
+
+        # Get the agent ID from the process parameters
+        self.agent_id = proc_params["agent_id"]
         self.initialised = False
 
     def run_spk(self):
+        """Runs the spiking handler process model.
+
+        The process is summarised as follows:
+            1. If the process is not initialised, it creates a zero matrix for the input spikes and a zero vector for the output spikes.
+            2. Receives the input spikes and activation matrix from the inports.
+            3. Prepares the output spikes based on the input spikes and sends them to the outports.
+        """
+        # Read the input spikes
         if self.initialised:
-        # First read the input spikes
-            s_vector = self.s_in.recv()
-            a_matrix = self.a_in.recv()
+            s_vector            = self.s_in.recv()
+            a_matrix            = self.a_in.recv()
         else:
-            s_vector = np.zeros(self.s_in.shape).astype(bool)
-            a_matrix = np.zeros(self.a_in.shape).astype(bool)
-            self.initialised = True
+            s_vector            = np.zeros(self.s_in.shape).astype(bool)
+            a_matrix            = np.zeros(self.a_in.shape).astype(bool)
+            self.initialised    = True
 
         # Prepare s_out using the input spikes
         self.s_matrix[self.agent_id, :] = s_vector[:]
 
         # Extract the incoming spikes
-        self.a_vector[:] = a_matrix[self.agent_id, :]
+        self.a_vector[:]                = a_matrix[self.agent_id, :]
 
         # Send the output spikes
         self.s_out.send(self.s_matrix)
@@ -883,29 +1077,59 @@ class PySpikingHandlerModel(PyLoihiProcessModel):
 @implements(proc=PositionSender, protocol=LoihiProtocol)
 @requires(CPU)
 class PyPositionSenderModel(PyLoihiProcessModel):
+    """Position sender model for Loihi-based perturbation-based nheuristics
+
+    This model sends the position and fitness values of an agent/unit to the external world, allowing other processes to access this information.
+
+    See Also
+    --------
+    :py:class:`neuroptimiser.core.processes.PositionSender`:
+        Process that sends the position and fitness values of an agent/unit in a NeuroHeuristicUnit.
+    """
+
+    # Inports
     p_in:   PyInPort    = LavaPyType(PyInPort.VEC_DENSE, _POS_FLOAT_)
     fp_in:  PyInPort    = LavaPyType(PyInPort.VEC_DENSE, _FIT_FLOAT_)
 
+    # Outports
     p_out:  PyOutPort   = LavaPyType(PyOutPort.VEC_DENSE, _POS_FLOAT_)
     fp_out: PyOutPort   = LavaPyType(PyOutPort.VEC_DENSE, _FIT_FLOAT_)
 
     def __init__(self, proc_params):
+        """Initialises the position sender model with the given parameters.
+
+        Arguments
+            proc_params : dict
+                A dictionary containing the parameters for the process model. It must include:
+                    - ``agent_id``: int, identifier of the agent
+                    - ``external_shape``: tuple, shape of the external state (e.g., number of agents and dimensions)
+        """
         super().__init__(proc_params)
-        self.agent_id = proc_params["agent_id"]
+
         # Define the template matrix
         self.p_matrix = np.zeros(
             shape=proc_params["external_shape"]).astype(float)
         self.fp_vector = np.zeros(
             shape=(proc_params["external_shape"][0],)).astype(float)
 
+        self.agent_id = proc_params["agent_id"]
+
     def run_spk(self):
+        """Runs the position sender process model.
+
+        The process is summarised as follows:
+            1. Receives the input position vector and fitness value from the inports.
+            2. Prepares the output position matrix and fitness vector using the input spikes.
+            3. Sends the output position matrix and fitness vector to the outports.
+        """
+
         # First read the inputs
-        p_vector = self.p_in.recv()
-        fp_value = self.fp_in.recv()
+        p_vector                        = self.p_in.recv()
+        fp_value                        = self.fp_in.recv()
 
         # Prepare x_out using the input spikes
-        self.p_matrix[self.agent_id, :]     = p_vector[:]
-        self.fp_vector[self.agent_id]       = fp_value[:]
+        self.p_matrix[self.agent_id, :] = p_vector[:]
+        self.fp_vector[self.agent_id]   = fp_value[:]
 
         # Send the output spikes
         self.p_out.send(self.p_matrix)
@@ -915,15 +1139,34 @@ class PyPositionSenderModel(PyLoihiProcessModel):
 @implements(proc=PositionReceiver, protocol=LoihiProtocol)
 @requires(CPU)
 class PyPositionReceiverModel(PyLoihiProcessModel):
+    """Position receiver model for Loihi-based perturbation-based nheuristics
+
+    This model receives the positions and fitness values of neighbouring agents/units in a neuroptimiser architecture, allowing the spiking core to access this information.
+
+    See Also
+    --------
+    :py:class:`neuroptimiser.core.processes.PositionReceiver`:
+        Process that receives the positions and fitness values of neighbouring agents/units in a NeuroHeuristicUnit.
+    """
+
+    # Inports
     p_in:   PyInPort    = LavaPyType(PyInPort.VEC_DENSE, _POS_FLOAT_)
     fp_in:  PyInPort    = LavaPyType(PyInPort.VEC_DENSE, _FIT_FLOAT_)
 
+    # Outports
     p_out:  PyOutPort   = LavaPyType(PyOutPort.VEC_DENSE, _POS_FLOAT_)
     fp_out: PyOutPort   = LavaPyType(PyOutPort.VEC_DENSE, _FIT_FLOAT_)
 
     def __init__(self, proc_params):
+        """Initialises the position receiver model with the given parameters.
+
+        Arguments
+            proc_params : dict
+                A dictionary containing the parameters for the process model. It must include:
+                    - ``agent_id``: int, identifier of the agent
+                    - ``external_shape``: tuple, shape of the external state (e.g., number of neighbours, dimensions, and agents)
+        """
         super().__init__(proc_params)
-        self.agent_id = proc_params["agent_id"]
 
         # Define the template matrix
         self.p_matrix = np.zeros(
@@ -931,7 +1174,17 @@ class PyPositionReceiverModel(PyLoihiProcessModel):
         self.fp_vector = np.zeros(
             shape=(proc_params["external_shape"][0],)).astype(float)
 
+        self.agent_id = proc_params["agent_id"]
+
     def run_spk(self):
+        """Runs the position receiver process model.
+
+        The process is summarised as follows:
+            1. Receives the input position tensor and fitness vector from the inports.
+            2. Prepares the output position matrix and fitness vector using the input spikes.
+            3. Sends the output position matrix and fitness vector to the outports.
+        """
+
         # First read the inputs
         p_tensor        = self.p_in.recv()
         fp_matrix       = self.fp_in.recv()

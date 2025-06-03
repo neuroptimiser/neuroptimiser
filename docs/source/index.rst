@@ -6,7 +6,7 @@
 NeurOptimiser's Reference
 ========================================
 
-**neurOptimiser** is a neuromorphic optimisation framework built upon spiking neural dynamics and heuristic search principles. It enables the design and evaluation of decentralised, asynchronous metaheuristic processes inspired by biological computation.
+**NeurOptimiser** is a neuromorphic optimisation framework built upon spiking neural dynamics and heuristic search principles. It enables the design and evaluation of decentralised, asynchronous metaheuristic processes inspired by biological computation.
 
 This documentation is intended for developers, researchers, and contributors interested in understanding the internals of neurOptimiser, extending its capabilities, or integrating it into other systems.
 

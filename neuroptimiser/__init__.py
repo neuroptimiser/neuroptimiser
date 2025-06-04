@@ -6,11 +6,8 @@ This module provides the public API to configure, run, and analyse neuromorphic 
 
 __version__ = "1.0.0"
 
-from .solvers import NeurOptimiser, AbstractSolver
-from .utils import get_arch_matrix
+from .solvers import NeurOptimiser
 
 __all__ = [
     "NeurOptimiser",
-    "AbstractSolver",
-    "get_arch_matrix",
 ]

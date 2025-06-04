@@ -1054,13 +1054,13 @@ class PySpikingHandlerModel(PyLoihiProcessModel):
             2. Prepares the output spikes based on the input spikes and sends them to the outports.
         """
         # Read the input spikes
-        # if self.initialised:
-        s_vector            = self.s_in.recv()
-        a_matrix            = self.a_in.recv()
-        # else:
-        #     s_vector            = np.zeros(self.s_in.shape).astype(bool)
-        #     a_matrix            = np.zeros(self.a_in.shape).astype(bool)
-        #     self.initialised    = True
+        if self.initialised:
+            s_vector            = self.s_in.recv()
+            a_matrix            = self.a_in.recv()
+        else:
+            s_vector            = np.zeros(self.s_in.shape).astype(bool)
+            a_matrix            = np.zeros(self.a_in.shape).astype(bool)
+            self.initialised    = True
 
         # Prepare s_out using the input spikes
         self.s_matrix[self.agent_id, :] = s_vector[:]

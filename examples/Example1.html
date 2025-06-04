@@ -482,20 +482,20 @@
 [neuropt:log] Monitors are set up.
 [neuropt:log] Starting simulation with 100 iterations...
 ... step: 0, best fitness: 81.21773529052734
-... step: 10, best fitness: 79.9868392944336
-... step: 20, best fitness: 79.52970123291016
-... step: 30, best fitness: 79.52970123291016
-... step: 40, best fitness: 79.52970123291016
-... step: 50, best fitness: 79.52970123291016
-... step: 60, best fitness: 79.4903564453125
-... step: 70, best fitness: 79.48014831542969
-... step: 80, best fitness: 79.48001098632812
-... step: 90, best fitness: 79.48001098632812
-... step: 99, best fitness: 79.48001098632812
+... step: 10, best fitness: 79.9867172241211
+... step: 20, best fitness: 79.5296859741211
+... step: 30, best fitness: 79.5296859741211
+... step: 40, best fitness: 79.5296859741211
+... step: 50, best fitness: 79.5296859741211
+... step: 60, best fitness: 79.50758361816406
+... step: 70, best fitness: 79.49720764160156
+... step: 80, best fitness: 79.49720764160156
+... step: 90, best fitness: 79.49720764160156
+... step: 99, best fitness: 79.49720764160156
 [neuropt:log] Simulation completed. Fetching monitor data... done
 </pre></div>
 </div>
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(array([ 0.25548838, -1.15485579]), array([79.48001099]))
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(array([ 0.38031675, -1.12602912]), array([79.49720764]))
 </pre></div>
 </div>
 </div>
@@ -508,8 +508,8 @@
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>{&#39;num_iterations&#39;: 100, &#39;num_agents&#39;: 30, &#39;spiking_core&#39;: &#39;TwoDimSpikingCore&#39;, &#39;num_neighbours&#39;: 10, &#39;neuron_topology&#39;: &#39;2dr&#39;, &#39;unit_topology&#39;: &#39;random&#39;, &#39;function&#39;: &lt;function AbstractSolver._rescale_problem.&lt;locals&gt;.scaled_problem at 0x1341b6d40&gt;, &#39;search_space&#39;: array([[-5.,  5.],
-       [-5.,  5.]]), &#39;seed&#39;: 69, &#39;num_dimensions&#39;: 2, &#39;core_params&#39;: {}}
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>{&#39;num_iterations&#39;: 100, &#39;num_agents&#39;: 30, &#39;spiking_core&#39;: &#39;TwoDimSpikingCore&#39;, &#39;num_neighbours&#39;: 10, &#39;neuron_topology&#39;: &#39;2dr&#39;, &#39;unit_topology&#39;: &#39;random&#39;, &#39;search_space&#39;: array([[-5.,  5.],
+       [-5.,  5.]]), &#39;num_dimensions&#39;: 2, &#39;function&#39;: &lt;function AbstractSolver._rescale_problem.&lt;locals&gt;.scaled_problem at 0x1058b1ab0&gt;, &#39;seed&#39;: 69, &#39;core_params&#39;: {}}
 </pre></div>
 </div>
 </div>
@@ -545,20 +545,20 @@
       <th>spk_cond</th>
       <th>hs_operator</th>
       <th>hs_variant</th>
-      <th>is_bounded</th>
       <th>thr_alpha</th>
-      <th>alpha</th>
-      <th>max_steps</th>
-      <th>seed</th>
-      <th>ref_mode</th>
+      <th>thr_k</th>
       <th>dt</th>
       <th>thr_mode</th>
       <th>approx</th>
-      <th>spk_alpha</th>
-      <th>thr_k</th>
-      <th>thr_max</th>
-      <th>noise_std</th>
       <th>thr_min</th>
+      <th>alpha</th>
+      <th>noise_std</th>
+      <th>seed</th>
+      <th>thr_max</th>
+      <th>ref_mode</th>
+      <th>max_steps</th>
+      <th>spk_alpha</th>
+      <th>is_bounded</th>
       <th>init_position</th>
     </tr>
   </thead>
@@ -570,20 +570,20 @@
       <td>fixed</td>
       <td>differential</td>
       <td>current-to-rand</td>
-      <td>False</td>
       <td>1.0</td>
-      <td>1.0</td>
-      <td>100</td>
-      <td>69</td>
-      <td>pg</td>
+      <td>0.05</td>
       <td>0.01</td>
       <td>diff_pg</td>
       <td>rk4</td>
-      <td>0.25</td>
-      <td>0.05</td>
+      <td>0.000001</td>
       <td>1.0</td>
       <td>0.1</td>
-      <td>0.000001</td>
+      <td>69</td>
+      <td>1.0</td>
+      <td>pg</td>
+      <td>100</td>
+      <td>0.25</td>
+      <td>False</td>
       <td>[-0.250919762305275, 0.9014286128198323]</td>
     </tr>
     <tr>
@@ -593,20 +593,20 @@
       <td>fixed</td>
       <td>differential</td>
       <td>current-to-rand</td>
-      <td>False</td>
       <td>1.0</td>
-      <td>1.0</td>
-      <td>100</td>
-      <td>70</td>
-      <td>pg</td>
+      <td>0.05</td>
       <td>0.01</td>
       <td>diff_pg</td>
       <td>rk4</td>
-      <td>0.25</td>
-      <td>0.05</td>
+      <td>0.000001</td>
       <td>1.0</td>
       <td>0.1</td>
-      <td>0.000001</td>
+      <td>70</td>
+      <td>1.0</td>
+      <td>pg</td>
+      <td>100</td>
+      <td>0.25</td>
+      <td>False</td>
       <td>[0.4639878836228102, 0.1973169683940732]</td>
     </tr>
     <tr>
@@ -616,20 +616,20 @@
       <td>fixed</td>
       <td>differential</td>
       <td>current-to-rand</td>
-      <td>False</td>
       <td>1.0</td>
-      <td>1.0</td>
-      <td>100</td>
-      <td>71</td>
-      <td>pg</td>
+      <td>0.05</td>
       <td>0.01</td>
       <td>diff_pg</td>
       <td>rk4</td>
-      <td>0.25</td>
-      <td>0.05</td>
+      <td>0.000001</td>
       <td>1.0</td>
       <td>0.1</td>
-      <td>0.000001</td>
+      <td>71</td>
+      <td>1.0</td>
+      <td>pg</td>
+      <td>100</td>
+      <td>0.25</td>
+      <td>False</td>
       <td>[-0.687962719115127, -0.6880109593275947]</td>
     </tr>
     <tr>
@@ -639,20 +639,20 @@
       <td>fixed</td>
       <td>differential</td>
       <td>current-to-rand</td>
-      <td>False</td>
       <td>1.0</td>
-      <td>1.0</td>
-      <td>100</td>
-      <td>72</td>
-      <td>pg</td>
+      <td>0.05</td>
       <td>0.01</td>
       <td>diff_pg</td>
       <td>rk4</td>
-      <td>0.25</td>
-      <td>0.05</td>
+      <td>0.000001</td>
       <td>1.0</td>
       <td>0.1</td>
-      <td>0.000001</td>
+      <td>72</td>
+      <td>1.0</td>
+      <td>pg</td>
+      <td>100</td>
+      <td>0.25</td>
+      <td>False</td>
       <td>[-0.8838327756636011, 0.7323522915498704]</td>
     </tr>
     <tr>
@@ -662,20 +662,20 @@
       <td>fixed</td>
       <td>differential</td>
       <td>current-to-rand</td>
-      <td>False</td>
       <td>1.0</td>
-      <td>1.0</td>
-      <td>100</td>
-      <td>73</td>
-      <td>pg</td>
+      <td>0.05</td>
       <td>0.01</td>
       <td>diff_pg</td>
       <td>rk4</td>
-      <td>0.25</td>
-      <td>0.05</td>
+      <td>0.000001</td>
       <td>1.0</td>
       <td>0.1</td>
-      <td>0.000001</td>
+      <td>73</td>
+      <td>1.0</td>
+      <td>pg</td>
+      <td>100</td>
+      <td>0.25</td>
+      <td>False</td>
       <td>[0.2022300234864176, 0.416145155592091]</td>
     </tr>
     <tr>
@@ -685,20 +685,20 @@
       <td>fixed</td>
       <td>differential</td>
       <td>current-to-rand</td>
-      <td>False</td>
       <td>1.0</td>
-      <td>1.0</td>
-      <td>100</td>
-      <td>74</td>
-      <td>pg</td>
+      <td>0.05</td>
       <td>0.01</td>
       <td>diff_pg</td>
       <td>rk4</td>
-      <td>0.25</td>
-      <td>0.05</td>
+      <td>0.000001</td>
       <td>1.0</td>
       <td>0.1</td>
-      <td>0.000001</td>
+      <td>74</td>
+      <td>1.0</td>
+      <td>pg</td>
+      <td>100</td>
+      <td>0.25</td>
+      <td>False</td>
       <td>[-0.9588310114083951, 0.9398197043239886]</td>
     </tr>
     <tr>
@@ -708,20 +708,20 @@
       <td>fixed</td>
       <td>differential</td>
       <td>current-to-rand</td>
-      <td>False</td>
       <td>1.0</td>
-      <td>1.0</td>
-      <td>100</td>
-      <td>75</td>
-      <td>pg</td>
+      <td>0.05</td>
       <td>0.01</td>
       <td>diff_pg</td>
       <td>rk4</td>
-      <td>0.25</td>
-      <td>0.05</td>
+      <td>0.000001</td>
       <td>1.0</td>
       <td>0.1</td>
-      <td>0.000001</td>
+      <td>75</td>
+      <td>1.0</td>
+      <td>pg</td>
+      <td>100</td>
+      <td>0.25</td>
+      <td>False</td>
       <td>[0.6648852816008435, -0.5753217786434477]</td>
     </tr>
     <tr>
@@ -731,20 +731,20 @@
       <td>fixed</td>
       <td>differential</td>
       <td>current-to-rand</td>
-      <td>False</td>
       <td>1.0</td>
-      <td>1.0</td>
-      <td>100</td>
-      <td>76</td>
-      <td>pg</td>
+      <td>0.05</td>
       <td>0.01</td>
       <td>diff_pg</td>
       <td>rk4</td>
-      <td>0.25</td>
-      <td>0.05</td>
+      <td>0.000001</td>
       <td>1.0</td>
       <td>0.1</td>
-      <td>0.000001</td>
+      <td>76</td>
+      <td>1.0</td>
+      <td>pg</td>
+      <td>100</td>
+      <td>0.25</td>
+      <td>False</td>
       <td>[-0.6363500655857988, -0.6331909802931324]</td>
     </tr>
     <tr>
@@ -754,20 +754,20 @@
       <td>fixed</td>
       <td>differential</td>
       <td>current-to-rand</td>
-      <td>False</td>
       <td>1.0</td>
-      <td>1.0</td>
-      <td>100</td>
-      <td>77</td>
-      <td>pg</td>
+      <td>0.05</td>
       <td>0.01</td>
       <td>diff_pg</td>
       <td>rk4</td>
-      <td>0.25</td>
-      <td>0.05</td>
+      <td>0.000001</td>
       <td>1.0</td>
       <td>0.1</td>
-      <td>0.000001</td>
+      <td>77</td>
+      <td>1.0</td>
+      <td>pg</td>
+      <td>100</td>
+      <td>0.25</td>
+      <td>False</td>
       <td>[-0.39151551408092455, 0.04951286326447568]</td>
     </tr>
     <tr>
@@ -777,20 +777,20 @@
       <td>fixed</td>
       <td>differential</td>
       <td>current-to-rand</td>
-      <td>False</td>
       <td>1.0</td>
-      <td>1.0</td>
-      <td>100</td>
-      <td>78</td>
-      <td>pg</td>
+      <td>0.05</td>
       <td>0.01</td>
       <td>diff_pg</td>
       <td>rk4</td>
-      <td>0.25</td>
-      <td>0.05</td>
+      <td>0.000001</td>
       <td>1.0</td>
       <td>0.1</td>
-      <td>0.000001</td>
+      <td>78</td>
+      <td>1.0</td>
+      <td>pg</td>
+      <td>100</td>
+      <td>0.25</td>
+      <td>False</td>
       <td>[-0.13610996271576847, -0.4175417196039162]</td>
     </tr>
     <tr>
@@ -800,20 +800,20 @@
       <td>fixed</td>
       <td>differential</td>
       <td>current-to-rand</td>
-      <td>False</td>
       <td>1.0</td>
-      <td>1.0</td>
-      <td>100</td>
-      <td>79</td>
-      <td>pg</td>
+      <td>0.05</td>
       <td>0.01</td>
       <td>diff_pg</td>
       <td>rk4</td>
-      <td>0.25</td>
-      <td>0.05</td>
+      <td>0.000001</td>
       <td>1.0</td>
       <td>0.1</td>
-      <td>0.000001</td>
+      <td>79</td>
+      <td>1.0</td>
+      <td>pg</td>
+      <td>100</td>
+      <td>0.25</td>
+      <td>False</td>
       <td>[0.22370578944475894, -0.7210122786959163]</td>
     </tr>
     <tr>
@@ -823,20 +823,20 @@
       <td>fixed</td>
       <td>differential</td>
       <td>current-to-rand</td>
-      <td>False</td>
       <td>1.0</td>
-      <td>1.0</td>
-      <td>100</td>
-      <td>80</td>
-      <td>pg</td>
+      <td>0.05</td>
       <td>0.01</td>
       <td>diff_pg</td>
       <td>rk4</td>
-      <td>0.25</td>
-      <td>0.05</td>
+      <td>0.000001</td>
       <td>1.0</td>
       <td>0.1</td>
-      <td>0.000001</td>
+      <td>80</td>
+      <td>1.0</td>
+      <td>pg</td>
+      <td>100</td>
+      <td>0.25</td>
+      <td>False</td>
       <td>[-0.4157107029295637, -0.2672763134126166]</td>
     </tr>
     <tr>
@@ -846,20 +846,20 @@
       <td>fixed</td>
       <td>differential</td>
       <td>current-to-rand</td>
-      <td>False</td>
       <td>1.0</td>
-      <td>1.0</td>
-      <td>100</td>
-      <td>81</td>
-      <td>pg</td>
+      <td>0.05</td>
       <td>0.01</td>
       <td>diff_pg</td>
       <td>rk4</td>
-      <td>0.25</td>
-      <td>0.05</td>
+      <td>0.000001</td>
       <td>1.0</td>
       <td>0.1</td>
-      <td>0.000001</td>
+      <td>81</td>
+      <td>1.0</td>
+      <td>pg</td>
+      <td>100</td>
+      <td>0.25</td>
+      <td>False</td>
       <td>[-0.08786003156592814, 0.5703519227860272]</td>
     </tr>
     <tr>
@@ -869,20 +869,20 @@
       <td>fixed</td>
       <td>differential</td>
       <td>current-to-rand</td>
-      <td>False</td>
       <td>1.0</td>
-      <td>1.0</td>
-      <td>100</td>
-      <td>82</td>
-      <td>pg</td>
+      <td>0.05</td>
       <td>0.01</td>
       <td>diff_pg</td>
       <td>rk4</td>
-      <td>0.25</td>
-      <td>0.05</td>
+      <td>0.000001</td>
       <td>1.0</td>
       <td>0.1</td>
-      <td>0.000001</td>
+      <td>82</td>
+      <td>1.0</td>
+      <td>pg</td>
+      <td>100</td>
+      <td>0.25</td>
+      <td>False</td>
       <td>[-0.6006524356832805, 0.02846887682722321]</td>
     </tr>
     <tr>
@@ -892,20 +892,20 @@
       <td>fixed</td>
       <td>differential</td>
       <td>current-to-rand</td>
-      <td>False</td>
       <td>1.0</td>
-      <td>1.0</td>
-      <td>100</td>
-      <td>83</td>
-      <td>pg</td>
+      <td>0.05</td>
       <td>0.01</td>
       <td>diff_pg</td>
       <td>rk4</td>
-      <td>0.25</td>
-      <td>0.05</td>
+      <td>0.000001</td>
       <td>1.0</td>
       <td>0.1</td>
-      <td>0.000001</td>
+      <td>83</td>
+      <td>1.0</td>
+      <td>pg</td>
+      <td>100</td>
+      <td>0.25</td>
+      <td>False</td>
       <td>[0.18482913772408494, -0.9070991745600046]</td>
     </tr>
     <tr>
@@ -915,20 +915,20 @@
       <td>fixed</td>
       <td>differential</td>
       <td>current-to-rand</td>
-      <td>False</td>
       <td>1.0</td>
-      <td>1.0</td>
-      <td>100</td>
-      <td>84</td>
-      <td>pg</td>
+      <td>0.05</td>
       <td>0.01</td>
       <td>diff_pg</td>
       <td>rk4</td>
-      <td>0.25</td>
-      <td>0.05</td>
+      <td>0.000001</td>
       <td>1.0</td>
       <td>0.1</td>
-      <td>0.000001</td>
+      <td>84</td>
+      <td>1.0</td>
+      <td>pg</td>
+      <td>100</td>
+      <td>0.25</td>
+      <td>False</td>
       <td>[0.21508970380287673, -0.6589517526254169]</td>
     </tr>
     <tr>
@@ -938,20 +938,20 @@
       <td>fixed</td>
       <td>differential</td>
       <td>current-to-rand</td>
-      <td>False</td>
       <td>1.0</td>
-      <td>1.0</td>
-      <td>100</td>
-      <td>85</td>
-      <td>pg</td>
+      <td>0.05</td>
       <td>0.01</td>
       <td>diff_pg</td>
       <td>rk4</td>
-      <td>0.25</td>
-      <td>0.05</td>
+      <td>0.000001</td>
       <td>1.0</td>
       <td>0.1</td>
-      <td>0.000001</td>
+      <td>85</td>
+      <td>1.0</td>
+      <td>pg</td>
+      <td>100</td>
+      <td>0.25</td>
+      <td>False</td>
       <td>[-0.869896814029441, 0.8977710745066665]</td>
     </tr>
     <tr>
@@ -961,20 +961,20 @@
       <td>fixed</td>
       <td>differential</td>
       <td>current-to-rand</td>
-      <td>False</td>
       <td>1.0</td>
-      <td>1.0</td>
-      <td>100</td>
-      <td>86</td>
-      <td>pg</td>
+      <td>0.05</td>
       <td>0.01</td>
       <td>diff_pg</td>
       <td>rk4</td>
-      <td>0.25</td>
-      <td>0.05</td>
+      <td>0.000001</td>
       <td>1.0</td>
       <td>0.1</td>
-      <td>0.000001</td>
+      <td>86</td>
+      <td>1.0</td>
+      <td>pg</td>
+      <td>100</td>
+      <td>0.25</td>
+      <td>False</td>
       <td>[0.9312640661491187, 0.6167946962329223]</td>
     </tr>
     <tr>
@@ -984,20 +984,20 @@
       <td>fixed</td>
       <td>differential</td>
       <td>current-to-rand</td>
-      <td>False</td>
       <td>1.0</td>
-      <td>1.0</td>
-      <td>100</td>
-      <td>87</td>
-      <td>pg</td>
+      <td>0.05</td>
       <td>0.01</td>
       <td>diff_pg</td>
       <td>rk4</td>
-      <td>0.25</td>
-      <td>0.05</td>
+      <td>0.000001</td>
       <td>1.0</td>
       <td>0.1</td>
-      <td>0.000001</td>
+      <td>87</td>
+      <td>1.0</td>
+      <td>pg</td>
+      <td>100</td>
+      <td>0.25</td>
+      <td>False</td>
       <td>[-0.39077246165325863, -0.8046557719872323]</td>
     </tr>
     <tr>
@@ -1007,20 +1007,20 @@
       <td>fixed</td>
       <td>differential</td>
       <td>current-to-rand</td>
-      <td>False</td>
       <td>1.0</td>
-      <td>1.0</td>
-      <td>100</td>
-      <td>88</td>
-      <td>pg</td>
+      <td>0.05</td>
       <td>0.01</td>
       <td>diff_pg</td>
       <td>rk4</td>
-      <td>0.25</td>
-      <td>0.05</td>
+      <td>0.000001</td>
       <td>1.0</td>
       <td>0.1</td>
-      <td>0.000001</td>
+      <td>88</td>
+      <td>1.0</td>
+      <td>pg</td>
+      <td>100</td>
+      <td>0.25</td>
+      <td>False</td>
       <td>[0.3684660530243138, -0.1196950125207974]</td>
     </tr>
     <tr>
@@ -1030,20 +1030,20 @@
       <td>fixed</td>
       <td>differential</td>
       <td>current-to-rand</td>
-      <td>False</td>
       <td>1.0</td>
-      <td>1.0</td>
-      <td>100</td>
-      <td>89</td>
-      <td>pg</td>
+      <td>0.05</td>
       <td>0.01</td>
       <td>diff_pg</td>
       <td>rk4</td>
-      <td>0.25</td>
-      <td>0.05</td>
+      <td>0.000001</td>
       <td>1.0</td>
       <td>0.1</td>
-      <td>0.000001</td>
+      <td>89</td>
+      <td>1.0</td>
+      <td>pg</td>
+      <td>100</td>
+      <td>0.25</td>
+      <td>False</td>
       <td>[-0.7559235303104423, -0.00964617977745963]</td>
     </tr>
     <tr>
@@ -1053,20 +1053,20 @@
       <td>fixed</td>
       <td>differential</td>
       <td>current-to-rand</td>
-      <td>False</td>
       <td>1.0</td>
-      <td>1.0</td>
-      <td>100</td>
-      <td>90</td>
-      <td>pg</td>
+      <td>0.05</td>
       <td>0.01</td>
       <td>diff_pg</td>
       <td>rk4</td>
-      <td>0.25</td>
-      <td>0.05</td>
+      <td>0.000001</td>
       <td>1.0</td>
       <td>0.1</td>
-      <td>0.000001</td>
+      <td>90</td>
+      <td>1.0</td>
+      <td>pg</td>
+      <td>100</td>
+      <td>0.25</td>
+      <td>False</td>
       <td>[-0.9312229577695632, 0.8186408041575641]</td>
     </tr>
     <tr>
@@ -1076,20 +1076,20 @@
       <td>fixed</td>
       <td>differential</td>
       <td>current-to-rand</td>
-      <td>False</td>
       <td>1.0</td>
-      <td>1.0</td>
-      <td>100</td>
-      <td>91</td>
-      <td>pg</td>
+      <td>0.05</td>
       <td>0.01</td>
       <td>diff_pg</td>
       <td>rk4</td>
-      <td>0.25</td>
-      <td>0.05</td>
+      <td>0.000001</td>
       <td>1.0</td>
       <td>0.1</td>
-      <td>0.000001</td>
+      <td>91</td>
+      <td>1.0</td>
+      <td>pg</td>
+      <td>100</td>
+      <td>0.25</td>
+      <td>False</td>
       <td>[-0.48244003679996617, 0.32504456870796394]</td>
     </tr>
     <tr>
@@ -1099,20 +1099,20 @@
       <td>fixed</td>
       <td>differential</td>
       <td>current-to-rand</td>
-      <td>False</td>
       <td>1.0</td>
-      <td>1.0</td>
-      <td>100</td>
-      <td>92</td>
-      <td>pg</td>
+      <td>0.05</td>
       <td>0.01</td>
       <td>diff_pg</td>
       <td>rk4</td>
-      <td>0.25</td>
-      <td>0.05</td>
+      <td>0.000001</td>
       <td>1.0</td>
       <td>0.1</td>
-      <td>0.000001</td>
+      <td>92</td>
+      <td>1.0</td>
+      <td>pg</td>
+      <td>100</td>
+      <td>0.25</td>
+      <td>False</td>
       <td>[-0.3765778478211781, 0.040136042355621626]</td>
     </tr>
     <tr>
@@ -1122,20 +1122,20 @@
       <td>fixed</td>
       <td>differential</td>
       <td>current-to-rand</td>
-      <td>False</td>
       <td>1.0</td>
-      <td>1.0</td>
-      <td>100</td>
-      <td>93</td>
-      <td>pg</td>
+      <td>0.05</td>
       <td>0.01</td>
       <td>diff_pg</td>
       <td>rk4</td>
-      <td>0.25</td>
-      <td>0.05</td>
+      <td>0.000001</td>
       <td>1.0</td>
       <td>0.1</td>
-      <td>0.000001</td>
+      <td>93</td>
+      <td>1.0</td>
+      <td>pg</td>
+      <td>100</td>
+      <td>0.25</td>
+      <td>False</td>
       <td>[0.0934205586865593, -0.6302910889489459]</td>
     </tr>
     <tr>
@@ -1145,20 +1145,20 @@
       <td>fixed</td>
       <td>differential</td>
       <td>current-to-rand</td>
-      <td>False</td>
       <td>1.0</td>
-      <td>1.0</td>
-      <td>100</td>
-      <td>94</td>
-      <td>pg</td>
+      <td>0.05</td>
       <td>0.01</td>
       <td>diff_pg</td>
       <td>rk4</td>
-      <td>0.25</td>
-      <td>0.05</td>
+      <td>0.000001</td>
       <td>1.0</td>
       <td>0.1</td>
-      <td>0.000001</td>
+      <td>94</td>
+      <td>1.0</td>
+      <td>pg</td>
+      <td>100</td>
+      <td>0.25</td>
+      <td>False</td>
       <td>[0.9391692555291171, 0.5502656467222291]</td>
     </tr>
     <tr>
@@ -1168,20 +1168,20 @@
       <td>fixed</td>
       <td>differential</td>
       <td>current-to-rand</td>
-      <td>False</td>
       <td>1.0</td>
-      <td>1.0</td>
-      <td>100</td>
-      <td>95</td>
-      <td>pg</td>
+      <td>0.05</td>
       <td>0.01</td>
       <td>diff_pg</td>
       <td>rk4</td>
-      <td>0.25</td>
-      <td>0.05</td>
+      <td>0.000001</td>
       <td>1.0</td>
       <td>0.1</td>
-      <td>0.000001</td>
+      <td>95</td>
+      <td>1.0</td>
+      <td>pg</td>
+      <td>100</td>
+      <td>0.25</td>
+      <td>False</td>
       <td>[0.8789978831283782, 0.7896547008552977]</td>
     </tr>
     <tr>
@@ -1191,20 +1191,20 @@
       <td>fixed</td>
       <td>differential</td>
       <td>current-to-rand</td>
-      <td>False</td>
       <td>1.0</td>
-      <td>1.0</td>
-      <td>100</td>
-      <td>96</td>
-      <td>pg</td>
+      <td>0.05</td>
       <td>0.01</td>
       <td>diff_pg</td>
       <td>rk4</td>
-      <td>0.25</td>
-      <td>0.05</td>
+      <td>0.000001</td>
       <td>1.0</td>
       <td>0.1</td>
-      <td>0.000001</td>
+      <td>96</td>
+      <td>1.0</td>
+      <td>pg</td>
+      <td>100</td>
+      <td>0.25</td>
+      <td>False</td>
       <td>[0.19579995762217028, 0.8437484700462337]</td>
     </tr>
     <tr>
@@ -1214,20 +1214,20 @@
       <td>fixed</td>
       <td>differential</td>
       <td>current-to-rand</td>
-      <td>False</td>
       <td>1.0</td>
-      <td>1.0</td>
-      <td>100</td>
-      <td>97</td>
-      <td>pg</td>
+      <td>0.05</td>
       <td>0.01</td>
       <td>diff_pg</td>
       <td>rk4</td>
-      <td>0.25</td>
-      <td>0.05</td>
+      <td>0.000001</td>
       <td>1.0</td>
       <td>0.1</td>
-      <td>0.000001</td>
+      <td>97</td>
+      <td>1.0</td>
+      <td>pg</td>
+      <td>100</td>
+      <td>0.25</td>
+      <td>False</td>
       <td>[-0.823014995896161, -0.6080342751617096]</td>
     </tr>
     <tr>
@@ -1237,20 +1237,20 @@
       <td>fixed</td>
       <td>differential</td>
       <td>current-to-rand</td>
-      <td>False</td>
       <td>1.0</td>
-      <td>1.0</td>
-      <td>100</td>
-      <td>98</td>
-      <td>pg</td>
+      <td>0.05</td>
       <td>0.01</td>
       <td>diff_pg</td>
       <td>rk4</td>
-      <td>0.25</td>
-      <td>0.05</td>
+      <td>0.000001</td>
       <td>1.0</td>
       <td>0.1</td>
-      <td>0.000001</td>
+      <td>98</td>
+      <td>1.0</td>
+      <td>pg</td>
+      <td>100</td>
+      <td>0.25</td>
+      <td>False</td>
       <td>[-0.9095454221789239, -0.3493393384734713]</td>
     </tr>
   </tbody>
@@ -1287,10 +1287,10 @@
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>fg: 79.4800, f*: 79.4800, error: 1.0986e-05
-norm2(g - x*): 3.3177e-03
--2.1086 &lt;= v1 &lt;= 2.4561
--1.1892 &lt;= v2 &lt;= 1.4185
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>fg: 79.4972, f*: 79.4800, error: 1.7208e-02
+norm2(g - x*): 1.3118e-01
+-2.1086 &lt;= v1 &lt;= 2.4560
+-1.1892 &lt;= v2 &lt;= 1.4446
 </pre></div>
 </div>
 </div>
@@ -1324,7 +1324,7 @@ norm2(g - x*): 3.3177e-03
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/b031c8729aaa5b0b68433a7c139d8c79e30c4d268c4f057124478b1b5a623a89.png" src="../_images/b031c8729aaa5b0b68433a7c139d8c79e30c4d268c4f057124478b1b5a623a89.png" />
+<img alt="../_images/529b958a64132014e389014b930cd8ebfb3791dcaeeae9cb8d3751fb756a8602.png" src="../_images/529b958a64132014e389014b930cd8ebfb3791dcaeeae9cb8d3751fb756a8602.png" />
 </div>
 </div>
 </section>
@@ -1361,7 +1361,7 @@ norm2(g - x*): 3.3177e-03
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/deaeae94d30a03a77e206187d4dc6d557cb1e7c58b2221bf66fac8d74168f91a.png" src="../_images/deaeae94d30a03a77e206187d4dc6d557cb1e7c58b2221bf66fac8d74168f91a.png" />
+<img alt="../_images/282357e99f137b1924a7fb39165ec1a680dd151011c736c2d9ae3f0d1e965f33.png" src="../_images/282357e99f137b1924a7fb39165ec1a680dd151011c736c2d9ae3f0d1e965f33.png" />
 </div>
 </div>
 </section>
@@ -1420,7 +1420,7 @@ norm2(g - x*): 3.3177e-03
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/8c83bd5836f0963c4301189f7c24b2dc78e232924653fdb837eb0d5f9dfc219d.png" src="../_images/8c83bd5836f0963c4301189f7c24b2dc78e232924653fdb837eb0d5f9dfc219d.png" />
+<img alt="../_images/fabf53fb135fe7a5077cfd3ab269ffe6edca8a44c1db804146f27796c1eb80ab.png" src="../_images/fabf53fb135fe7a5077cfd3ab269ffe6edca8a44c1db804146f27796c1eb80ab.png" />
 </div>
 </div>
 </section>
@@ -1461,7 +1461,7 @@ norm2(g - x*): 3.3177e-03
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/e51d891a146e9e039c14c1976a72fb56e0767463a60ad233058cd350a56fe055.png" src="../_images/e51d891a146e9e039c14c1976a72fb56e0767463a60ad233058cd350a56fe055.png" />
+<img alt="../_images/40a78615234a853155b9aaba21cefe494f66dc345d0d5413b2604e1bff44037e.png" src="../_images/40a78615234a853155b9aaba21cefe494f66dc345d0d5413b2604e1bff44037e.png" />
 </div>
 </div>
 </section>
@@ -1525,7 +1525,7 @@ norm2(g - x*): 3.3177e-03
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/5dd4e10db3a7417567c2cf1b7ccdee098382f792ac7c255ab8d0afc4ef2435a9.png" src="../_images/5dd4e10db3a7417567c2cf1b7ccdee098382f792ac7c255ab8d0afc4ef2435a9.png" />
+<img alt="../_images/92fef014fcd6ae599d84c9e688effc4c9cc9574088bfdae20729e137075436e8.png" src="../_images/92fef014fcd6ae599d84c9e688effc4c9cc9574088bfdae20729e137075436e8.png" />
 </div>
 </div>
 </section>
@@ -1555,7 +1555,7 @@ norm2(g - x*): 3.3177e-03
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/921254a13baff6f1e97151cde58ca7f55da52828ff27f82e6ecc98ea01ec9d4c.png" src="../_images/921254a13baff6f1e97151cde58ca7f55da52828ff27f82e6ecc98ea01ec9d4c.png" />
+<img alt="../_images/cf0364f7830f8fa4b85ad2f288eca9117703896d9be3ad04879902178303af86.png" src="../_images/cf0364f7830f8fa4b85ad2f288eca9117703896d9be3ad04879902178303af86.png" />
 </div>
 </div>
 </section>

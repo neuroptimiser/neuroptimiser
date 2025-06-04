@@ -1050,18 +1050,17 @@ class PySpikingHandlerModel(PyLoihiProcessModel):
         """Runs the spiking handler process model.
 
         The process is summarised as follows:
-            1. If the process is not initialised, it creates a zero matrix for the input spikes and a zero vector for the output spikes.
-            2. Receives the input spikes and activation matrix from the inports.
-            3. Prepares the output spikes based on the input spikes and sends them to the outports.
+            1. Receives the input spikes and activation matrix from the inports.
+            2. Prepares the output spikes based on the input spikes and sends them to the outports.
         """
         # Read the input spikes
-        if self.initialised:
-            s_vector            = self.s_in.recv()
-            a_matrix            = self.a_in.recv()
-        else:
-            s_vector            = np.zeros(self.s_in.shape).astype(bool)
-            a_matrix            = np.zeros(self.a_in.shape).astype(bool)
-            self.initialised    = True
+        # if self.initialised:
+        s_vector            = self.s_in.recv()
+        a_matrix            = self.a_in.recv()
+        # else:
+        #     s_vector            = np.zeros(self.s_in.shape).astype(bool)
+        #     a_matrix            = np.zeros(self.a_in.shape).astype(bool)
+        #     self.initialised    = True
 
         # Prepare s_out using the input spikes
         self.s_matrix[self.agent_id, :] = s_vector[:]

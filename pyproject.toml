@@ -1,6 +1,11 @@
+[tool.setuptools]
+package-dir = {"" = "src"}
+
 [tool.setuptools.packages.find]
+where = ["src"]
 include = ["neuroptimiser"]
 exclude = ["tests"]
+
 [project]
 name = "neuroptimiser"
 version = "1.0.0"

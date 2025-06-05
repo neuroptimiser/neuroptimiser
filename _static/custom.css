@@ -9,9 +9,6 @@ body p {
     text-align: justify;
 }
 
-.sidebar {
-  position: sticky;
-  top: 0;
-  overflow-y: auto;
-  max-height: 100vh;
+.wy-nav-content {
+    max-width: none;
 }

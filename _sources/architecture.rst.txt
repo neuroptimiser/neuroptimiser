@@ -52,4 +52,4 @@ For further details on the NeurOptimiser model dynamics, spiking core equations,
 
 .. rubric:: References
 
-.. [1] Jorge M. Cruz-Duarte and El-Ghazali Talbi. **NeurOptimiser: A Neuromorphic Metaheuristic Framework for Asynchronous Spike-Driven Optimisation**, in *WBO 2025, Springer Proceedings*, 2025. DOI: pending from Zenodo.
+.. [1] Jorge M. Cruz-Duarte and El-Ghazali Talbi. **NeurOptimiser: A Neuromorphic Metaheuristic Framework for Asynchronous Spike-Driven Optimisation**, in *WBO 2025, Springer Proceedings*, 2025. [Submitted]

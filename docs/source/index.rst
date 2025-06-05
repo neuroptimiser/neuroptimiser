@@ -3,43 +3,66 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-NeurOptimiser's Reference
-========================================
+NeurOptimiser's Documentation
+=====================================
 
-**NeurOptimiser** is a neuromorphic optimisation framework built upon spiking neural dynamics and heuristic search principles. It enables the design and evaluation of decentralised, asynchronous metaheuristic processes inspired by biological computation.
-
-This documentation is intended for developers, researchers, and contributors interested in understanding the internals of neurOptimiser, extending its capabilities, or integrating it into other systems.
+**NeurOptimiser** is a neuromorphic optimisation framework built on top of the Lava-NC framework [1]_. It combines spiking neural dynamics with heuristic search principles, enabling the design, simulation, and evaluation of decentralised, asynchronous metaheuristic processes inspired by biological computation. This documentation provides detailed information for users, developers, and researchers aiming to utilise, extend, or contribute to the NeurOptimiser framework.
 
 .. note::
    This project is under active development.
 
-Structure of this Documentation
--------------------------------
-This documentation is organised into the following main sections:
+Documentation Overview
+----------------------
+The documentation is organised into the following sections:
 
-- **Modules Overview**: A high-level description of the internal modules that constitute the neurOptimiser framework.
-- **API Reference**: Automatically generated reference for all public classes, functions, and modules. This includes docstrings, inheritance structure, and usage hints.
-- **Usage Examples** (coming soon): Practical examples on how to instantiate and run neurOptimiser simulations, define spiking models, and configure custom heuristics.
-- **Developer Notes** (coming soon): Guidelines for contributing to the project, including style conventions, branching strategy, and testing.
+- :doc:`Installation Guide <installation>`: Instructions for installing NeurOptimiser and setting up the development environment.
+- :doc:`Usage Guide <usage>`: Examples and instructions on configuring and running optimisation tasks.
+- :doc:`Architecture <architecture>`: Detailed description of the internal modules, components, and computational flow.
+- :doc:`API Reference <api>`: Automatically generated documentation for public classes, functions, and modules.
+- :doc:`Contributing Guide <contributing>`: Information for contributors, including coding standards and contribution workflow.
 
 Getting Started
----------------
+----------------
+To start using NeurOptimiser:
 
-To begin using neurOptimiser:
+1. Install the framework locally or via package manager (see the Installation Guide).
+2. Import and instantiate `NeurOptimiser` or its modular components.
+3. Configure the optimisation problem, spiking model, and metaheuristic parameters.
+4. Execute and analyse the simulation results.
 
-1. Install the framework locally or via a package manager (see README).
-2. Import and instantiate `Neuroptimiser` or its components.
-3. Configure your problem, neural model, and metaheuristic parameters.
-4. Run and evaluate your simulations.
+If you are new to neuromorphic computing or metaheuristic optimisation, we recommend reviewing the Usage Guide for step-by-step examples.
 
-If you're new to neuromorphic computing or heuristic search, we recommend starting with the Examples section once it's available.
+----
 
 .. toctree::
-   :maxdepth: 1
-   :caption: Contents
+   :maxdepth: 2
+   :caption: User Guide
+   :hidden:
 
    installation
    usage
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Architecture
+   :hidden:
+
    architecture
+
+.. toctree::
+   :maxdepth: 2
+   :caption: API Reference
+   :hidden:
+
    api
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Contribution Guide
+   :hidden:
+
    contributing
+
+References
+----------
+.. [1] Intel Neuromorphic Computing Lab. **Lava-NC: A software framework for neuromorphic computing**, 2023. Available at: https://lava-nc.org

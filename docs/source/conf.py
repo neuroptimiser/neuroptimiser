@@ -3,6 +3,11 @@
 # For the full list of built-in configuration values, see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
+import os
+import sys
+
+sys.path.insert(0, os.path.abspath('../src'))
+
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
@@ -47,6 +52,14 @@ html_static_path = ["_static"]
 html_css_files = ['custom.css']
 html_extra_path = ['.nojekyll']
 html_baseurl = "https://jcrvz.github.io/neuroptimiser/"
+html_sidebars = {
+    "**": [
+        "sidebar/brand.html",
+        "sidebar/search.html",
+        "sidebar/navigation.html",
+        "sidebar/ethical-ads.html",  # if using ReadTheDocs Ads
+    ]
+}
 
 html_theme_options = {
     "navigation_with_keys": True,
@@ -55,14 +68,16 @@ html_theme_options = {
     "light_logo": "neuropty-Light-small.png",
     "dark_logo": "neuropty-Dark-small.png",
     "light_css_variables": {
-        "color-brand-primary": "#3B4CCA",    # sober blue accent
+        "color-brand-primary": "#A5B68D",    # sober blue accent
         "color-brand-content": "#1A1A1A",    # dark grey for text
-        "color-background-primary": "#FFFFFF",  # pure white background
+        "color-background-primary": "#FFFFFE",  # quite-white background
         "color-background-secondary": "#F7F7F7",  # very light grey for sections
-        "color-sidebar-background": "#F0F0F0",    # light grey sidebar
+        "color-sidebar-background": "#E4E0E1",    # light grey sidebar
         "color-sidebar-link-text": "#333333",  # almost black sidebar links
         "color-sidebar-link-text--top-level": "#1A1A1A",
         "color-sidebar-link-background--active": "#E6E6E6",
+        "sidebar-width": "50px",
+        "sidebar-width--mobile": "70vw",
     },
     "dark_css_variables": {
         "color-brand-primary": "#7DA2FF",    # soft blue for dark mode
@@ -73,6 +88,8 @@ html_theme_options = {
         "color-sidebar-link-text": "#CCCCCC",
         "color-sidebar-link-text--top-level": "#FFFFFF",
         "color-sidebar-link-background--active": "#333333",  # active link background
+        "sidebar-width": "50px",
+        "sidebar-width--mobile": "70vw",
     },
     "footer_icons": [
         {
@@ -92,5 +109,4 @@ html_theme_options = {
 
 napoleon_use_param = True
 napoleon_use_rtype = True
-
-
+nb_remove_code_source = True

@@ -1,1 +1,9 @@
+.DS_store
+.idea
+.egg-info
+uv.lock
+__pycache__
 /docs/build/
+/exdata/*
+/figures/*
+tests/__*

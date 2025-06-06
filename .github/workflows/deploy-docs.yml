@@ -21,11 +21,12 @@ jobs:
       - name: Install dependencies
         run: |
           pip install -e .
+          pip install sphinx  
+          pip install furo 
 
       - name: Build Sphinx docs
         run: |
-          cd docs
-          make -C docs/ html
+          sphinx-build -b html docs docs/_build/html
 
       - name: Deploy to neuroptimiser.github.io
         uses: peaceiris/actions-gh-pages@v3

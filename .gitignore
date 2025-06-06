@@ -4,6 +4,8 @@
 uv.lock
 __pycache__
 /docs/build/
-/exdata/*
+docs/source/generated/
+docs/source/examples/exdata/
+docs/source/examples/figures/
 /figures/*
 tests/__*

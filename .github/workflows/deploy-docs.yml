@@ -12,6 +12,8 @@ jobs:
     steps:
       - name: Checkout source repo
         uses: actions/checkout@v3
+        with:
+          path: .
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -33,5 +35,5 @@ jobs:
         with:
           personal_token: ${{ secrets.GH_PAGES_TOKEN }}
           external_repository: neuroptimiser/neuroptimiser.github.io
-          publish_dir: neuroptimiser/docs/_build/html
+          publish_dir: docs/_build/html
           publish_branch: main

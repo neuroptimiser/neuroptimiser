@@ -51,12 +51,12 @@ Neuroptimiser has been validated over the [BBOB suite](https://github.com/numbbo
 
 ## 🔬 Citation
 ```bibtex
-@inproceedings{Cruz-Duarte2025neuroptimiser,
-  title={NeurOptimiser: A General Framework for Neuromorphic Optimisation},
+@misc{neuroptimiser2025,
   author={Cruz-Duarte, Jorge M. and Talbi, El-Ghazali},
-  booktitle={WBO 2025, Springer Proceedings},
-  year={2025},
-  doi={pending from Zenodo}
+  title        = {Neuroptimiser: A neuromorphic optimisation framework},
+  year         = {2025},
+  url          = {https://github.com/neuroptimiser/neuroptimiser},
+  note         = {Version 1.0.0, accessed on 20XX-XX-XX}
 }
 ```
 

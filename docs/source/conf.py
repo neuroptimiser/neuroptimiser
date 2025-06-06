@@ -51,7 +51,7 @@ html_favicon = '_static/neuropty-Light-small.png'
 html_static_path = ["_static"]
 html_css_files = ['custom.css']
 html_extra_path = ['.nojekyll']
-html_baseurl = "https://jcrvz.github.io/neuroptimiser/"
+html_baseurl = "https://neuroptimiser.github.io/"
 html_sidebars = {
     "**": [
         "sidebar/brand.html",

@@ -3,20 +3,43 @@ name: Deploy Documentation to GitHub Pages
 on:
   push:
     branches:
-      - gh-pages 
+      - main
 
 jobs:
-  deploy:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout source repo
         uses: actions/checkout@v3
+        with:
+          path: neuroptimiser
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          cd neuroptimiser
+          pip install -e .
+          pip install sphinx furo
+
+      - name: Build Sphinx docs
+        run: |
+          cd neuroptimiser
+          make -C docs html
+
+      - name: Debug build result
+        run: |
+          cd neuroptimiser
+          ls -la docs/build/html
 
       - name: Deploy to neuroptimiser.github.io
         uses: peaceiris/actions-gh-pages@v3
         with:
           personal_token: ${{ secrets.GH_PAGES_TOKEN }}
           external_repository: neuroptimiser/neuroptimiser.github.io
-          publish_dir: .
+          publish_dir: neuroptimiser/docs/build/html
           publish_branch: main

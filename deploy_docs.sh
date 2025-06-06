@@ -1,20 +1,41 @@
 #!/bin/bash
 
-# Build docs
+set -e  # Exit immediately if a command fails
+set -o pipefail
+
+# CONFIGURATION
+GITHUB_REPO="https://github.com/neuroptimiser/neuroptimiser.github.io.git"
+BUILD_DIR="docs/build/html"
+DEPLOY_DIR="/tmp/neuroptimiser-docs-deploy"
+
+echo "🚀 Starting documentation deployment"
+
+# Step 1 — Build Sphinx documentation locally
+echo "🔧 Building documentation"
 make -C docs html
 
-# Clean and prepare temporary deploy folder
-rm -rf /tmp/docs-deploy/*
-git worktree add /tmp/docs-deploy gh-pages
+# Step 2 — Prepare deployment directory
+echo "📂 Preparing deploy folder"
+rm -rf "$DEPLOY_DIR/"
+git clone "$GITHUB_REPO" "$DEPLOY_DIR"
 
-# Copy built docs
-rsync -av docs/build/html/ /tmp/docs-deploy/
+# Step 3 — Sync built HTML to deployment repo
+echo "📄 Copying generated files"
+rsync -av --delete "$BUILD_DIR/" "$DEPLOY_DIR/"
 
-# Commit and push
-cd /tmp/docs-deploy
-git add --all
-git commit -m "Update docs $(date)"
-git push origin gh-pages
+# Step 4 — Commit and push if changes exist
+cd "$DEPLOY_DIR"
 
-# Cleanup
-git worktree remove /tmp/docs-deploy
+if [ -n "$(git status --porcelain)" ]; then
+    echo "✅ Changes detected, committing..."
+    git add --all
+    git commit -m "Update documentation: $(date -u +"%Y-%m-%d %H:%M:%S UTC")"
+    git push origin main
+    echo "🚀 Deployment successful!"
+else
+    echo "ℹ️ No changes to deploy."
+fi
+
+# Step 5 — Clean up
+rm -rf "$DEPLOY_DIR"
+echo "🧹 Cleanup complete"

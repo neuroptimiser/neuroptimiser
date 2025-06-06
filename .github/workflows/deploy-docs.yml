@@ -3,7 +3,7 @@ name: Deploy Pre-Built Documentation to GitHub Pages
 on:
   push:
     branches:
-      - gh-pages-build   # <-- or whatever branch you want to use for deployment trigger
+      - gh-pages-build   
 
 jobs:
   deploy:

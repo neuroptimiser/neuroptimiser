@@ -8,7 +8,7 @@ NeurOptimiser's Documentation
 
 **NeurOptimiser** is a neuromorphic optimisation framework built on top of the Lava-NC framework [1]_. It combines spiking neural dynamics with heuristic search principles, enabling the design, simulation, and evaluation of decentralised, asynchronous metaheuristic processes inspired by biological computation. This documentation provides detailed information for users, developers, and researchers aiming to utilise, extend, or contribute to the NeurOptimiser framework.
 
-For more information, visit `NeurOptimiser on GitHub <https://github.com/jcrvz/neuroptimiser>`__.
+For more information, visit `NeurOptimiser on GitHub <https://github.com/neuroptimiser/neuroptimiser>`__.
 
 .. note::
    This project is under active development.

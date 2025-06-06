@@ -33,7 +33,7 @@ Alternatively, you can clone the repository and install in *editable mode* for l
 
 .. code-block:: bash
 
-    git clone https://github.com/jcrvz/neuroptimiser.git
+    git clone https://github.com/neuroptimiser/neuroptimiser.git
     cd neuroptimiser
     pip install -e .
 

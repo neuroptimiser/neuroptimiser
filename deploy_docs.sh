@@ -26,15 +26,11 @@ rsync -av --delete "$BUILD_DIR/" "$DEPLOY_DIR/"
 # Step 4 — Commit and push if changes exist
 cd "$DEPLOY_DIR"
 
-if [ -n "$(git status --porcelain)" ]; then
-    echo "✅ Changes detected, committing..."
-    git add --all
-    git commit -m "Update documentation: $(date -u +"%Y-%m-%d %H:%M:%S UTC")"
-    git push origin main
-    echo "🚀 Deployment successful!"
-else
-    echo "ℹ️ No changes to deploy."
-fi
+echo "✅ Changes detected, committing..."
+git add --all
+git commit -m "Update documentation: $(date -u +"%Y-%m-%d %H:%M:%S UTC")"
+git push origin main
+echo "🚀 Deployment successful!"
 
 # Step 5 — Clean up
 rm -rf "$DEPLOY_DIR"

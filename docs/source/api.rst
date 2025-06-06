@@ -5,7 +5,7 @@ The NeurOptimiser framework exposes several modules to build and execute neuromo
 
 For the general architecture and design principles, refer to the :doc:`architecture` section. The main entry points for most users are the solvers and core models. Internal modules provide access to lower-level processes, models, and utilities.
 
-The source code for `NeurOptimiser is on GitHub <https://github.com/jcrvz/neuroptimiser>`__.
+The source code for `NeurOptimiser is on GitHub <https://github.com/neuroptimiser/neuroptimiser>`__.
 
 .. important:: Please, consider that this API is under active development, and some components may change in future releases.
 

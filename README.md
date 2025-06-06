@@ -18,7 +18,7 @@ This framework enables fully event-driven, low-power optimisation by integrating
 ---
 
 ## 📖 Documentation
-For detailed documentation, examples, and API reference, please visit the [Neuroptimiser Documentation](https://jcrvz.github.io/neuroptimiser/).
+For detailed documentation, examples, and API reference, please visit the [Neuroptimiser Documentation](https://neuroptimiser.github.io/).
 
 ## 📦 Installation
 
@@ -61,7 +61,7 @@ Neuroptimiser has been validated over the [BBOB suite](https://github.com/numbbo
 ```
 
 ## 🔗 Resources
-* 📘 [Paper (WBO 2025)](https://github.com/jcrvz/neuroptimiser)
+* 📘 [Documentation](https://neuroptimiser.github.io)
 * 🧠 [Intel Lava-NC](https://github.com/lava-nc/lava)
 * 🧪 [COCO Platform](https://github.com/numbbo/coco)
 

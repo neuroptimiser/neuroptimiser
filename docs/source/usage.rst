@@ -10,7 +10,7 @@ To begin using `neuroptimiser`, follow these steps:
 
     .. code-block:: bash
 
-        git clone https://github.com/jcrvz/neuroptimiser.git
+        git clone https://github.com/neuroptimiser/neuroptimiser.git
         cd neuroptimiser
 
 2. **Create and Activate a Virtual Environment**:

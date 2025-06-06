@@ -1,6 +1,6 @@
 .DS_store
 .idea
-.egg-info
+*.egg-info
 uv.lock
 __pycache__
 /docs/build/

@@ -1,42 +1,22 @@
-name: Deploy Documentation to GitHub Pages
+name: Deploy Pre-Built Documentation to GitHub Pages
 
 on:
   push:
     branches:
-      - main
+      - gh-pages-build   # <-- or whatever branch you want to use for deployment trigger
 
 jobs:
-  build-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout source repo
         uses: actions/checkout@v3
-        with:
-          path: .
-
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
-
-      - name: Install dependencies
-        run: |
-          pip install -e .
-          pip install sphinx furo
-
-      - name: Build Sphinx docs
-        run: |
-          make -C docs/ html
-
-      - name: Debug build result
-        run: |
-          ls -la docs/_build/html
 
       - name: Deploy to neuroptimiser.github.io
         uses: peaceiris/actions-gh-pages@v3
         with:
           personal_token: ${{ secrets.GH_PAGES_TOKEN }}
           external_repository: neuroptimiser/neuroptimiser.github.io
-          publish_dir: docs/_build/html
+          publish_dir: .
           publish_branch: main

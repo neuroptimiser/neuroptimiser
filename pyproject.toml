@@ -11,6 +11,17 @@ name = "neuroptimiser"
 version = "1.0.0"
 description = "A modular and asynchronous framework for neuromorphic optimisation using spike-driven metaheuristics and heuristic-controlled spiking dynamics."
 readme = "README.md"
+license = {file = "LICENSE"}
+authors = [
+    {name = "Jorge Mario Cruz-Duarte", email = "jorge.cruz-duarte@univ-lille.fr"},
+    {name = "El-Ghazali Talbi", email = "el-ghazali.talbi@univ-lille.fr"},
+]
+keywords = ["neuromorphic", "spiking", "optimisation", "lava-nc"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
 requires-python = ">=3.10"
 dependencies = [
     "ipython>=8.31.0",
@@ -43,3 +54,7 @@ dependencies = [
     "furo>=2024.8.6",
     "myst-nb>=1.2.0",
 ]
+
+[project.urls]
+"Documentation" = "https://neuroptimiser.github.io"
+"Source" = "https://github.com/neuroptimiser/neuroptimiser"

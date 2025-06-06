@@ -3,7 +3,7 @@ name: Deploy Documentation to GitHub Pages
 on:
   push:
     branches:
-      - main  # or your default branch name
+      - main
 
 jobs:
   build-and-deploy:
@@ -18,7 +18,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.10'  # adapt to your version
+          python-version: '3.10'
 
       - name: Install dependencies
         run: |
@@ -27,7 +27,11 @@ jobs:
 
       - name: Build Sphinx docs
         run: |
-          sphinx-build -b html docs docs/_build/html
+          make -C docs/ html
+
+      - name: Debug build result
+        run: |
+          ls -la docs/_build/html
 
       - name: Deploy to neuroptimiser.github.io
         uses: peaceiris/actions-gh-pages@v3

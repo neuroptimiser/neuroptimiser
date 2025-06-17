@@ -200,11 +200,14 @@ class PyTwoDimSpikingCoreModel(AbstractPerturbationNHeuristicModel):
             raise ValueError(f"Unknown approximation method: {self.approx}")
 
         self._spike_condition   = self._init_spike_condition()
-        self._threshold_fn      = self._init_threshold_fn()
-        self._base_threshold    = self.thr_alpha * np.ones_like(self.v1)
 
-        self.v1_best            = np.zeros(self.shape).astype(float)
-        self.v2_best            = np.zeros(self.shape).astype(float)
+        self.v1_pbest           = np.zeros(self.shape).astype(float)
+        self.v1_gbest           = np.zeros(self.shape).astype(float)
+        self.v2_pbest           = np.random.uniform(-1.0, 1.0, size=self.shape).astype(float)
+        self.v2_gbest           = np.random.uniform(-1.0, 1.0, size=self.shape).astype(float)
+
+        self._base_threshold    = self.thr_alpha * np.ones_like(self.v1)
+        self._threshold_fn      = self._init_threshold_fn()
 
         self.v_bounds           = np.zeros((2,self.shape[0])).astype(float)
         self.x_ref              = np.zeros(self.shape).astype(float)
@@ -301,8 +304,8 @@ class PyTwoDimSpikingCoreModel(AbstractPerturbationNHeuristicModel):
 
     def _hs_fixed(self, dim, var):
         """Fixed heuristic search operator for perturbation-based nheuristics."""
-        new_var_1 = self.v1_best[dim]
-        new_var_2 = self.v2_best[dim]
+        new_var_1 = self.v1_pbest[dim]
+        new_var_2 = self.v2_pbest[dim]
 
         new_var = np.array([new_var_1, new_var_2]) + np.random.normal(0, self.noise_std, 2)
         return new_var
@@ -317,10 +320,9 @@ class PyTwoDimSpikingCoreModel(AbstractPerturbationNHeuristicModel):
 
     def _hs_directional(self, dim, var):
         """Directional heuristic search operator for perturbation-based nheuristics."""
-        dir1 = self.v1_best[dim] - var[0]
-        dir2 = self.v2_best[dim] - var[1]
-        scale = self.alpha * np.random.randn() * self.noise_std
-        new_var  = np.array(var) + scale * np.array([dir1, dir2])
+        dir1 = self.v1_pbest[dim] - var[0]
+        dir2 = self.v2_pbest[dim] - var[1]
+        new_var  = np.array(var) + self.alpha  * np.array([dir1, dir2]) + np.random.randn() * self.noise_std
         return new_var
 
     @staticmethod
@@ -330,36 +332,58 @@ class PyTwoDimSpikingCoreModel(AbstractPerturbationNHeuristicModel):
 
     def _hs_differential(self, dim, var):
         """Differential heuristic search operator for perturbation-based nheuristics."""
-        if self.hs_variant in ["rand", "current-to-rand", "best-to-rand"]:
-            # Get from neighbours
-            if self.num_neighbours > 3:
-                ind1, ind2, ind3  = self.neighbour_indices_cache[dim]
-                pre_sum = self.vn[ind1, dim]
-                the_sum = self.vn[ind2, dim] - self.vn[ind3, dim]
-            else:
-                pre_sum = np.random.normal(0, self.noise_std)
-                the_sum = np.random.normal(0, self.noise_std)
-
-            if self.hs_variant == "current-to-rand":
-                new_var1 = var[0] + self._get_F() * (pre_sum - var[0]) + self._get_F() * the_sum
-            elif self.hs_variant == "best-to-rand":
-                new_var1 = var[0] + self._get_F() * (self.v1_best[dim] - var[0]) + self._get_F() * the_sum
-            else: # rand
-                new_var1 = pre_sum + self._get_F() * the_sum
-
-            new_var2 = var[1] + self._get_F() * np.random.normal(0, self.noise_std)
-            new_var = np.array([new_var1, new_var2])
-            return new_var
-
-        elif self.hs_variant == "current-to-best":
-            # F parameter is calculated using a distribution
-            diff1 = self.v1_best[dim] - var[0]
-            diff2 = self.v2_best[dim] - var[1]
-            new_var = np.array(var) + self._get_F() * np.array([diff1, diff2])
-            return new_var
-
+        # Get from neighbours
+        if self.num_neighbours > 3:
+            ind1, ind2, ind3  = self.neighbour_indices_cache[dim]
+            pre_sum = self.vn[ind1, dim]
+            the_sum = self.vn[ind2, dim] - self.vn[ind3, dim]
         else:
-            raise ValueError(f"Unknown hs_variant: {self.hs_variant}")
+            pre_sum = np.random.normal(0, self.noise_std)
+            the_sum = np.random.normal(0, self.noise_std)
+        pre_sum_2 = pre_sum + np.random.normal(0, self.noise_std)
+
+        match self.hs_variant:
+            case "rand":
+                new_var1 = pre_sum
+                new_var2 = pre_sum_2
+            case "current":
+                new_var1 = var[0]
+                new_var2 = var[1]
+            case "pbest":
+                new_var1 = self.v1_pbest[dim]
+                new_var2 = self.v2_pbest[dim]
+            case "best":
+                new_var1 = self.v1_gbest[dim]
+                new_var2 = self.v2_gbest[dim]
+            case "current-to-rand":
+                new_var1 = var[0] + self._get_F() * (pre_sum - var[0])
+                new_var2 = var[1] + self._get_F() * (pre_sum_2 - var[1])
+            case "best-to-rand":
+                new_var1 = self.v1_gbest[dim] + self._get_F() * (pre_sum - self.v1_gbest[dim])
+                new_var2 = self.v2_gbest[dim] + self._get_F() * (pre_sum_2 - self.v2_gbest[dim])
+            case "pbest-to-rand":
+                new_var1 = self.v1_pbest[dim] + self._get_F() * (pre_sum - self.v1_pbest[dim])
+                new_var2 = self.v2_pbest[dim] + self._get_F() * (pre_sum_2 - self.v2_pbest[dim])
+            case "current-to-best":
+                new_var1 = var[0] + self._get_F() * (self.v1_gbest[dim] - var[0])
+                new_var2 = var[1] + self._get_F() * (self.v2_gbest[dim] - var[1])
+            case "current-to-pbest":
+                new_var1 = var[0] + self._get_F() * (self.v1_pbest[dim]- var[0])
+                new_var2 = var[1] + self._get_F() * (self.v2_pbest[dim] - var[1])
+            case "rand-to-best":
+                new_var1 = pre_sum + self._get_F() * (self.v1_gbest[dim] - pre_sum)
+                new_var2 = pre_sum_2 + self._get_F() * (self.v2_gbest[dim] - pre_sum)
+            case "rand-to-pbest":
+                new_var1 = pre_sum + self._get_F() * (self.v1_pbest[dim] - pre_sum)
+                new_var2 = pre_sum_2 + self._get_F() * (self.v2_pbest[dim] - pre_sum)
+            case _:
+                raise ValueError(f"Unknown hs_variant: {self.hs_variant}")
+
+        new_var1 += self._get_F() * the_sum
+        new_var2 += self._get_F() * the_sum
+        new_var = np.array([new_var1, new_var2])
+        return new_var
+
 
     # DYNAMIC HEURISTIC
     def _apply_hd(self, dim, var):
@@ -410,39 +434,40 @@ class PyTwoDimSpikingCoreModel(AbstractPerturbationNHeuristicModel):
 
         # Variable preparation
         self.v1         = self._linear_transform(self.x)
-        self.v1_best    = self._linear_transform(self.p)
+        self.v1_pbest   = self._linear_transform(self.p)
+        self.v1_gbest   = self._linear_transform(self.g)
 
         if self.xn is not None:
             self.vn[:] = self._linear_transform(self.xn)
         self.ref_point  = self._linear_transform(np.average(x_refs, axis=0))
 
     # Threshold determination
-    def _threshold_fixed(self, base_threshold):
+    def _threshold_fixed(self):
         """Returns a fixed threshold value."""
-        return base_threshold
+        return self._base_threshold * np.ones_like(self.v1)
 
-    def _threshold_adaptive_time(self, base_threshold):
+    def _threshold_adaptive_time(self):
         """Returns an adaptive threshold based on the time step."""
         scale = 1.0 / (1.0 + self.thr_k * (self.time_step + 1.0))
-        return base_threshold * scale
+        return self._base_threshold * scale * np.ones_like(self.v1)
 
-    def _threshold_adaptive_stag(self, base_threshold):
+    def _threshold_adaptive_stag(self):
         """Returns an adaptive threshold based on the stagnation count."""
         scale = 1.0 + self.thr_k * self.stag_count
-        return base_threshold * scale
+        return self._base_threshold * scale * np.ones_like(self.v1)
 
-    def _threshold_diff_pg(self, base_threshold=None):
+    def _threshold_diff_pg(self):
         """Returns a threshold based on the difference between the current position and the global best."""
         return self.thr_alpha * np.abs(self.p - self.g)
 
-    def _threshold_diff_pref(self, base_threshold=None):
+    def _threshold_diff_pref(self):
         """Returns a threshold based on the difference between the current position and the reference point."""
         return self.thr_alpha * np.abs(self.x_ref - self.p)
 
-    def _threshold_random(self, base_threshold):
+    def _threshold_random(self):
         """Returns a random threshold value based on a normal distribution."""
         noise = np.random.normal(0, self.noise_std, size=self.shape)
-        return base_threshold + self.thr_k * noise
+        return self._base_threshold + self.thr_k * noise
 
     def _init_threshold_fn(self):
         """Initialises the threshold function based on the specified threshold mode."""
@@ -463,39 +488,39 @@ class PyTwoDimSpikingCoreModel(AbstractPerturbationNHeuristicModel):
 
     def _update_threshold(self):
         """Updates the threshold based on the current time step and the base threshold."""
-        self.threshold = self._threshold_fn(self._base_threshold)
+        self.threshold = self._threshold_fn()
         self.threshold = np.clip(self.threshold, self.thr_min, self.thr_max)
 
     # SPIKING CONDITIONS
-    def _spike_fixed(self, v1, v2, thr, dim):
+    def _spike_fixed(self, v1: float, v2: float, thr: float, dim: int):
         """Fixed spiking condition based on a threshold."""
         return np.abs(v1) > thr
 
-    def _spike_l1(self, v1, v2, thr, dim):
+    def _spike_l1(self, v1: float, v2: float, thr: float, dim: int):
         """L1 norm spiking condition based on a threshold."""
         return np.abs(v1) + np.abs(v2) > thr
 
-    def _spike_l2(self, v1, v2, thr, dim):
+    def _spike_l2(self, v1: float, v2: float, thr: float, dim: int):
         """L2 norm spiking condition based on a threshold."""
         return np.linalg.norm([v1, v2]) > thr
 
-    def _spike_l2_gen(self, v1, v2, thr, dim):
+    def _spike_l2_gen(self, v1: float, v2: float, thr: float, dim: int):
         """Generalised L2 norm spiking condition based on a threshold."""
         return (v1 ** 2 + self.spk_alpha * v2 ** 2) > thr ** 2
 
-    def _spike_random(self, v1, v2, thr, dim):
+    def _spike_random(self, v1: float, v2: float, thr: float, dim: int):
         """Random spiking condition based on a threshold."""
         magnitude = np.linalg.norm([v1, v2])
         spike_prob = 1.0 / (1.0 + np.exp(-(magnitude - thr)))
         return np.random.rand() < spike_prob
 
-    def _spike_adaptive(self, v1, v2, thr, dim):
+    def _spike_adaptive(self, v1: float, v2: float, thr: float, dim: int):
         """Adaptive spiking condition based on the spiking alpha and time step."""
         min_threshold = 1e-6
         adaptive_threshold = max(min_threshold, self.spk_alpha / (1 + self.time_step / self.max_steps))
         return np.abs(v1) > adaptive_threshold
 
-    def _spike_stable(self, v1, v2, thr, dim):
+    def _spike_stable(self,v1: float, v2: float, thr: float, dim: int):
         """Stable spiking condition based on the stability of the system."""
         eps = 1e-3 / (1 + self.time_step)
         return np.linalg.norm([v1, v2]) < eps
@@ -539,6 +564,7 @@ class PyTwoDimSpikingCoreModel(AbstractPerturbationNHeuristicModel):
             self.g = np.random.uniform(-1, 1, self.shape).astype(float)
 
             self._transform_variables()
+            self._update_threshold()
             self.initialised = True
 
         else:

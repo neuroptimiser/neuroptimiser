@@ -328,7 +328,7 @@ class PyTwoDimSpikingCoreModel(AbstractPerturbationNHeuristicModel):
     @staticmethod
     def _get_F():
         """Returns a random scaling factor for the heuristic search operator, particularly for the differential variant."""
-        return np.random.normal(0.5, 0.1)
+        return np.random.uniform(low=0.0, high=0.5)
 
     def _hs_differential(self, dim, var):
         """Differential heuristic search operator for perturbation-based nheuristics."""

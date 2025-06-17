@@ -109,4 +109,4 @@ html_theme_options = {
 
 napoleon_use_param = True
 napoleon_use_rtype = True
-nb_remove_code_source = True
+nb_remove_code_source = False

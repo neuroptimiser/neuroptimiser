@@ -53,6 +53,9 @@ dependencies = [
     "sphinxcontrib-napoleon>=0.7",
     "furo>=2024.8.6",
     "myst-nb>=1.2.0",
+    "sphinx-copybutton>=0.5.2",
+    "sphinx-panels>=0.4.1",
+    "sphinx-design>=0.6.1",
 ]
 
 [project.urls]

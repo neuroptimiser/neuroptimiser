@@ -10,7 +10,7 @@ The global architecture consists of a set of distributed *Neuromorphic Heuristic
 
 The following diagram presents the complete NeurOptimiser architecture:
 
-.. image:: _static/nheuristic_algorithm_h.pdf
+.. image:: _static/images/nheuristic_algorithm_h.pdf
     :align: center
     :width: 75%
     :alt: NeurOptimiser Architecture
@@ -31,7 +31,7 @@ At the core of the optimisation process lies the NHU, which integrates the essen
 
 The internal structure of the NHU is depicted below:
 
-.. image:: _static/nheuristic_unit_h.pdf
+.. image:: _static/images/nheuristic_unit_h.pdf
     :align: center
     :width: 75%
     :alt: Neuromorphic Heuristic Unit

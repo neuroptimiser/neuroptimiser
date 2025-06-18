@@ -5,6 +5,7 @@
 
 import os
 import sys
+import datetime as dt
 
 sys.path.insert(0, os.path.abspath('../src'))
 
@@ -12,9 +13,13 @@ sys.path.insert(0, os.path.abspath('../src'))
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = 'neuroptimiser'
-copyright = '2025, Jorge M. Cruz-Duarte (jorge-mario.cruz-duarte@inria.fr)'
+
+year = dt.datetime.now().year
 author = 'Jorge M. Cruz-Duarte'
+email = 'jorge-mario.cruz-duarte@inria.fr'
 release = '1.0.0'
+
+copyright = f"2025 - {year}, {author} ({email})"  # noqa: A001
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -23,11 +28,28 @@ extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.napoleon",
     "sphinx.ext.autosummary",
-    "sphinx_autodoc_typehints",
+    "sphinx.ext.viewcode",
+    "sphinx.ext.todo",
+    "sphinx.ext.intersphinx",
+    "sphinx.ext.mathjax",
+    "sphinx_copybutton",
     "myst_nb",
+    # "sphinxcontrib.bibtex",
+    "sphinx_design",
+    # "sphinxcontrib.mermaid",
 ]
 add_module_names = False
 nb_execution_mode = "off"
+
+myst_enable_extensions = ["colon_fence", "dollarmath", "html_image"]
+myst_fence_as_directive = ["mermaid"]
+
+copybutton_prompt_text = ">>> "
+copybutton_only_copy_prompt_lines = False
+html_show_sourcelink = True
+html_copy_source = True
+html_show_copyright = True
+html_show_sphinx = True
 
 autoclass_content = 'class'
 autosummary_generate = True
@@ -47,7 +69,7 @@ exclude_patterns = []
 # html_logo = "_pics/neuropty.png"
 html_theme = "furo"
 html_title = "NeurOptimiser"
-html_favicon = '_static/neuropty-Light-small.png'
+html_favicon = '_static/images/neuropty-Light-small.png'
 html_static_path = ["_static"]
 html_css_files = ['custom.css']
 html_extra_path = ['.nojekyll']
@@ -65,8 +87,8 @@ html_theme_options = {
     "navigation_with_keys": True,
     "announcement": "This is a WIP project, and the documentation is under construction.",
     "body_max_width": "100%",
-    "light_logo": "neuropty-Light-small.png",
-    "dark_logo": "neuropty-Dark-small.png",
+    "light_logo": "images/neuropty-light.svg",
+    "dark_logo": "images/neuropty-dark.svg",
     "light_css_variables": {
         "color-brand-primary": "#A5B68D",    # sober blue accent
         "color-brand-content": "#1A1A1A",    # dark grey for text

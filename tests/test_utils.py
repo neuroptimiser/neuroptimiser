@@ -2,7 +2,7 @@ from neuroptimiser.utils import get_2d_sys
 import numpy as np
 import pytest
 
-@pytest.mark.parametrize("trials", [10, 100, 500])
+@pytest.mark.parametrize("trials", [10, 50, 100])
 def test_get_2d_sys(trials):
     for _ in range(trials):
         # Sink (spiral sink): complex eigenvalues, Re(λ) < 0

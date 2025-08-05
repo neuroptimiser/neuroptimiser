@@ -23,7 +23,7 @@ jobs:
       - name: Install dependencies
         run: |
           cd neuroptimiser
-          pip install -e .
+          pip install -e ".[docs]"
           pip install sphinx furo
 
       - name: Build Sphinx docs

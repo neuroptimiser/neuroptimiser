@@ -9,3 +9,4 @@ docs/source/examples/exdata/
 docs/source/examples/figures/
 /figures/*
 tests/__*
+/exp/

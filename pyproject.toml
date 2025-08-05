@@ -8,7 +8,7 @@ exclude = ["tests"]
 
 [project]
 name = "neuroptimiser"
-version = "1.0.0"
+version = "1.0.1.dev0"
 description = "A modular and asynchronous framework for neuromorphic optimisation using spike-driven metaheuristics and heuristic-controlled spiking dynamics."
 readme = "README.md"
 authors = [

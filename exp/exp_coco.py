@@ -252,7 +252,7 @@ def main():
     observer = cocoex.Observer(
         name=observer_name,
         options=f"result_folder: {folder_path} "
-                f"algorithm_name: {experiment_params['name']}",  # TODO: Automatically generate the name
+                f"algorithm_name: {experiment_params['name']}",
     )
 
     # Set up the experiment repeater

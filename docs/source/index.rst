@@ -8,7 +8,7 @@ NeurOptimiser's Documentation
 
 **NeurOptimiser** is a neuromorphic optimisation framework built on top of the Lava-NC framework [1]_. It combines spiking neural dynamics with heuristic search principles, enabling the design, simulation, and evaluation of decentralised, asynchronous metaheuristic processes inspired by biological computation. This documentation provides detailed information for users, developers, and researchers aiming to utilise, extend, or contribute to the NeurOptimiser framework.
 
-For more information, visit `NeurOptimiser on GitHub <https://github.com/neuroptimiser/neuroptimiser>`__.
+For more information, visit NeurOptimiser on `arXiv <https://doi.org/10.48550/arXiv.2507.08320>`__ [2]_ and `GitHub <https://github.com/neuroptimiser/neuroptimiser>`__.
 
 .. note::
    This project is under active development.
@@ -68,3 +68,4 @@ If you are new to neuromorphic computing or metaheuristic optimisation, we recom
 References
 ----------
 .. [1] Intel Neuromorphic Computing Lab. **Lava-NC: A software framework for neuromorphic computing**, 2023. Available at: https://lava-nc.org
+.. [2] Cruz-Duarte JM, Talbi EG. **NeurOptimisation: The Spiking Way to Evolve**. arXiv preprint arXiv:2507.08320, 2025 Jul 11. Available at: https://doi.org/10.48550/arXiv.2507.08320

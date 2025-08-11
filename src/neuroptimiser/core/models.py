@@ -11,6 +11,8 @@ __all__ = ["AbstractPerturbationNHeuristicModel", "PyTwoDimSpikingCoreModel",
            "PyNeighbourhoodManagerModel", "PySpikingHandlerModel",
            "PyPositionReceiverModel", "PyPositionReceiverModel"]
 
+from collections.abc import Callable
+
 import numpy as np
 from functools import partial
 from lava.magma.core.model.py.model import PyLoihiProcessModel
@@ -126,8 +128,10 @@ class PyTwoDimSpikingCoreModel(AbstractPerturbationNHeuristicModel):
                     - ``thr_k``: float, scaling factor for the threshold
                     - ``spk_cond``: str, spiking condition (e.g., "fixed", "l1", "l2", "l2_gen", "random", "adaptive", "stable")
                     - ``spk_alpha``: float, scaling factor for the spiking condition
-                    - ``hs_operator``: str, heuristic search operator (e.g., "fixed", "random", "directional", "differential")
-                    - ``hs_variant``: str, variant of the heuristic search operator (e.g., "current-to-rand", "best-to-rand", "rand", "current-to-best")
+                    - ``hs_operator``: str, heuristic search operator (i.e., "fixed", "random", "directional", "differential")
+                    - ``hs_variant``: str, variant of the heuristic search operator. The available variants when
+                        - ``hs_operator``="directional" are "pbest", "gbest", and "center".
+                        - ``hs_operator``="differential" are "current-to-rand", "best-to-rand", "rand", and "current-to-best".
                     - ``is_bounded``: bool, whether the perturbation is bounded (default: True)
 
         """
@@ -320,9 +324,19 @@ class PyTwoDimSpikingCoreModel(AbstractPerturbationNHeuristicModel):
 
     def _hs_directional(self, dim, var):
         """Directional heuristic search operator for perturbation-based nheuristics."""
-        dir1 = self.v1_pbest[dim] - var[0]
-        dir2 = self.v2_pbest[dim] - var[1]
-        new_var  = np.array(var) + self.alpha  * np.array([dir1, dir2]) + np.random.randn() * self.noise_std
+        match self.hs_variant:
+            case "pbest":
+                dir1 = self.v1_pbest[dim] - var[0]
+                dir2 = self.v2_pbest[dim] - var[1]
+            case "center":
+                dir1 = 0.0 - var[0]
+                dir2 = 0.0 - var[1]
+            case _: # default: "gbest" or "fixed"
+                dir1 = self.v1_gbest[dim] - var[0]
+                dir2 = self.v2_gbest[dim] - var[1]
+
+        new_var  = (np.array(var) + self.alpha  * np.array([dir1, dir2]) +
+                    np.random.randn() * self.noise_std)
         return new_var
 
     @staticmethod
@@ -398,7 +412,8 @@ class PyTwoDimSpikingCoreModel(AbstractPerturbationNHeuristicModel):
         """Runs the core process of the two-dimensional spiking core model."""
         for dim in range(self.num_dimensions):
             # Get the spike condition for this neuron
-            self.self_fire[dim]     = self._spike_condition(self.v1[dim], self.v2[dim], self.threshold[dim], dim)
+            self.self_fire[dim]     = self._spike_condition(
+                v1=self.v1[dim], v2=self.v2[dim], thr=self.threshold[dim], dim=dim)
             fire_condition          = self.self_fire[dim] or self.compulsory_fire[dim]
 
             upsilon = np.array([self.v1[dim], self.v2[dim]])
@@ -525,7 +540,7 @@ class PyTwoDimSpikingCoreModel(AbstractPerturbationNHeuristicModel):
         eps = 1e-3 / (1 + self.time_step)
         return np.linalg.norm([v1, v2]) < eps
 
-    def _init_spike_condition(self):
+    def _init_spike_condition(self) -> Callable:
         """Initialises the spiking condition based on the specified spiking condition type."""
         if self.spk_cond == "fixed":
             return self._spike_fixed
@@ -624,8 +639,28 @@ class PySelectorModel(PyLoihiProcessModel):
         self.num_agents = proc_params['num_agents']
 
         self.funct      = proc_params['function']
+        self.sel_mode   = proc_params.get('sel_mode', 'greedy')
+
+        match self.sel_mode:
+            case 'random':
+                self._selection = self._sel_random
+            case 'metropolis':
+                self._selection = self._sel_metropolis
+            case _: # Default to greedy selection
+                self._selection = self._sel_greedy
 
         self.initialised = False
+
+    def _sel_greedy(self, fx, **kwargs):
+        """Greedy selection strategy: always selects the best position."""
+        return fx < self.fp[0]
+
+    def _sel_random(self, fx, **kwargs):
+        return np.random.rand() < 0.5
+
+    def _sel_metropolis(self, fx, **kwargs):
+        """Metropolis selection strategy: accepts a new position with a probability based on the fitness difference."""
+        return np.random.rand() < np.exp(- (fx - self.fp[0]))
 
     def run_spk(self):
         """Runs the selector process model.
@@ -643,7 +678,7 @@ class PySelectorModel(PyLoihiProcessModel):
         fx      = self.funct(x.flatten())
 
         # Update the particular position
-        if not self.initialised or fx < self.fp[0]:
+        if not self.initialised or self._selection(fx, x=x):
             self.initialised    = True
             self.p[:]           = x
             self.fp[:]          = fx
@@ -721,7 +756,7 @@ class PyHighLevelSelectionModel(PyLoihiProcessModel):
         new_fg              = fg_candidates[best_candidate]
 
         # Compare and update the global best
-        if new_fg < self.fg[0] or not self.initialised:
+        if not self.initialised or new_fg < self.fg[0]:
             self.initialised    = True
             self.g[:]           = new_g
             self.fg[:]          = new_fg

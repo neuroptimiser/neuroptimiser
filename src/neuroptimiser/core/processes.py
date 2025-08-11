@@ -317,6 +317,7 @@ class Selector(AbstractProcess):
                  num_agents: int = 1,
                  num_dimensions: int = 2,
                  function=None,
+                 sel_mode="greedy",
                  **kwargs):
         """Initialise the Selector with the given parameters.
 
@@ -343,6 +344,7 @@ class Selector(AbstractProcess):
         self.proc_params["agent_id"]    = agent_id
         self.proc_params["num_agents"]  = num_agents
         self.proc_params["function"]    = function
+        self.proc_params["sel_mode"]    = sel_mode
 
         # Inports
         self.x_in   = InPort(shape=shape)

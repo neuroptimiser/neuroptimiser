@@ -191,7 +191,8 @@ class PyTwoDimSpikingCoreModel(AbstractPerturbationNHeuristicModel):
                 for dim in range(self.num_dimensions):
                     triplet = np.random.choice(range(self.num_neighbours), 3, replace=False)
                     self.neighbour_indices_cache.append(triplet)
-
+        elif self.hs_operator == "swarm":
+            self._apply_hs = self._hs_swarm
         else:
             raise ValueError(f"Unknown hs_operator: {self.hs_operator}")
 
@@ -342,7 +343,7 @@ class PyTwoDimSpikingCoreModel(AbstractPerturbationNHeuristicModel):
     @staticmethod
     def _get_F():
         """Returns a random scaling factor for the heuristic search operator, particularly for the differential variant."""
-        return np.random.uniform(low=0.0, high=0.5)
+        return np.random.uniform(low=0.0, high=2.5)
 
     def _hs_differential(self, dim, var):
         """Differential heuristic search operator for perturbation-based nheuristics."""
@@ -396,6 +397,76 @@ class PyTwoDimSpikingCoreModel(AbstractPerturbationNHeuristicModel):
         new_var1 += self._get_F() * the_sum
         new_var2 += self._get_F() * the_sum
         new_var = np.array([new_var1, new_var2])
+        return new_var
+
+    def _hs_swarm(self, dim, var):
+        """Swarm-style heuristic search operator (PSO-inspired).
+
+        Variants (set via self.hs_variant):
+            - "cognitive"         : pull towards personal best (pbest)
+            - "social"            : pull towards global best (gbest)
+            - "cogsocial" (default): combine cognitive + social
+            - "neighbourhood"     : pull towards neighbourhood mean (if available, else gbest)
+            - "center"            : pull towards the origin (0, 0), like a centripetal term
+
+        TODO: Revise this implementation to ensure it aligns with the PSO-inspired approach.
+
+        Notes
+        -----
+        * Uses scalar random coefficients per step (r1, r2, r3) like standard PSO.
+        * Adds a small scalar Gaussian noise (same as _hs_directional style).
+        * For 'neighbourhood', since we don't track neighbours' fitness here,
+          we use the mean of vn[:, dim] as a simple social signal.
+        """
+        v1, v2 = var[0], var[1]
+
+        # Cognitive and social directions
+        pdir1 = self.v1_pbest[dim] - v1
+        pdir2 = self.v2_pbest[dim] - v2
+        gdir1 = self.v1_gbest[dim] - v1
+        gdir2 = self.v2_gbest[dim] - v2
+
+        # Neighbourhood signal (scalar per dim; mirrors how differential uses vn)
+        if self.num_neighbours > 0:
+            nbar = float(np.mean(self.vn[:, dim]))
+        else:
+            nbar = self.v1_gbest[dim]  # sensible fallback
+
+        # Random coefficients
+        r1 = np.random.uniform(0.0, 1.0)
+        r2 = np.random.uniform(0.0, 1.0)
+        r3 = np.random.uniform(0.0, 1.0)
+
+        # Coefficients
+        phi1 = 0.5 * self._get_F()
+        phi2 = 0.5 * self._get_F()
+        phi3 = 0.5 * self._get_F()
+        w = 0.2 * self._get_F()
+
+        match self.hs_variant:
+            case "cognitive":
+                dv1 = phi1 * r1 * pdir1
+                dv2 = phi1 * r1 * pdir2
+            case "social":
+                dv1 = phi2 * r2 * gdir1
+                dv2 = phi2 * r2 * gdir2
+            case "neighbourhood":
+                # pull both components towards the same neighbourhood scalar (as in differential)
+                dv1 = phi3 * r3 * (nbar - v1)
+                dv2 = phi3 * r3 * (nbar - v2)
+            case "center":
+                dv1 = self._get_F() * (-v1)
+                dv2 = self._get_F() * (-v2)
+            case _:  # "cogsocial" by default
+                dv1 = phi1 * r1 * pdir1 + phi2 * r2 * gdir1
+                dv2 = phi1 * r1 * pdir2 + phi2 * r2 * gdir2
+
+        # Mild inertia-like nudge towards staying close to current state
+        dv1 += w * (v1 - 0.0)
+        dv2 += w * (v2 - 0.0)
+
+        # Assemble update with small scalar noise (same flavour as _hs_directional)
+        new_var = np.array([v1 + dv1, v2 + dv2]) #+ np.random.randn() * self.noise_std
         return new_var
 
 

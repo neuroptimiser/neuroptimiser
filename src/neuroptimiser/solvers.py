@@ -326,8 +326,8 @@ class NeurOptimiser(AbstractSolver):
                 And(lambda n: isinstance(n, (float, int)) and n >= 0.0,
                     error="spk_alpha must be a non-negative float or int"),
             Optional("hs_operator", default="fixed"):
-                And(lambda n: n in ["fixed", "directional", "differential", "random"],
-                    error="hs_operator must be either 'fixed', 'directional', 'differential', 'random'"),
+                And(lambda n: n in ["fixed", "directional", "differential", "swarm", "random"],
+                    error="hs_operator must be either 'fixed', 'directional', 'swarm', 'differential', 'random'"),
             Optional("hs_variant", default="fixed"):
                 And(lambda n: isinstance(n, str),
                     error="hs_variant must be a string"),

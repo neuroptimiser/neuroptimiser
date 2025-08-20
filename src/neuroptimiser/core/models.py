@@ -90,6 +90,34 @@ class AbstractPerturbationNHeuristicModel(PyLoihiProcessModel):
 
         np.random.default_rng(seed=int(self.seed))
 
+HS_DEFAULT_PARAMS = {
+    "fixed": {
+        "jitter_scale": 0.0,            # add small noise after selecting point
+    },
+    "random": {
+        "normal_std": 1.0,
+        "uniform_low": -1.0,
+        "uniform_high": 1.0,
+    },
+    "directional": {
+        "alpha_scale": 1.0,           # scaling factor for the direction
+        "jitter_scale": 0.0,          # add small noise after selecting point
+    },
+    "differential": {
+        "F": None,                    # actual F value, if not None, it # overrides _get_F and other F-related params lost their effect
+        "F_low": 0.0,                 # overrides _get_F range if provided
+        "F_high": 2.5,
+        "jitter_scale": 0.0,         # add small noise after selecting point
+    },
+    "swarm": {
+        "phi1": 1.45,                 # cognitive weight
+        "phi2": 1.55,                 # social weight
+        "phi3": 1.50,                 # neighbourhood weight
+        "w": 0.67,                    # inertia-like term
+        "jitter_scale": 0.0,          # add small noise after selecting point
+    }
+}
+
 @implements(proc=TwoDimSpikingCore, protocol=LoihiProtocol)
 @requires(CPU)
 class PyTwoDimSpikingCoreModel(AbstractPerturbationNHeuristicModel):
@@ -130,8 +158,11 @@ class PyTwoDimSpikingCoreModel(AbstractPerturbationNHeuristicModel):
                     - ``spk_alpha``: float, scaling factor for the spiking condition
                     - ``hs_operator``: str, heuristic search operator (i.e., "fixed", "random", "directional", "differential")
                     - ``hs_variant``: str, variant of the heuristic search operator. The available variants when
-                        - ``hs_operator``="directional" are "pbest", "gbest", and "center".
-                        - ``hs_operator``="differential" are "current-to-rand", "best-to-rand", "rand", and "current-to-best".
+                        - ``hs_operator``="fixed" are "gbest", "center", "pgbest", "pbest"|"fixed" (default).
+                        - ``hs_operator``="random" are "uniform" and "normal" (default).
+                        - ``hs_operator``="directional" are "pbest", "gbest"|"fixed" (default), and "center".
+                        - ``hs_operator``="differential" are "rand", "current", "pbest", "best", "current-to-rand", "best-to-rand", "pbest-to-rand", "current-to-best" (default), "current-to-pbest", "rand-to-best", and "rand-to-pbest".
+                        - ``hs_operator``="swarm" are "cognitive", "social", "cogsocial" (default), and "neighbourhood".
                     - ``is_bounded``: bool, whether the perturbation is bounded (default: True)
 
         """
@@ -179,22 +210,38 @@ class PyTwoDimSpikingCoreModel(AbstractPerturbationNHeuristicModel):
         self.neighbour_indices_cache = []
         self._buffer_new_v_array = np.empty((self.num_dimensions, 2), dtype=float)
 
-        if self.hs_operator == "fixed":
-            self._apply_hs = self._hs_fixed
-        elif self.hs_operator == "random":
-            self._apply_hs = self._hs_random
-        elif self.hs_operator == "directional":
-            self._apply_hs = self._hs_directional
-        elif self.hs_operator == "differential":
-            self._apply_hs = self._hs_differential
-            if self.num_neighbours > 3:
-                for dim in range(self.num_dimensions):
-                    triplet = np.random.choice(range(self.num_neighbours), 3, replace=False)
-                    self.neighbour_indices_cache.append(triplet)
-        elif self.hs_operator == "swarm":
-            self._apply_hs = self._hs_swarm
-        else:
-            raise ValueError(f"Unknown hs_operator: {self.hs_operator}")
+        # Read the parameters for the heuristic search operator
+        hs_user_params = proc_params.get("hs_params", {})
+        self._hs_params = dict(HS_DEFAULT_PARAMS.get(self.hs_operator, {}))
+        self._hs_params.update(hs_user_params)
+
+        # Configure the heuristic search operator
+        match self.hs_operator:
+            case "fixed":
+                self._apply_hs = self._hs_fixed
+            case "random":
+                self._apply_hs = self._hs_random
+            case "directional":
+                self._apply_hs = self._hs_directional
+            case "differential":
+                self._apply_hs = self._hs_differential
+
+                self._get_F = self._hs_params["F"]
+                if self._get_F is None:
+                    self._get_F = partial(self._sample_F,
+                        F_low=self._hs_params["F_low"], F_high=self._hs_params["F_high"])
+
+                if self.num_neighbours > 3:
+                    for dim in range(self.num_dimensions):
+                        triplet = np.random.choice(
+                            range(self.num_neighbours), 3, replace=False)
+                        self.neighbour_indices_cache.append(triplet)
+            case "swarm":
+                self._apply_hs = self._hs_swarm
+            case _:
+                raise ValueError(f"Unknown hs_operator: {self.hs_operator}")
+
+        # print(self._hs_params)
 
         # Initialise the approximation method
         if self.approx == "euler":
@@ -308,23 +355,64 @@ class PyTwoDimSpikingCoreModel(AbstractPerturbationNHeuristicModel):
         return deriv_upsilon
 
     def _hs_fixed(self, dim, var):
-        """Fixed heuristic search operator for perturbation-based nheuristics."""
-        new_var_1 = self.v1_pbest[dim]
-        new_var_2 = self.v2_pbest[dim]
+        """Fixed heuristic search operator for perturbation-based nheuristics.
 
-        new_var = np.array([new_var_1, new_var_2]) + np.random.normal(0, self.noise_std, 2)
+        Variants (set via self.hs_variant):
+            - "gbest"  : uses the global best (gbest) position
+            - "center" : uses the center (0, 0) as the reference point
+            - "pgbest" : uses the average of personal best (pbest) and global best (gbest)
+            - "pbest"|"fixed" : uses the personal best (pbest) position
+        """
+        match self.hs_variant:
+            case "gbest":
+                new_var_1 = self.v1_gbest[dim]
+                new_var_2 = self.v2_gbest[dim]
+            case "center":
+                new_var_1 = 0.0
+                new_var_2 = 0.0
+            case "pgbest":
+                new_var_1 = (self.v1_pbest[dim] + self.v1_gbest[dim]) / 2.0
+                new_var_2 = (self.v2_pbest[dim] + self.v2_gbest[dim]) / 2.0
+            case _: #"pbest" | "fixed":
+                new_var_1 = self.v1_pbest[dim]
+                new_var_2 = self.v2_pbest[dim]
+
+        new_var = np.array([new_var_1, new_var_2]) + np.random.normal(
+            scale=self._hs_params["jitter_scale"], size= 2)
         return new_var
 
     def _hs_random(self, dim, var):
-        """Random heuristic search operator for perturbation-based nheuristics."""
-        new_var_1 = np.random.normal(0.0, 1)
-        new_var_2 = np.random.normal(0.0, 1)
+        """Random heuristic search operator for perturbation-based nheuristics.
+
+        Variants (set via self.hs_variant):
+            - "uniform" : generates random values from a uniform distribution
+            - "normal"  : generates random values from a normal distribution
+        """
+        match self.hs_variant:
+            case "uniform":
+                new_var_1 = np.random.uniform(
+                    low=self._hs_params["uniform_low"],
+                    high=self._hs_params["uniform_high"])
+                new_var_2 = np.random.uniform(
+                    low=self._hs_params["uniform_low"],
+                    high=self._hs_params["uniform_high"])
+            case _: #"normal":
+                new_var_1 = np.random.normal(
+                    loc=0.0, scale=self._hs_params["normal_std"])
+                new_var_2 = np.random.normal(
+                    loc=0.0, scale=self._hs_params["normal_std"])
 
         new_var  = np.array([new_var_1, new_var_2])
         return new_var
 
     def _hs_directional(self, dim, var):
-        """Directional heuristic search operator for perturbation-based nheuristics."""
+        """Directional heuristic search operator for perturbation-based nheuristics.
+
+        Variants (set via self.hs_variant):
+            - "pbest"  : pulls towards personal best (pbest)
+            - "gbest"  : pulls towards global best (gbest) or fixed point
+            - "center" : pulls towards the centre (0, 0)
+        """
         match self.hs_variant:
             case "pbest":
                 dir1 = self.v1_pbest[dim] - var[0]
@@ -336,30 +424,45 @@ class PyTwoDimSpikingCoreModel(AbstractPerturbationNHeuristicModel):
                 dir1 = self.v1_gbest[dim] - var[0]
                 dir2 = self.v2_gbest[dim] - var[1]
 
-        new_var  = (np.array(var) + self.alpha  * np.array([dir1, dir2]) +
-                    np.random.randn() * self.noise_std)
+        new_var  = (np.array(var)
+                    + self._hs_params["alpha_scale"]  * np.array([dir1, dir2])
+                    + np.random.normal(scale=self._hs_params["jitter_scale"], size=2))
         return new_var
 
     @staticmethod
-    def _get_F():
+    def _sample_F(F_low, F_high):
         """Returns a random scaling factor for the heuristic search operator, particularly for the differential variant."""
-        return np.random.uniform(low=0.0, high=2.5)
+        return np.random.uniform(low=F_low, high=F_high)
 
     def _hs_differential(self, dim, var):
-        """Differential heuristic search operator for perturbation-based nheuristics."""
+        """Differential heuristic search operator for perturbation-based nheuristics.
+
+        Variants (set via self.hs_variant):
+            - "rand"                : uses random neighbours for the perturbation
+            - "current"             : uses the current position as a reference
+            - "pbest"               : uses the personal best (pbest) position
+            - "best"|"gbest"     : uses the global best (gbest) position
+            - "current-to-rand"     : pulls towards a random point from the current position
+            - "best-to-rand"        : pulls towards a random point from the global best position
+            - "pbest-to-rand"       : pulls towards a random point from the personal best position
+            - "current-to-best"     : pulls towards the global best from the current position
+            - "current-to-pbest"    : pulls towards the personal best from the current position
+            - "rand-to-best"        : pulls towards the global best from a random point
+            - "rand-to-pbest"       : pulls towards the personal best from a random point
+        """
         # Get from neighbours
         if self.num_neighbours > 3:
             ind1, ind2, ind3  = self.neighbour_indices_cache[dim]
-            pre_sum = self.vn[ind1, dim]
+            pre_sum_1 = self.vn[ind1, dim]
             the_sum = self.vn[ind2, dim] - self.vn[ind3, dim]
         else:
-            pre_sum = np.random.normal(0, self.noise_std)
+            pre_sum_1 = np.random.normal(0, self.noise_std)
             the_sum = np.random.normal(0, self.noise_std)
-        pre_sum_2 = pre_sum + np.random.normal(0, self.noise_std)
+        pre_sum_2 = pre_sum_1 + np.random.normal(0, self.noise_std)
 
         match self.hs_variant:
             case "rand":
-                new_var1 = pre_sum
+                new_var1 = pre_sum_1
                 new_var2 = pre_sum_2
             case "current":
                 new_var1 = var[0]
@@ -367,36 +470,35 @@ class PyTwoDimSpikingCoreModel(AbstractPerturbationNHeuristicModel):
             case "pbest":
                 new_var1 = self.v1_pbest[dim]
                 new_var2 = self.v2_pbest[dim]
-            case "best":
+            case "best": # "gbest"
                 new_var1 = self.v1_gbest[dim]
                 new_var2 = self.v2_gbest[dim]
             case "current-to-rand":
-                new_var1 = var[0] + self._get_F() * (pre_sum - var[0])
+                new_var1 = var[0] + self._get_F() * (pre_sum_1 - var[0])
                 new_var2 = var[1] + self._get_F() * (pre_sum_2 - var[1])
             case "best-to-rand":
-                new_var1 = self.v1_gbest[dim] + self._get_F() * (pre_sum - self.v1_gbest[dim])
+                new_var1 = self.v1_gbest[dim] + self._get_F() * (pre_sum_1 - self.v1_gbest[dim])
                 new_var2 = self.v2_gbest[dim] + self._get_F() * (pre_sum_2 - self.v2_gbest[dim])
             case "pbest-to-rand":
-                new_var1 = self.v1_pbest[dim] + self._get_F() * (pre_sum - self.v1_pbest[dim])
+                new_var1 = self.v1_pbest[dim] + self._get_F() * (pre_sum_1 - self.v1_pbest[dim])
                 new_var2 = self.v2_pbest[dim] + self._get_F() * (pre_sum_2 - self.v2_pbest[dim])
-            case "current-to-best":
-                new_var1 = var[0] + self._get_F() * (self.v1_gbest[dim] - var[0])
-                new_var2 = var[1] + self._get_F() * (self.v2_gbest[dim] - var[1])
             case "current-to-pbest":
                 new_var1 = var[0] + self._get_F() * (self.v1_pbest[dim]- var[0])
                 new_var2 = var[1] + self._get_F() * (self.v2_pbest[dim] - var[1])
             case "rand-to-best":
-                new_var1 = pre_sum + self._get_F() * (self.v1_gbest[dim] - pre_sum)
-                new_var2 = pre_sum_2 + self._get_F() * (self.v2_gbest[dim] - pre_sum)
+                new_var1 = pre_sum_1 + self._get_F() * (self.v1_gbest[dim] - pre_sum_1)
+                new_var2 = pre_sum_2 + self._get_F() * (self.v2_gbest[dim] - pre_sum_1)
             case "rand-to-pbest":
-                new_var1 = pre_sum + self._get_F() * (self.v1_pbest[dim] - pre_sum)
-                new_var2 = pre_sum_2 + self._get_F() * (self.v2_pbest[dim] - pre_sum)
-            case _:
-                raise ValueError(f"Unknown hs_variant: {self.hs_variant}")
+                new_var1 = pre_sum_1 + self._get_F() * (self.v1_pbest[dim] - pre_sum_1)
+                new_var2 = pre_sum_2 + self._get_F() * (self.v2_pbest[dim] - pre_sum_1)
+            case _: # "current-to-best"
+                new_var1 = var[0] + self._get_F() * (self.v1_gbest[dim] - var[0])
+                new_var2 = var[1] + self._get_F() * (self.v2_gbest[dim] - var[1])
 
         new_var1 += self._get_F() * the_sum
         new_var2 += self._get_F() * the_sum
-        new_var = np.array([new_var1, new_var2])
+        new_var = np.array([new_var1, new_var2]) + np.random.normal(
+            scale=self._hs_params["jitter_scale"], size=2)
         return new_var
 
     def _hs_swarm(self, dim, var):
@@ -407,26 +509,16 @@ class PyTwoDimSpikingCoreModel(AbstractPerturbationNHeuristicModel):
             - "social"            : pull towards global best (gbest)
             - "cogsocial" (default): combine cognitive + social
             - "neighbourhood"     : pull towards neighbourhood mean (if available, else gbest)
-            - "center"            : pull towards the origin (0, 0), like a centripetal term
-
-        TODO: Revise this implementation to ensure it aligns with the PSO-inspired approach.
-
-        Notes
-        -----
-        * Uses scalar random coefficients per step (r1, r2, r3) like standard PSO.
-        * Adds a small scalar Gaussian noise (same as _hs_directional style).
-        * For 'neighbourhood', since we don't track neighbours' fitness here,
-          we use the mean of vn[:, dim] as a simple social signal.
         """
         v1, v2 = var[0], var[1]
 
-        # Cognitive and social directions
+        # Cognitive (self) and social (global) directions
         pdir1 = self.v1_pbest[dim] - v1
         pdir2 = self.v2_pbest[dim] - v2
         gdir1 = self.v1_gbest[dim] - v1
         gdir2 = self.v2_gbest[dim] - v2
 
-        # Neighbourhood signal (scalar per dim; mirrors how differential uses vn)
+        # Neighbourhood signal (scalar per dim; it mirrors how differential uses vn)
         if self.num_neighbours > 0:
             nbar = float(np.mean(self.vn[:, dim]))
         else:
@@ -438,10 +530,10 @@ class PyTwoDimSpikingCoreModel(AbstractPerturbationNHeuristicModel):
         r3 = np.random.uniform(0.0, 1.0)
 
         # Coefficients
-        phi1 = 0.5 * self._get_F()
-        phi2 = 0.5 * self._get_F()
-        phi3 = 0.5 * self._get_F()
-        w = 0.2 * self._get_F()
+        phi1    = self._hs_params["phi1"]
+        phi2    = self._hs_params["phi2"]
+        phi3    = self._hs_params["phi3"]
+        w       =   self._hs_params["w"]
 
         match self.hs_variant:
             case "cognitive":
@@ -451,12 +543,9 @@ class PyTwoDimSpikingCoreModel(AbstractPerturbationNHeuristicModel):
                 dv1 = phi2 * r2 * gdir1
                 dv2 = phi2 * r2 * gdir2
             case "neighbourhood":
-                # pull both components towards the same neighbourhood scalar (as in differential)
+                # pull both components towards the same neighbourhood scalar
                 dv1 = phi3 * r3 * (nbar - v1)
                 dv2 = phi3 * r3 * (nbar - v2)
-            case "center":
-                dv1 = self._get_F() * (-v1)
-                dv2 = self._get_F() * (-v2)
             case _:  # "cogsocial" by default
                 dv1 = phi1 * r1 * pdir1 + phi2 * r2 * gdir1
                 dv2 = phi1 * r1 * pdir2 + phi2 * r2 * gdir2
@@ -466,7 +555,8 @@ class PyTwoDimSpikingCoreModel(AbstractPerturbationNHeuristicModel):
         dv2 += w * (v2 - 0.0)
 
         # Assemble update with small scalar noise (same flavour as _hs_directional)
-        new_var = np.array([v1 + dv1, v2 + dv2]) #+ np.random.randn() * self.noise_std
+        new_var = np.array([v1 + dv1, v2 + dv2]) + np.random.normal(
+            scale=self._hs_params["jitter_scale"], size=2)
         return new_var
 
 

@@ -33,6 +33,7 @@ from neuroptimiser.core.processes import (
 )
 
 _INVALID_VALUE = 1e9
+_EPS = 1e-12
 _POS_FLOAT_ = np.float32
 _FIT_FLOAT_ = np.float32
 SPK_CORE_OPTIONS = ["TwoDimSpikingCore"]  # To be extended with more options
@@ -115,7 +116,21 @@ HS_DEFAULT_PARAMS = {
         "phi3": 1.50,                 # neighbourhood weight
         "w": 0.67,                    # inertia-like term
         "jitter_scale": 0.0,          # add small noise after selecting point
-    }
+    },
+    # //////////////////////// WORK IN PROGRESS /////////////////////////
+    # "cma": {
+    #     "sigma_init": 0.3,     # initial global step-size
+    #     "eta_m": 0.25,         # mean drift rate towards guidance
+    #     "c1": 0.2,             # rank-1 covariance update weight
+    #     "c_sigma": 0.3,        # step-size adaptation rate
+    #     "d_sigma": 1.0,        # damping (kept simple)
+    #     "min_sigma": 1e-4,
+    #     "max_sigma": 3.0,
+    #     "target_success": 0.2, # (1+1) success rule target
+    #     "forget_rate": 0.1,    # slight forgetting on failure
+    #     "jitter_scale": 0.0    # optional tiny Gaussian noise on output
+    # },
+    # //////////////////////// WORK IN PROGRESS /////////////////////////
 }
 
 @implements(proc=TwoDimSpikingCore, protocol=LoihiProtocol)
@@ -238,6 +253,18 @@ class PyTwoDimSpikingCoreModel(AbstractPerturbationNHeuristicModel):
                         self.neighbour_indices_cache.append(triplet)
             case "swarm":
                 self._apply_hs = self._hs_swarm
+            case "cma":
+                self._apply_hs = self._hs_cma
+
+
+                self._cma_m = np.zeros((self.num_dimensions, 2)).astype(float)  # mean
+                self._cma_C = np.stack([np.eye(2) for _ in range(self.num_dimensions)]).astype(float) # covariance
+                self._cma_sigma = np.full(self.num_dimensions, self._hs_params["sigma_init"], dtype=float)  # step-size
+                self._cma_initialised = np.zeros(self.num_dimensions, dtype=bool)
+
+                self._cma_pc = np.zeros((self.num_dimensions, 2)).astype(float)  # evolution path for covariance
+                self._cma_ps = np.zeros((self.num_dimensions, 2)).astype(float)  # evolution path for sigma
+
             case _:
                 raise ValueError(f"Unknown hs_operator: {self.hs_operator}")
 
@@ -559,6 +586,102 @@ class PyTwoDimSpikingCoreModel(AbstractPerturbationNHeuristicModel):
             scale=self._hs_params["jitter_scale"], size=2)
         return new_var
 
+    # //////////////////////// WORK IN PROGRESS /////////////////////////
+    # def _hs_cma(self, dim, var):
+    #     """CMA-ES operator (2D per dim) with variants:
+    #        - online  : aCMA-like drift using pbest/gbest/neighbourhood
+    #        - 1p1     : (1+1)-CMA style step-size control and rank-1 on success
+    #        - recomb  : rank-µ-like mean via fitness-weighted recombination
+    #     """
+    #     # Initialise CMA state if needed
+    #     if not self._cma_initialised[dim]:
+    #         self._cma_m[dim, 0] = var[0]
+    #         self._cma_m[dim, 1] = var[1]
+    #         self._cma_initialised[dim] = True
+    #
+    #     # Shortcut references to CMA state
+    #     m = self._cma_m[dim]
+    #     C = self._cma_C[dim]
+    #     sigma = self._cma_sigma[dim]
+    #     pc = self._cma_pc[dim]
+    #     ps = self._cma_ps[dim]
+    #
+    #     # Eigendecomposition of C to get A where C = A A^T
+    #     try:
+    #         A = np.linalg.cholesky(C + _EPS * np.eye(2))
+    #     except np.linalg.LinAlgError:
+    #         C[:] = np.eye(2)
+    #         A = np.eye(2)
+    #
+    #     # Sample new point from N(m, sigma^2 C)
+    #     z = np.random.normal(size=2)  # ~ N(0, I)
+    #     y = A @ z  # ~ N(0, C)
+    #     x_prop = m + sigma * y
+    #
+    #     # Extract reference points for guidance (elite-based)
+    #     x_p = np.array([self.v1_pbest[dim], self.v2_pbest[dim]])
+    #     x_g = np.array([self.v1_gbest[dim], self.v2_gbest[dim]])
+    #     if self.num_neighbours > 0:
+    #         nbar = float(np.mean(self.vn[:, dim]))
+    #     else:
+    #         nbar = self.v1_gbest[dim]
+    #     x_n = np.array([nbar, nbar])
+    #
+    #     # Weighted mean of reference points (equal weights by default)
+    #     w_p0, w_g0, w_n0 = 0.5, 0.5, 0.25
+    #     x_mu    = (w_p0 * x_p + w_g0 * x_g + w_n0 * x_n) / (w_p0 + w_g0 + w_n0)
+    #     y_w     = (x_mu - m) / (sigma + _EPS)
+    #
+    #     # CSA (paths and step-size), n = 2
+    #     cs      = self._hs_params["c_sigma"]
+    #     damps   = self._hs_params["d_sigma"]
+    #     ps      = (1.0 - cs) * ps + np.sqrt(cs * (2.0 - cs)) * z
+    #     E_norm  = 1.2533141373155  # E||N(0, I_2)|| = sqrt(2)*Gamma(2)/Gamma(1)
+    #
+    #     # hsig: Heaviside
+    #     # finite-horizon normaliser for gate
+    #     t = float(getattr(self, "time_step", 0) + 1)
+    #     chi = np.sqrt(1.0 - (1.0 - cs) ** (2.0 * t))
+    #     if chi < 1e-12:
+    #         chi = 1.0
+    #     hsig = float(np.linalg.norm(ps) / chi < (1.4 + 2.0 / 3.0) * E_norm)
+    #
+    #     cc = self._hs_params["c_c"]
+    #     pc = (1.0 - cc) * pc + hsig * np.sqrt(cc * (2.0 - cc)) * y_w
+    #
+    #     # match self.hs_variant:
+    #     # case "1p1":
+    #     # success if personal best moved (greedy selector semantics)
+    #     success = float(abs(self.p[dim] - self.prev_p[dim]) > 1e-15)
+    #     target = self._hs_params["target_success"]
+    #
+    #     # 1/5th rule
+    #     sigma = sigma * np.exp((cs / damps) * (success - target))
+    #     sigma = float(np.clip(sigma, self._hs_params["min_sigma"], self._hs_params["max_sigma"]))
+    #
+    #     # covariance: strengthen on success, mild forgetting otherwise
+    #     c1 = self._hs_params["c1"]
+    #     forget = self._hs_params["forget_rate"]
+    #     y_unit = y / (np.linalg.norm(y) + _EPS)
+    #     if success >= target:
+    #         C[:] = (1.0 - c1) * C + c1 * np.outer(y_unit, y_unit)
+    #     else:
+    #         C[:] = (1.0 - c1 * forget) * C
+    #
+    #     # mean drift
+    #     m[:] = m + self._hs_params["eta_m"] * (x_mu - m)
+    #
+    #     # persist
+    #     self._cma_m[dim] = m
+    #     self._cma_C[dim] = C
+    #     self._cma_sigma[dim] = sigma
+    #     self._cma_pc[dim] = pc
+    #     self._cma_ps[dim] = ps
+    #
+    #     # proposal (match flavour of other operators)
+    #     new_var = x_prop + np.random.normal(scale=self._hs_params["jitter_scale"], size=2)
+    #     return new_var
+    # //////////////////////// WORK IN PROGRESS /////////////////////////
 
     # DYNAMIC HEURISTIC
     def _apply_hd(self, dim, var):

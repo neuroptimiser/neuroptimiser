@@ -34,6 +34,7 @@ from neuroptimiser.core.processes import (
 
 _INVALID_VALUE = 1e9
 _EPS = 1e-12
+_E_norm = 1.253314137315500120806178 # sqrt(2) * gamma(2) / gamma(1) = expected norm of N(0,I) in 2D
 _POS_FLOAT_ = np.float32
 _FIT_FLOAT_ = np.float32
 SPK_CORE_OPTIONS = ["TwoDimSpikingCore"]  # To be extended with more options
@@ -53,6 +54,7 @@ class AbstractPerturbationNHeuristicModel(PyLoihiProcessModel):
     s_in:   PyInPort        = LavaPyType(PyInPort.VEC_DENSE, bool)
     p_in:   PyInPort        = LavaPyType(PyInPort.VEC_DENSE, _POS_FLOAT_)
     fp_in:  PyInPort        = LavaPyType(PyInPort.VEC_DENSE, _FIT_FLOAT_)
+    fx_in:  PyInPort        = LavaPyType(PyInPort.VEC_DENSE, _FIT_FLOAT_)
     g_in:   PyInPort        = LavaPyType(PyInPort.VEC_DENSE, _POS_FLOAT_)
     fg_in:  PyInPort        = LavaPyType(PyInPort.VEC_DENSE, _FIT_FLOAT_)
     xn_in:  PyInPort        = LavaPyType(PyInPort.VEC_DENSE, _POS_FLOAT_)
@@ -118,18 +120,20 @@ HS_DEFAULT_PARAMS = {
         "jitter_scale": 0.0,          # add small noise after selecting point
     },
     # //////////////////////// WORK IN PROGRESS /////////////////////////
-    # "cma": {
-    #     "sigma_init": 0.3,     # initial global step-size
-    #     "eta_m": 0.25,         # mean drift rate towards guidance
-    #     "c1": 0.2,             # rank-1 covariance update weight
-    #     "c_sigma": 0.3,        # step-size adaptation rate
-    #     "d_sigma": 1.0,        # damping (kept simple)
-    #     "min_sigma": 1e-4,
-    #     "max_sigma": 3.0,
-    #     "target_success": 0.2, # (1+1) success rule target
-    #     "forget_rate": 0.1,    # slight forgetting on failure
-    #     "jitter_scale": 0.0    # optional tiny Gaussian noise on output
-    # },
+    "cma": {
+        "sigma_init": 0.3,     # initial global step-size
+        "eta_m": 0.25,         # mean drift rate towards guidance
+        "c1": 0.2,             # rank-1 covariance update weight
+        "c_sigma": 0.3,        # step-size adaptation rate
+        "d_sigma": 1.0,        # damping factor for step-size adaptation
+        "c_c": 0.3,            # time horizon for cumulation for covariance
+        "c_mu": 0.0,           # mean update rate (0 = only rank-1 update)
+        "min_sigma": 1e-4,
+        "max_sigma": 3.0,
+        "target_success": 0.2, # (1+1) success rule target
+        "forget_rate": 0.1,    # slight forgetting on failure
+        "jitter_scale": 0.0    # optional tiny Gaussian noise on output
+    },
     # //////////////////////// WORK IN PROGRESS /////////////////////////
 }
 
@@ -256,14 +260,14 @@ class PyTwoDimSpikingCoreModel(AbstractPerturbationNHeuristicModel):
             case "cma":
                 self._apply_hs = self._hs_cma
 
+                self._cma_countiter     = np.zeros(self.num_dimensions).astype(float)
+                self._cma_m             = np.zeros((self.num_dimensions, 2)).astype(float)  # mean
+                self._cma_C             = np.stack([np.eye(2) for _ in range(self.num_dimensions)]).astype(float) # covariance
+                self._cma_sigma         = np.full(self.num_dimensions, self._hs_params["sigma_init"], dtype=float)  # step-size
+                self._cma_initialised   = np.zeros(self.num_dimensions, dtype=bool)
 
-                self._cma_m = np.zeros((self.num_dimensions, 2)).astype(float)  # mean
-                self._cma_C = np.stack([np.eye(2) for _ in range(self.num_dimensions)]).astype(float) # covariance
-                self._cma_sigma = np.full(self.num_dimensions, self._hs_params["sigma_init"], dtype=float)  # step-size
-                self._cma_initialised = np.zeros(self.num_dimensions, dtype=bool)
-
-                self._cma_pc = np.zeros((self.num_dimensions, 2)).astype(float)  # evolution path for covariance
-                self._cma_ps = np.zeros((self.num_dimensions, 2)).astype(float)  # evolution path for sigma
+                self._cma_pc            = np.zeros((self.num_dimensions, 2)).astype(float)  # evolution path for covariance
+                self._cma_ps            = np.zeros((self.num_dimensions, 2)).astype(float)  # evolution path for sigma
 
             case _:
                 raise ValueError(f"Unknown hs_operator: {self.hs_operator}")
@@ -296,6 +300,12 @@ class PyTwoDimSpikingCoreModel(AbstractPerturbationNHeuristicModel):
             shape=(self.num_neighbours, self.num_dimensions)).astype(float)
         self.ref_point          = np.zeros(self.shape).astype(float)
         self.prev_p             = np.zeros(self.shape).astype(float)
+
+        self.fx                 = np.empty(shape=(1,)).astype(float)
+        self.fp                 = np.empty(shape=(1,)).astype(float)
+        self.fg                 = np.empty(shape=(1,)).astype(float)
+        self.fxn                = np.empty(shape=(self.num_neighbours,)).astype(float)
+
         self.stag_count         = 0
 
     # TRANSFORMATION METHODS
@@ -587,100 +597,91 @@ class PyTwoDimSpikingCoreModel(AbstractPerturbationNHeuristicModel):
         return new_var
 
     # //////////////////////// WORK IN PROGRESS /////////////////////////
-    # def _hs_cma(self, dim, var):
-    #     """CMA-ES operator (2D per dim) with variants:
-    #        - online  : aCMA-like drift using pbest/gbest/neighbourhood
-    #        - 1p1     : (1+1)-CMA style step-size control and rank-1 on success
-    #        - recomb  : rank-µ-like mean via fitness-weighted recombination
-    #     """
-    #     # Initialise CMA state if needed
-    #     if not self._cma_initialised[dim]:
-    #         self._cma_m[dim, 0] = var[0]
-    #         self._cma_m[dim, 1] = var[1]
-    #         self._cma_initialised[dim] = True
-    #
-    #     # Shortcut references to CMA state
-    #     m = self._cma_m[dim]
-    #     C = self._cma_C[dim]
-    #     sigma = self._cma_sigma[dim]
-    #     pc = self._cma_pc[dim]
-    #     ps = self._cma_ps[dim]
-    #
-    #     # Eigendecomposition of C to get A where C = A A^T
-    #     try:
-    #         A = np.linalg.cholesky(C + _EPS * np.eye(2))
-    #     except np.linalg.LinAlgError:
-    #         C[:] = np.eye(2)
-    #         A = np.eye(2)
-    #
-    #     # Sample new point from N(m, sigma^2 C)
-    #     z = np.random.normal(size=2)  # ~ N(0, I)
-    #     y = A @ z  # ~ N(0, C)
-    #     x_prop = m + sigma * y
-    #
-    #     # Extract reference points for guidance (elite-based)
-    #     x_p = np.array([self.v1_pbest[dim], self.v2_pbest[dim]])
-    #     x_g = np.array([self.v1_gbest[dim], self.v2_gbest[dim]])
-    #     if self.num_neighbours > 0:
-    #         nbar = float(np.mean(self.vn[:, dim]))
-    #     else:
-    #         nbar = self.v1_gbest[dim]
-    #     x_n = np.array([nbar, nbar])
-    #
-    #     # Weighted mean of reference points (equal weights by default)
-    #     w_p0, w_g0, w_n0 = 0.5, 0.5, 0.25
-    #     x_mu    = (w_p0 * x_p + w_g0 * x_g + w_n0 * x_n) / (w_p0 + w_g0 + w_n0)
-    #     y_w     = (x_mu - m) / (sigma + _EPS)
-    #
-    #     # CSA (paths and step-size), n = 2
-    #     cs      = self._hs_params["c_sigma"]
-    #     damps   = self._hs_params["d_sigma"]
-    #     ps      = (1.0 - cs) * ps + np.sqrt(cs * (2.0 - cs)) * z
-    #     E_norm  = 1.2533141373155  # E||N(0, I_2)|| = sqrt(2)*Gamma(2)/Gamma(1)
-    #
-    #     # hsig: Heaviside
-    #     # finite-horizon normaliser for gate
-    #     t = float(getattr(self, "time_step", 0) + 1)
-    #     chi = np.sqrt(1.0 - (1.0 - cs) ** (2.0 * t))
-    #     if chi < 1e-12:
-    #         chi = 1.0
-    #     hsig = float(np.linalg.norm(ps) / chi < (1.4 + 2.0 / 3.0) * E_norm)
-    #
-    #     cc = self._hs_params["c_c"]
-    #     pc = (1.0 - cc) * pc + hsig * np.sqrt(cc * (2.0 - cc)) * y_w
-    #
-    #     # match self.hs_variant:
-    #     # case "1p1":
-    #     # success if personal best moved (greedy selector semantics)
-    #     success = float(abs(self.p[dim] - self.prev_p[dim]) > 1e-15)
-    #     target = self._hs_params["target_success"]
-    #
-    #     # 1/5th rule
-    #     sigma = sigma * np.exp((cs / damps) * (success - target))
-    #     sigma = float(np.clip(sigma, self._hs_params["min_sigma"], self._hs_params["max_sigma"]))
-    #
-    #     # covariance: strengthen on success, mild forgetting otherwise
-    #     c1 = self._hs_params["c1"]
-    #     forget = self._hs_params["forget_rate"]
-    #     y_unit = y / (np.linalg.norm(y) + _EPS)
-    #     if success >= target:
-    #         C[:] = (1.0 - c1) * C + c1 * np.outer(y_unit, y_unit)
-    #     else:
-    #         C[:] = (1.0 - c1 * forget) * C
-    #
-    #     # mean drift
-    #     m[:] = m + self._hs_params["eta_m"] * (x_mu - m)
-    #
-    #     # persist
-    #     self._cma_m[dim] = m
-    #     self._cma_C[dim] = C
-    #     self._cma_sigma[dim] = sigma
-    #     self._cma_pc[dim] = pc
-    #     self._cma_ps[dim] = ps
-    #
-    #     # proposal (match flavour of other operators)
-    #     new_var = x_prop + np.random.normal(scale=self._hs_params["jitter_scale"], size=2)
-    #     return new_var
+    def _hs_cma(self, dim, var):
+        # Ensure initialisation of CMA-ES parameters
+        if not self._cma_initialised[dim]:
+            self._cma_m[dim]        = np.array([var[0], var[1]], dtype=float)
+            self._cma_C[dim]        = np.eye(2, dtype=float)
+            self._cma_sigma[dim]    = self._hs_params["sigma_init"]
+            self._cma_pc[dim]       = np.zeros(2, dtype=float)
+            self._cma_ps[dim]       = np.zeros(2, dtype=float)
+            self._cma_initialised[dim] = True
+
+        m       = self._cma_m[dim].copy()
+        C       = self._cma_C[dim].copy()
+        sigma   = self._cma_sigma[dim]
+        pc      = self._cma_pc[dim].copy()
+        ps      = self._cma_ps[dim].copy()
+
+        # Find Cholesky of C (with tiny jitter for numerical stability)
+        C       = 0.5 * (C + C.T)     # For symmetry (should be already)
+        try:
+            A = np.linalg.cholesky(C + _EPS * np.eye(2))
+        except np.linalg.LinAlgError:
+            C = np.eye(2)
+            A = np.eye(2)
+
+        # Sample new point in 2D
+        z       = np.random.normal(size=2)
+        x_prop  = m + sigma * (A @ z)
+
+        # Build guidance point (pseudo-population) from pbest, gbest, and neighbourhood positions
+        # Todo: consider adding variants for this guidance construction
+        x_p = np.array([self.v1_pbest[dim], self.v2_pbest[dim]])
+        x_g = np.array([self.v1_gbest[dim], self.v2_gbest[dim]])
+        if self.num_neighbours > 0:
+            nbar = float(np.mean(self.vn[:, dim]))
+        else:
+            nbar = self.v1_gbest[dim]
+        x_n = np.array([nbar, nbar])
+
+        w_g, w_p, w_n   = 0.5, 0.3, 0.2
+        wsum            = max(1e-12, w_p + w_g + w_n)
+        x_mu            = (w_g * x_g + w_p * x_p + w_n * x_n) / wsum
+
+        # Cumulation for sigma (ps) and covariance (pc) updates
+        c_sigma         = self._cma_sigma[dim]
+        ps              = (1.0 - c_sigma) * ps + np.sqrt(c_sigma * (2.0 - c_sigma)) * z
+
+        # Expected Euclidean norm of N(0,I) in N dimensions, here N=2
+        # E_norm = np.sqrt(np.pi/2)
+        hsig = float(np.linalg.norm(ps) / np.sqrt(1.0 - (1.0 - c_sigma) ** (2.0 * (self._cma_countiter[dim] + 1.0)))
+                     < (1.4 + 2.0 / (2 + 1)))
+
+        # <hic sum>
+
+        # drift direction in "C units"
+        y_w = (x_mu - m) / (sigma + _EPS)
+
+        # path for covariance
+        pc = (1.0 - self._hs_params["c_c"]) * pc + hsig * np.sqrt(self._hs_params["c_c"] * (2.0 - self._hs_params["c_c"])) * y_w
+
+        # covariance update (rank-1 + small rank-µ on guidance)
+        C = (1.0 - self._hs_params["c1"] - self._hs_params["c_mu"]) * C + self._hs_params["c1"] * np.outer(pc, pc) + self._hs_params["c_mu"] * np.outer(y_w, y_w)
+
+        # step-size update
+        sigma *= np.exp((c_sigma / self._hs_params["d_sigma"]) * (np.linalg.norm(ps) / E_norm - 1.0))
+        sigma = float(np.clip(sigma, self._hs_params["min_sigma"], self._hs_params["max_sigma"]))
+
+        # mean drift towards pseudo-µ
+        m = m + self._hs_params["eta_m"] * (x_mu - m)
+
+        # optional success-based nudge (proxy): did p move?
+        moved = float(abs(self.p[dim] - self.prev_p[dim]) > 1e-15)
+        forget = float(self._hs_params["forget_rate"])
+        if moved < self._hs_params["target_success"]:
+            C *= (1.0 - self._hs_params["c1"] * forget)
+
+        # persist
+        self._cma_m[dim] = m
+        self._cma_C[dim] = C
+        self._cma_sigma[dim] = sigma
+        self._cma_pc[dim] = pc
+        self._cma_ps[dim] = ps
+
+        # proposal (same flavour as other operators)
+        new_var = x_prop + np.random.normal(scale=self._hs_params["jitter_scale"], size=2)
+        return new_var
     # //////////////////////// WORK IN PROGRESS /////////////////////////
 
     # DYNAMIC HEURISTIC
@@ -868,12 +869,13 @@ class PyTwoDimSpikingCoreModel(AbstractPerturbationNHeuristicModel):
 
         else:
             s_in        = self.s_in.recv()
-            self.g      = self.g_in.recv()
-            fg_in       = self.fg_in.recv()
+            self.fx     = self.fx_in.recv()
             self.p      = self.p_in.recv()
-            fp_in       = self.fp_in.recv()
+            self.fp     = self.fp_in.recv()
+            self.g      = self.g_in.recv()
+            self.fg     = self.fg_in.recv()
             self.xn     = self.xn_in.recv()
-            fxn_in      = self.fxn_in.recv()
+            self.fxn    = self.fxn_in.recv()
 
             self.compulsory_fire = s_in.astype(bool)
             self._transform_variables()
@@ -900,10 +902,13 @@ class PySelectorModel(PyLoihiProcessModel):
     x_in:   PyInPort        = LavaPyType(PyInPort.VEC_DENSE, _POS_FLOAT_)
 
     # Variables
+    x:      np.ndarray      = LavaPyType(np.ndarray, _POS_FLOAT_)
+    fx:     np.ndarray      = LavaPyType(np.ndarray, _FIT_FLOAT_)
     p:      np.ndarray      = LavaPyType(np.ndarray, _POS_FLOAT_)
     fp:     np.ndarray      = LavaPyType(np.ndarray, _FIT_FLOAT_)
 
     # Outputs
+    fx_out: PyOutPort       = LavaPyType(PyOutPort.VEC_DENSE, _FIT_FLOAT_)
     p_out:  PyOutPort       = LavaPyType(PyOutPort.VEC_DENSE, _POS_FLOAT_)
     fp_out: PyOutPort       = LavaPyType(PyOutPort.VEC_DENSE, _FIT_FLOAT_)
 
@@ -956,10 +961,12 @@ class PySelectorModel(PyLoihiProcessModel):
             4. Sends the updated-best position and fitness to the outports.
         """
         # Read the input position
-        x       = self.x_in.recv()
+        x           = self.x_in.recv()
+        self.x[:]   = x
 
         # Evaluate the function
-        fx      = self.funct(x.flatten())
+        fx          = self.funct(x.flatten())
+        self.fx[:] = fx
 
         # Update the particular position
         if not self.initialised or self._selection(fx, x=x):
@@ -968,6 +975,7 @@ class PySelectorModel(PyLoihiProcessModel):
             self.fp[:]          = fx
 
         # Send the updated position
+        self.fx_out.send(self.fx)
         self.p_out.send(self.p)
         self.fp_out.send(self.fp)
 
@@ -1165,6 +1173,8 @@ class SubNeuroHeuristicUnitModel(AbstractSubProcessModel):
         self.spiking_handler.out_ports.a_out.connect(
             self.perturbator.in_ports.s_in)
 
+        self.selector.out_ports.f_out.connect(
+            self.perturbator.in_ports.f_in)
         self.selector.out_ports.p_out.connect(
             self.perturbator.in_ports.p_in)
         self.selector.out_ports.fp_out.connect(

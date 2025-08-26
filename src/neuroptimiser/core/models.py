@@ -130,8 +130,8 @@ HS_DEFAULT_PARAMS = {
         "c_mu": 0.0,           # mean update rate (0 = only rank-1 update)
         "min_sigma": 1e-4,
         "max_sigma": 3.0,
-        "target_success": 0.2, # (1+1) success rule target
-        "forget_rate": 0.1,    # slight forgetting on failure
+        # "target_success": 0.2, # (1+1) success rule target
+        # "forget_rate": 0.1,    # slight forgetting on failure
         "jitter_scale": 0.0    # optional tiny Gaussian noise on output
     },
     # //////////////////////// WORK IN PROGRESS /////////////////////////
@@ -630,56 +630,46 @@ class PyTwoDimSpikingCoreModel(AbstractPerturbationNHeuristicModel):
         x_p = np.array([self.v1_pbest[dim], self.v2_pbest[dim]])
         x_g = np.array([self.v1_gbest[dim], self.v2_gbest[dim]])
         if self.num_neighbours > 0:
-            nbar = float(np.mean(self.vn[:, dim]))
+            nbar = float(np.median(self.vn[:, dim]))
         else:
             nbar = self.v1_gbest[dim]
         x_n = np.array([nbar, nbar])
 
-        w_g, w_p, w_n   = 0.5, 0.3, 0.2
+        w_g, w_p, w_n   = 0.3, 0.3, 0.4
         wsum            = max(1e-12, w_p + w_g + w_n)
         x_mu            = (w_g * x_g + w_p * x_p + w_n * x_n) / wsum
 
         # Cumulation for sigma (ps) and covariance (pc) updates
-        c_sigma         = self._cma_sigma[dim]
-        ps              = (1.0 - c_sigma) * ps + np.sqrt(c_sigma * (2.0 - c_sigma)) * z
+        c_sigma     = self._hs_params["c_sigma"]
+        ps          = (1.0 - c_sigma) * ps + np.sqrt(c_sigma * (2.0 - c_sigma)) * z
+        hsig        = float(np.linalg.norm(ps) / np.sqrt(1.0 - (1.0 - c_sigma) ** (
+                (self._cma_countiter[dim] + 1.0) / 3.0)) < (31.0 / 15.0))
+        y_w         = (x_mu - m) / (sigma + _EPS)
+        pc          = ((1.0 - self._hs_params["c_c"]) * pc
+                       + hsig * np.sqrt(self._hs_params["c_c"] * (2.0 - self._hs_params["c_c"])) * y_w)
 
-        # Expected Euclidean norm of N(0,I) in N dimensions, here N=2
-        # E_norm = np.sqrt(np.pi/2)
-        hsig = float(np.linalg.norm(ps) / np.sqrt(1.0 - (1.0 - c_sigma) ** (2.0 * (self._cma_countiter[dim] + 1.0)))
-                     < (1.4 + 2.0 / (2 + 1)))
+        # Adapt covariance matrix towards pseudo-µ direction
+        C           = ((1.0 - self._hs_params["c1"] - self._hs_params["c_mu"]) * C       # considering the old matrix
+                       + self._hs_params["c1"] * (np.outer(pc, pc)                       # plus rank-one update
+                        + (1.0 - hsig) * self._hs_params["c_c"] * (2.0 - self._hs_params["c_c"]) * C) # with hsig correction
+                       + self._hs_params["c_mu"] * np.outer(y_w, y_w))               # plus rank-mu update
 
-        # <hic sum>
-
-        # drift direction in "C units"
-        y_w = (x_mu - m) / (sigma + _EPS)
-
-        # path for covariance
-        pc = (1.0 - self._hs_params["c_c"]) * pc + hsig * np.sqrt(self._hs_params["c_c"] * (2.0 - self._hs_params["c_c"])) * y_w
-
-        # covariance update (rank-1 + small rank-µ on guidance)
-        C = (1.0 - self._hs_params["c1"] - self._hs_params["c_mu"]) * C + self._hs_params["c1"] * np.outer(pc, pc) + self._hs_params["c_mu"] * np.outer(y_w, y_w)
-
-        # step-size update
-        sigma *= np.exp((c_sigma / self._hs_params["d_sigma"]) * (np.linalg.norm(ps) / E_norm - 1.0))
+        # Adapt step-size sigma
+        sigma *= float(np.exp((c_sigma / self._hs_params["d_sigma"]) * (np.linalg.norm(ps) / _E_norm - 1.0)))
         sigma = float(np.clip(sigma, self._hs_params["min_sigma"], self._hs_params["max_sigma"]))
 
-        # mean drift towards pseudo-µ
-        m = m + self._hs_params["eta_m"] * (x_mu - m)
-
-        # optional success-based nudge (proxy): did p move?
-        moved = float(abs(self.p[dim] - self.prev_p[dim]) > 1e-15)
-        forget = float(self._hs_params["forget_rate"])
-        if moved < self._hs_params["target_success"]:
-            C *= (1.0 - self._hs_params["c1"] * forget)
+        # Mean update towards pseudo-µ and the counteriter
+        m                        += self._hs_params["eta_m"] * (x_mu - m)
+        self._cma_countiter[dim] += 1
 
         # persist
-        self._cma_m[dim] = m
-        self._cma_C[dim] = C
-        self._cma_sigma[dim] = sigma
-        self._cma_pc[dim] = pc
-        self._cma_ps[dim] = ps
+        self._cma_m[dim]        = m
+        self._cma_C[dim]        = C
+        self._cma_sigma[dim]    = sigma
+        self._cma_pc[dim]       = pc
+        self._cma_ps[dim]       = ps
 
-        # proposal (same flavour as other operators)
+        # Render proposed point with small jitter
         new_var = x_prop + np.random.normal(scale=self._hs_params["jitter_scale"], size=2)
         return new_var
     # //////////////////////// WORK IN PROGRESS /////////////////////////
@@ -1173,8 +1163,8 @@ class SubNeuroHeuristicUnitModel(AbstractSubProcessModel):
         self.spiking_handler.out_ports.a_out.connect(
             self.perturbator.in_ports.s_in)
 
-        self.selector.out_ports.f_out.connect(
-            self.perturbator.in_ports.f_in)
+        self.selector.out_ports.fx_out.connect(
+            self.perturbator.in_ports.fx_in)
         self.selector.out_ports.p_out.connect(
             self.perturbator.in_ports.p_in)
         self.selector.out_ports.fp_out.connect(

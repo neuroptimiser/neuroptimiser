@@ -173,8 +173,10 @@ class PyTwoDimSpikingCoreModel(AbstractPerturbationNHeuristicModel):
                     - ``thr_min``: float, minimum threshold value
                     - ``thr_max``: float, maximum threshold value
                     - ``thr_k``: float, scaling factor for the threshold
-                    - ``spk_cond``: str, spiking condition (e.g., "fixed", "l1", "l2", "l2_gen", "random", "adaptive", "stable")
+                    - ``spk_cond``: str, spiking condition (e.g., "fixed", "l1", "l2", "l2_gen", "wlq", "random", "adaptive", "stable")
                     - ``spk_alpha``: float, scaling factor for the spiking condition
+                    - ``spk_q_ord``: int, order of the norm for the spiking condition (default: 2)
+                    - ``spk_weights``: list of float, weights for the spiking condition components (default: [0.5, 0.5])
                     - ``hs_operator``: str, heuristic search operator (i.e., "fixed", "random", "directional", "differential")
                     - ``hs_variant``: str, variant of the heuristic search operator. The available variants when
                         - ``hs_operator``="fixed" are "gbest", "center", "pgbest", "pbest"|"fixed" (default).
@@ -203,6 +205,9 @@ class PyTwoDimSpikingCoreModel(AbstractPerturbationNHeuristicModel):
 
         self.spk_cond   = proc_params['spk_cond']
         self.spk_alpha  = proc_params['spk_alpha']
+        self.spk_q_ord  = proc_params.get('spk_q_ord', 2)
+        spk_weights     = proc_params.get('spk_weights', [0.5, 0.5])
+        self.spk_weights= np.array(spk_weights) / np.mean(spk_weights) # normalise to mean 1 for stability
 
         self.hs_operator= proc_params['hs_operator']
         self.hs_variant = proc_params['hs_variant']
@@ -596,7 +601,6 @@ class PyTwoDimSpikingCoreModel(AbstractPerturbationNHeuristicModel):
             scale=self._hs_params["jitter_scale"], size=2)
         return new_var
 
-    # //////////////////////// WORK IN PROGRESS /////////////////////////
     def _hs_cma(self, dim, var):
         # Ensure initialisation of CMA-ES parameters
         if not self._cma_initialised[dim]:
@@ -672,13 +676,20 @@ class PyTwoDimSpikingCoreModel(AbstractPerturbationNHeuristicModel):
         # Render proposed point with small jitter
         new_var = x_prop + np.random.normal(scale=self._hs_params["jitter_scale"], size=2)
         return new_var
-    # //////////////////////// WORK IN PROGRESS /////////////////////////
 
     # DYNAMIC HEURISTIC
     def _apply_hd(self, dim, var):
         """Applies the selected approximation to the dynamic system for a given dimension."""
         # Apply the model using an approximation, if so
         new_var = self.approx_method(self.models[dim], var, dt=self.dt)
+
+        # WIP: Add assistive nudge from network activity like a reward sharing
+        a = float(self.compulsory_fire[dim])
+        if a > 0.0:
+            v_ref = np.array([self.v1_gbest[dim], self.v2_gbest[dim]])
+
+            # TODO: Add 'beta  = self._hs_params.get("nudging_beta", 0.05)'
+            new_var += 0.05 * (v_ref - var)
 
         # Post-processing
         return new_var
@@ -798,6 +809,12 @@ class PyTwoDimSpikingCoreModel(AbstractPerturbationNHeuristicModel):
         """Generalised L2 norm spiking condition based on a threshold."""
         return (v1 ** 2 + self.spk_alpha * v2 ** 2) > thr ** 2
 
+    # WIP: Weighted Lq norm (q=2) spiking condition
+    # Future: Remove l1, l2, l2_gen and only use wlq
+    def _spike_wlq(self, v1: float, v2: float, thr: float, dim: int):
+        """Weighted Lq norm (q=2) spiking condition based on a threshold."""
+        return np.linalg.norm(self.spk_weights * np.array([v1, v2]), ord=self.spk_q_ord) > thr
+
     def _spike_random(self, v1: float, v2: float, thr: float, dim: int):
         """Random spiking condition based on a threshold."""
         magnitude = np.linalg.norm([v1, v2])
@@ -819,12 +836,14 @@ class PyTwoDimSpikingCoreModel(AbstractPerturbationNHeuristicModel):
         """Initialises the spiking condition based on the specified spiking condition type."""
         if self.spk_cond == "fixed":
             return self._spike_fixed
-        elif self.spk_cond == "l1":
+        elif self.spk_cond == "l1":         # Future: Remove it and only use wlq
             return self._spike_l1
-        elif self.spk_cond == "l2":
+        elif self.spk_cond == "l2":         # Future: Remove it and only use wlq
             return self._spike_l2
-        elif self.spk_cond == "l2_gen":
+        elif self.spk_cond == "l2_gen":     # Future: Remove it and only use wlq
             return self._spike_l2_gen
+        elif self.spk_cond == "wlq":        # Weighted Lq norm (q=2) spiking condition
+            return self._spike_wlq
         elif self.spk_cond == "random":
             return self._spike_random
         elif self.spk_cond == "adaptive":
@@ -868,6 +887,14 @@ class PyTwoDimSpikingCoreModel(AbstractPerturbationNHeuristicModel):
             self.fxn    = self.fxn_in.recv()
 
             self.compulsory_fire = s_in.astype(bool)
+
+            # WIP: If any neighbour has a better fitness, propagate the spike
+            # First check: it is actually working pretty fine !!!
+            if self.num_neighbours > 0:
+                is_better = np.any(self.fxn[:] < (self.fp[0] - _EPS))
+                if is_better:
+                    self.compulsory_fire[:] = True
+
             self._transform_variables()
             self._update_threshold()
             self._run_core_process()

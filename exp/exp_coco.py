@@ -279,11 +279,11 @@ def main():
             # %% Initialise the solver
             optimiser = NeurOptimiser(config_params, core_params)
 
-            problem.observe_with(observer)  # generate data for cocopp
-            problem(problem.dimension * [0])  # for better comparability
+            problem.observe_with(observer)      # generate data for cocopp
+            problem(problem.dimension * [0])    # for better comparability
 
-            num_iterations = problem.dimension * config_params["num_iterations"]
-            # num_iterations = config_params["num_iterations"]
+            # num_iterations = problem.dimension * config_params["num_iterations"]
+            num_iterations = config_params["num_iterations"]
 
             time_start = time.time()
             xopt, fxopt = optimiser.solve(

@@ -27,6 +27,9 @@ pip install -e .
 ```
 Ensure you have Python ≥ 3.10 and the Lava-NC environment configured.
 
+You can also clone the repository and install it. Check the Makefile for additional options.
+
+
 ## 🚀 Example Usage
 ```python
 from neuroptimiser import NeuroOptimiser
@@ -56,12 +59,13 @@ Neuroptimiser has been validated over the [BBOB suite](https://github.com/numbbo
   title        = {Neuroptimiser: A neuromorphic optimisation framework},
   year         = {2025},
   url          = {https://github.com/neuroptimiser/neuroptimiser},
-  note         = {Version 1.0.0, accessed on 20XX-XX-XX}
+  note         = {Version 1.0.X, accessed on 20XX-XX-XX}
 }
 ```
 
 ## 🔗 Resources
 * 📘 [Documentation](https://neuroptimiser.github.io)
+* 📜 [Paper](https://doi.org/10.48550/arXiv.2507.08320)
 * 🧠 [Intel Lava-NC](https://github.com/lava-nc/lava)
 * 🧪 [COCO Platform](https://github.com/numbbo/coco)
 

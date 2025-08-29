@@ -43,18 +43,22 @@ You can also clone the repository and install it. Check the Makefile for additio
 ## 🚀 Example Usage
 ```python
 from neuroptimiser import NeuroOptimiser
+import numpy as np
 
-neuropt = NeuroOptimiser(
-    problem=my_bbob_function,
-    dimension=10,
-    num_units=30,
-    neuron_model="izhikevich",
-    spike_operator="de_rand",
-    spike_condition="l2"
+problem_function    = lambda x: np.linalg.norm(x)
+problem_bounds      = np.array([[-5.0, 5.0], [-5.0, 5.0]])
+
+optimiser = NeurOptimiser()
+
+optimiser.solve(
+    obj_func=problem_function,
+    search_space=problem_bounds,
+    debug_mode=True,
+    num_iterations=1000,
 )
-
-neuropt.run(max_steps=1000)
 ```
+
+For more examples, please, visit [Neuroptimiser Usage](https://neuroptimiser.github.io/usage.html)
 
 ## 📊 Benchmarking
 Neuroptimiser has been validated over the [BBOB suite](https://github.com/numbbo/coco), showing:

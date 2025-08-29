@@ -17,7 +17,7 @@ project = 'neuroptimiser'
 year = dt.datetime.now().year
 author = 'Jorge M. Cruz-Duarte'
 email = 'jorge-mario.cruz-duarte@inria.fr'
-release = '1.0.0'
+release = '1.0.1'
 
 copyright = f"2025 - {year}, {author} ({email})"  # noqa: A001
 
@@ -85,7 +85,7 @@ html_sidebars = {
 
 html_theme_options = {
     "navigation_with_keys": True,
-    "announcement": "This is a WIP project, and the documentation is under construction.",
+    "announcement": "🎉 First version is out! You can now download it from PyPI: <a href='https://pypi.org/project/neuroptimiser/'>neuroptimiser</a>",
     "body_max_width": "100%",
     "light_logo": "images/neuropty-light.svg",
     "dark_logo": "images/neuropty-dark.svg",

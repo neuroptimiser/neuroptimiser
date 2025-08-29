@@ -119,7 +119,6 @@ HS_DEFAULT_PARAMS = {
         "w": 0.67,                    # inertia-like term
         "jitter_scale": 0.0,          # add small noise after selecting point
     },
-    # //////////////////////// WORK IN PROGRESS /////////////////////////
     "cma": {
         "sigma_init": 0.3,     # initial global step-size
         "eta_m": 0.25,         # mean drift rate towards guidance
@@ -134,7 +133,6 @@ HS_DEFAULT_PARAMS = {
         # "forget_rate": 0.1,    # slight forgetting on failure
         "jitter_scale": 0.0    # optional tiny Gaussian noise on output
     },
-    # //////////////////////// WORK IN PROGRESS /////////////////////////
 }
 
 @implements(proc=TwoDimSpikingCore, protocol=LoihiProtocol)
@@ -177,7 +175,7 @@ class PyTwoDimSpikingCoreModel(AbstractPerturbationNHeuristicModel):
                     - ``spk_alpha``: float, scaling factor for the spiking condition
                     - ``spk_q_ord``: int, order of the norm for the spiking condition (default: 2)
                     - ``spk_weights``: list of float, weights for the spiking condition components (default: [0.5, 0.5])
-                    - ``hs_operator``: str, heuristic search operator (i.e., "fixed", "random", "directional", "differential")
+                    - ``hs_operator``: str, heuristic search operator (i.e., "fixed", "random", "directional", "differential", "cma")
                     - ``hs_variant``: str, variant of the heuristic search operator. The available variants when
                         - ``hs_operator``="fixed" are "gbest", "center", "pgbest", "pbest"|"fixed" (default).
                         - ``hs_operator``="random" are "uniform" and "normal" (default).
@@ -602,7 +600,8 @@ class PyTwoDimSpikingCoreModel(AbstractPerturbationNHeuristicModel):
         return new_var
 
     def _hs_cma(self, dim, var):
-        # Ensure initialisation of CMA-ES parameters
+        """CMA-ES lite heuristic search operator (CMA-ES inspired).
+        """
         if not self._cma_initialised[dim]:
             self._cma_m[dim]        = np.array([var[0], var[1]], dtype=float)
             self._cma_C[dim]        = np.eye(2, dtype=float)

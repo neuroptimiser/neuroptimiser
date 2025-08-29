@@ -27,7 +27,7 @@ If you prefer to install the latest development version directly from the GitHub
 
 .. code-block:: bash
 
-    pip install git+https://github.com/jcrvz/neuroptimiser.git
+    pip install git+https://github.com/neuroptimiser/neuroptimiser.git
 
 Alternatively, you can clone the repository and install in *editable mode* for local development:
 
@@ -39,7 +39,7 @@ Alternatively, you can clone the repository and install in *editable mode* for l
 
 **2. Installing from PyPI (available soon)**
 
-Once the first official release is published, the package can be installed via:
+The package can be installed via:
 
 .. code-block:: bash
 

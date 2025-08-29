@@ -4,7 +4,7 @@
 
 # Experiment metadata
 metadata:
-  name: Neuropt-Hyb100-2d
+  name: Neuropt-Hyb-30p15n-20d        # Name of the experiment
   description: Prelim exp for bbob-largescale with hybrid core
   debug_mode: false                   # true | false
   suite_name: bbob-large              # bbob | bbob-largescale | bbob-noisy

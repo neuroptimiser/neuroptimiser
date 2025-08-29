@@ -1,3 +1,13 @@
+![Status](https://img.shields.io/badge/status-active-success)
+[![PyPI Version](https://img.shields.io/pypi/v/neuroptimiser)](https://pypi.org/project/neuroptimiser/)
+![GitHub Tag](https://img.shields.io/github/v/tag/neuroptimiser/neuroptimiser)
+[![Python Versions](https://img.shields.io/pypi/pyversions/neuroptimiser.svg)](https://pypi.org/project/neuroptimiser/)
+[![PyPI Downloads](https://img.shields.io/pypi/dm/neuroptimiser)](https://pypi.org/project/neuroptimiser/)
+![License](https://img.shields.io/github/license/neuroptimiser/neuroptimiser)
+[![arXiv](https://img.shields.io/badge/arXiv-2507.08320-b31b1b.svg)](https://arxiv.org/abs/2507.08320)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.15592900.svg)](https://doi.org/10.5281/zenodo.15592900)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.15858610.svg)](https://doi.org/10.5281/zenodo.15858610)
+
 # NeurOptimiser
 
 **NeurOptimiser** is a neuromorphic optimisation framework in which metaheuristic search emerges from asynchronous spiking dynamics. It defines optimisation as a decentralised process executed by interconnected Neuromorphic Heuristic Units (NHUs), each embedding a spiking neuron model and a spike-triggered heuristic rule.

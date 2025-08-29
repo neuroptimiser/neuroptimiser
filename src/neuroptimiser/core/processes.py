@@ -32,6 +32,8 @@ class AbstractSpikingCore(AbstractProcess):
                 Input port for the spiking activity.
             p_in : InPort
                 Input port for the position variable.
+            fx_in : InPort
+                Input port for the fitness variable.
             fp_in : InPort
                 Input port for the fitness variable.
             g_in : InPort
@@ -93,6 +95,7 @@ class AbstractSpikingCore(AbstractProcess):
         # Inports
         self.s_in       = InPort(shape=self.shape)
         self.p_in       = InPort(shape=self.shape)
+        self.fx_in      = InPort(shape=shape_fx)
         self.fp_in      = InPort(shape=shape_fx)
         self.g_in       = InPort(shape=self.shape)
         self.fg_in      = InPort(shape=shape_fx)
@@ -137,6 +140,8 @@ class TwoDimSpikingCore(AbstractSpikingCore):
                 Input port for the spiking activity.
             p_in : InPort
                 Input port for the position variable.
+            fx_in : InPort
+                Input port for the fitness variable.
             fp_in : InPort
                 Input port for the fitness variable.
             g_in : InPort
@@ -298,15 +303,21 @@ class Selector(AbstractProcess):
             x_in : InPort
                 Input port for the position variable.
         Variables
+            x : Var
+                Variable for the current position of the spiking core.
+            fx: Var
+                Variable for the current fitness of the spiking core.
             p : Var
                 Variable for the position of the agent.
             fp : Var
                 Variable for the fitness of the agent.
         Outports
+            fx_out : OutPort
+                Output port for the current fitness of the spiking core.
             p_out : OutPort
-                Output port for the position variable.
+                Output port for the particular best position.
             fp_out : OutPort
-                Output port for the fitness variable.
+                Output port for the particular best fitness.
 
     See Also
     --------
@@ -350,10 +361,13 @@ class Selector(AbstractProcess):
         self.x_in   = InPort(shape=shape)
 
         # Variables
+        self.x      = Var(shape=shape, init=0.0)
+        self.fx     = Var(shape=(1,), init=6.9)
         self.p      = Var(shape=shape, init=0.0)
         self.fp     = Var(shape=(1,), init=6.9)
 
         # Outports
+        self.fx_out = OutPort(shape=(1,))
         self.p_out  = OutPort(shape=shape)
         self.fp_out = OutPort(shape=(1,))
 

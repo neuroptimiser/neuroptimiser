@@ -301,7 +301,7 @@ class NeurOptimiser(AbstractSolver):
             Optional("approx", default="rk4"):
                 And(lambda n: n in ["rk4", "euler"] or n is None,
                     error="approx must be either 'rk4', 'euler' or None"),
-            Optional("ref_mode", default="pg"):
+            Optional("ref_mode", default="pgn"):
                 And(lambda n: n in [None, "p", "g", "pg", "pgn"],
                     error="ref_mode must be either None, 'p', 'g', 'pg' or 'pgn'"),
             Optional("thr_mode", default="diff_pg"):
@@ -319,16 +319,22 @@ class NeurOptimiser(AbstractSolver):
             Optional("thr_k", default=0.05):
                 And(lambda n: isinstance(n, (float, int)) and n >= 0.0,
                     error="thr_k must be a non-negative float or int"),
-            Optional("spk_cond", default="fixed"):
-                And(lambda n: n in ["fixed", "l1", "l2", "l2_gen", "random", "adaptive", "stable"],
-                    error="spk_cond must be either 'fixed', 'l1', 'l2', 'l2_gen', 'random', 'adaptive', and 'stable'"),
+            Optional("spk_cond", default="l1"):
+                And(lambda n: n in ["fixed", "l1", "l2", "l2_gen", "wlq", "random", "adaptive", "stable"],
+                    error="spk_cond must be either 'fixed', 'wlq', 'l1', 'l2', 'l2_gen', 'random', 'adaptive', and 'stable'"),
             Optional("spk_alpha", default=0.25):
                 And(lambda n: isinstance(n, (float, int)) and n >= 0.0,
                     error="spk_alpha must be a non-negative float or int"),
-            Optional("hs_operator", default="fixed"):
-                And(lambda n: n in ["fixed", "directional", "differential", "random"],
-                    error="hs_operator must be either 'fixed', 'directional', 'differential', 'random'"),
-            Optional("hs_variant", default="fixed"):
+            Optional("spk_q_ord", default=2):
+                And(lambda n: isinstance(n, int) and n >= 1,
+                    error="spk_q_ord must be a positive integer"),
+            Optional("spk_weights", default=[0.5, 0.5]):
+                And(lambda n: isinstance(n, (list, tuple)) and len(n) == 2 and all(isinstance(i, (float, int)) for i in n),
+                    error="spk_weights must be a list or tuple of two numbers, e.g., [0.5, 0.5]"),
+            Optional("hs_operator", default="differential"):
+                And(lambda n: n in ["fixed", "directional", "differential", "swarm", "cma", "random"],
+                    error="hs_operator must be either 'fixed', 'directional', 'swarm', 'differential', 'random'"),
+            Optional("hs_variant", default="rand"):
                 And(lambda n: isinstance(n, str),
                     error="hs_variant must be a string"),
             Optional("is_bounded", default=False):

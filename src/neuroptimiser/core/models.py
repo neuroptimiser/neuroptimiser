@@ -33,6 +33,8 @@ from neuroptimiser.core.processes import (
 )
 
 _INVALID_VALUE = 1e9
+_EPS = 1e-12
+_E_norm = 1.253314137315500120806178 # sqrt(2) * gamma(2) / gamma(1) = expected norm of N(0,I) in 2D
 _POS_FLOAT_ = np.float32
 _FIT_FLOAT_ = np.float32
 SPK_CORE_OPTIONS = ["TwoDimSpikingCore"]  # To be extended with more options
@@ -52,6 +54,7 @@ class AbstractPerturbationNHeuristicModel(PyLoihiProcessModel):
     s_in:   PyInPort        = LavaPyType(PyInPort.VEC_DENSE, bool)
     p_in:   PyInPort        = LavaPyType(PyInPort.VEC_DENSE, _POS_FLOAT_)
     fp_in:  PyInPort        = LavaPyType(PyInPort.VEC_DENSE, _FIT_FLOAT_)
+    fx_in:  PyInPort        = LavaPyType(PyInPort.VEC_DENSE, _FIT_FLOAT_)
     g_in:   PyInPort        = LavaPyType(PyInPort.VEC_DENSE, _POS_FLOAT_)
     fg_in:  PyInPort        = LavaPyType(PyInPort.VEC_DENSE, _FIT_FLOAT_)
     xn_in:  PyInPort        = LavaPyType(PyInPort.VEC_DENSE, _POS_FLOAT_)
@@ -90,6 +93,48 @@ class AbstractPerturbationNHeuristicModel(PyLoihiProcessModel):
 
         np.random.default_rng(seed=int(self.seed))
 
+HS_DEFAULT_PARAMS = {
+    "fixed": {
+        "jitter_scale": 0.0,            # add small noise after selecting point
+    },
+    "random": {
+        "normal_std": 1.0,
+        "uniform_low": -1.0,
+        "uniform_high": 1.0,
+    },
+    "directional": {
+        "alpha_scale": 1.0,           # scaling factor for the direction
+        "jitter_scale": 0.0,          # add small noise after selecting point
+    },
+    "differential": {
+        "F": None,                    # actual F value, if not None, it # overrides _get_F and other F-related params lost their effect
+        "F_low": 0.0,                 # overrides _get_F range if provided
+        "F_high": 2.5,
+        "jitter_scale": 0.0,         # add small noise after selecting point
+    },
+    "swarm": {
+        "phi1": 1.45,                 # cognitive weight
+        "phi2": 1.55,                 # social weight
+        "phi3": 1.50,                 # neighbourhood weight
+        "w": 0.67,                    # inertia-like term
+        "jitter_scale": 0.0,          # add small noise after selecting point
+    },
+    "cma": {
+        "sigma_init": 0.3,     # initial global step-size
+        "eta_m": 0.25,         # mean drift rate towards guidance
+        "c1": 0.2,             # rank-1 covariance update weight
+        "c_sigma": 0.3,        # step-size adaptation rate
+        "d_sigma": 1.0,        # damping factor for step-size adaptation
+        "c_c": 0.3,            # time horizon for cumulation for covariance
+        "c_mu": 0.0,           # mean update rate (0 = only rank-1 update)
+        "min_sigma": 1e-4,
+        "max_sigma": 3.0,
+        # "target_success": 0.2, # (1+1) success rule target
+        # "forget_rate": 0.1,    # slight forgetting on failure
+        "jitter_scale": 0.0    # optional tiny Gaussian noise on output
+    },
+}
+
 @implements(proc=TwoDimSpikingCore, protocol=LoihiProtocol)
 @requires(CPU)
 class PyTwoDimSpikingCoreModel(AbstractPerturbationNHeuristicModel):
@@ -126,12 +171,17 @@ class PyTwoDimSpikingCoreModel(AbstractPerturbationNHeuristicModel):
                     - ``thr_min``: float, minimum threshold value
                     - ``thr_max``: float, maximum threshold value
                     - ``thr_k``: float, scaling factor for the threshold
-                    - ``spk_cond``: str, spiking condition (e.g., "fixed", "l1", "l2", "l2_gen", "random", "adaptive", "stable")
+                    - ``spk_cond``: str, spiking condition (e.g., "fixed", "l1", "l2", "l2_gen", "wlq", "random", "adaptive", "stable")
                     - ``spk_alpha``: float, scaling factor for the spiking condition
-                    - ``hs_operator``: str, heuristic search operator (i.e., "fixed", "random", "directional", "differential")
+                    - ``spk_q_ord``: int, order of the norm for the spiking condition (default: 2)
+                    - ``spk_weights``: list of float, weights for the spiking condition components (default: [0.5, 0.5])
+                    - ``hs_operator``: str, heuristic search operator (i.e., "fixed", "random", "directional", "differential", "cma")
                     - ``hs_variant``: str, variant of the heuristic search operator. The available variants when
-                        - ``hs_operator``="directional" are "pbest", "gbest", and "center".
-                        - ``hs_operator``="differential" are "current-to-rand", "best-to-rand", "rand", and "current-to-best".
+                        - ``hs_operator``="fixed" are "gbest", "center", "pgbest", "pbest"|"fixed" (default).
+                        - ``hs_operator``="random" are "uniform" and "normal" (default).
+                        - ``hs_operator``="directional" are "pbest", "gbest"|"fixed" (default), and "center".
+                        - ``hs_operator``="differential" are "rand", "current", "pbest", "best", "current-to-rand", "best-to-rand", "pbest-to-rand", "current-to-best" (default), "current-to-pbest", "rand-to-best", and "rand-to-pbest".
+                        - ``hs_operator``="swarm" are "cognitive", "social", "cogsocial" (default), and "neighbourhood".
                     - ``is_bounded``: bool, whether the perturbation is bounded (default: True)
 
         """
@@ -153,6 +203,9 @@ class PyTwoDimSpikingCoreModel(AbstractPerturbationNHeuristicModel):
 
         self.spk_cond   = proc_params['spk_cond']
         self.spk_alpha  = proc_params['spk_alpha']
+        self.spk_q_ord  = proc_params.get('spk_q_ord', 2)
+        spk_weights     = proc_params.get('spk_weights', [0.5, 0.5])
+        self.spk_weights= np.array(spk_weights) / np.mean(spk_weights) # normalise to mean 1 for stability
 
         self.hs_operator= proc_params['hs_operator']
         self.hs_variant = proc_params['hs_variant']
@@ -179,21 +232,50 @@ class PyTwoDimSpikingCoreModel(AbstractPerturbationNHeuristicModel):
         self.neighbour_indices_cache = []
         self._buffer_new_v_array = np.empty((self.num_dimensions, 2), dtype=float)
 
-        if self.hs_operator == "fixed":
-            self._apply_hs = self._hs_fixed
-        elif self.hs_operator == "random":
-            self._apply_hs = self._hs_random
-        elif self.hs_operator == "directional":
-            self._apply_hs = self._hs_directional
-        elif self.hs_operator == "differential":
-            self._apply_hs = self._hs_differential
-            if self.num_neighbours > 3:
-                for dim in range(self.num_dimensions):
-                    triplet = np.random.choice(range(self.num_neighbours), 3, replace=False)
-                    self.neighbour_indices_cache.append(triplet)
+        # Read the parameters for the heuristic search operator
+        hs_user_params = proc_params.get("hs_params", {})
+        self._hs_params = dict(HS_DEFAULT_PARAMS.get(self.hs_operator, {}))
+        self._hs_params.update(hs_user_params)
 
-        else:
-            raise ValueError(f"Unknown hs_operator: {self.hs_operator}")
+        # Configure the heuristic search operator
+        match self.hs_operator:
+            case "fixed":
+                self._apply_hs = self._hs_fixed
+            case "random":
+                self._apply_hs = self._hs_random
+            case "directional":
+                self._apply_hs = self._hs_directional
+            case "differential":
+                self._apply_hs = self._hs_differential
+
+                self._get_F = self._hs_params["F"]
+                if self._get_F is None:
+                    self._get_F = partial(self._sample_F,
+                        F_low=self._hs_params["F_low"], F_high=self._hs_params["F_high"])
+
+                if self.num_neighbours > 3:
+                    for dim in range(self.num_dimensions):
+                        triplet = np.random.choice(
+                            range(self.num_neighbours), 3, replace=False)
+                        self.neighbour_indices_cache.append(triplet)
+            case "swarm":
+                self._apply_hs = self._hs_swarm
+            case "cma":
+                self._apply_hs = self._hs_cma
+
+                self._cma_countiter     = np.zeros(self.num_dimensions).astype(float)
+                self._cma_m             = np.zeros((self.num_dimensions, 2)).astype(float)  # mean
+                self._cma_C             = np.stack([np.eye(2) for _ in range(self.num_dimensions)]).astype(float) # covariance
+                self._cma_sigma         = np.full(self.num_dimensions, self._hs_params["sigma_init"], dtype=float)  # step-size
+                self._cma_initialised   = np.zeros(self.num_dimensions, dtype=bool)
+
+                self._cma_pc            = np.zeros((self.num_dimensions, 2)).astype(float)  # evolution path for covariance
+                self._cma_ps            = np.zeros((self.num_dimensions, 2)).astype(float)  # evolution path for sigma
+
+            case _:
+                raise ValueError(f"Unknown hs_operator: {self.hs_operator}")
+
+        # print(self._hs_params)
 
         # Initialise the approximation method
         if self.approx == "euler":
@@ -221,6 +303,12 @@ class PyTwoDimSpikingCoreModel(AbstractPerturbationNHeuristicModel):
             shape=(self.num_neighbours, self.num_dimensions)).astype(float)
         self.ref_point          = np.zeros(self.shape).astype(float)
         self.prev_p             = np.zeros(self.shape).astype(float)
+
+        self.fx                 = np.empty(shape=(1,)).astype(float)
+        self.fp                 = np.empty(shape=(1,)).astype(float)
+        self.fg                 = np.empty(shape=(1,)).astype(float)
+        self.fxn                = np.empty(shape=(self.num_neighbours,)).astype(float)
+
         self.stag_count         = 0
 
     # TRANSFORMATION METHODS
@@ -307,23 +395,64 @@ class PyTwoDimSpikingCoreModel(AbstractPerturbationNHeuristicModel):
         return deriv_upsilon
 
     def _hs_fixed(self, dim, var):
-        """Fixed heuristic search operator for perturbation-based nheuristics."""
-        new_var_1 = self.v1_pbest[dim]
-        new_var_2 = self.v2_pbest[dim]
+        """Fixed heuristic search operator for perturbation-based nheuristics.
 
-        new_var = np.array([new_var_1, new_var_2]) + np.random.normal(0, self.noise_std, 2)
+        Variants (set via self.hs_variant):
+            - "gbest"  : uses the global best (gbest) position
+            - "center" : uses the center (0, 0) as the reference point
+            - "pgbest" : uses the average of personal best (pbest) and global best (gbest)
+            - "pbest"|"fixed" : uses the personal best (pbest) position
+        """
+        match self.hs_variant:
+            case "gbest":
+                new_var_1 = self.v1_gbest[dim]
+                new_var_2 = self.v2_gbest[dim]
+            case "center":
+                new_var_1 = 0.0
+                new_var_2 = 0.0
+            case "pgbest":
+                new_var_1 = (self.v1_pbest[dim] + self.v1_gbest[dim]) / 2.0
+                new_var_2 = (self.v2_pbest[dim] + self.v2_gbest[dim]) / 2.0
+            case _: #"pbest" | "fixed":
+                new_var_1 = self.v1_pbest[dim]
+                new_var_2 = self.v2_pbest[dim]
+
+        new_var = np.array([new_var_1, new_var_2]) + np.random.normal(
+            scale=self._hs_params["jitter_scale"], size= 2)
         return new_var
 
     def _hs_random(self, dim, var):
-        """Random heuristic search operator for perturbation-based nheuristics."""
-        new_var_1 = np.random.normal(0.0, 1)
-        new_var_2 = np.random.normal(0.0, 1)
+        """Random heuristic search operator for perturbation-based nheuristics.
+
+        Variants (set via self.hs_variant):
+            - "uniform" : generates random values from a uniform distribution
+            - "normal"  : generates random values from a normal distribution
+        """
+        match self.hs_variant:
+            case "uniform":
+                new_var_1 = np.random.uniform(
+                    low=self._hs_params["uniform_low"],
+                    high=self._hs_params["uniform_high"])
+                new_var_2 = np.random.uniform(
+                    low=self._hs_params["uniform_low"],
+                    high=self._hs_params["uniform_high"])
+            case _: #"normal":
+                new_var_1 = np.random.normal(
+                    loc=0.0, scale=self._hs_params["normal_std"])
+                new_var_2 = np.random.normal(
+                    loc=0.0, scale=self._hs_params["normal_std"])
 
         new_var  = np.array([new_var_1, new_var_2])
         return new_var
 
     def _hs_directional(self, dim, var):
-        """Directional heuristic search operator for perturbation-based nheuristics."""
+        """Directional heuristic search operator for perturbation-based nheuristics.
+
+        Variants (set via self.hs_variant):
+            - "pbest"  : pulls towards personal best (pbest)
+            - "gbest"  : pulls towards global best (gbest) or fixed point
+            - "center" : pulls towards the centre (0, 0)
+        """
         match self.hs_variant:
             case "pbest":
                 dir1 = self.v1_pbest[dim] - var[0]
@@ -335,30 +464,45 @@ class PyTwoDimSpikingCoreModel(AbstractPerturbationNHeuristicModel):
                 dir1 = self.v1_gbest[dim] - var[0]
                 dir2 = self.v2_gbest[dim] - var[1]
 
-        new_var  = (np.array(var) + self.alpha  * np.array([dir1, dir2]) +
-                    np.random.randn() * self.noise_std)
+        new_var  = (np.array(var)
+                    + self._hs_params["alpha_scale"]  * np.array([dir1, dir2])
+                    + np.random.normal(scale=self._hs_params["jitter_scale"], size=2))
         return new_var
 
     @staticmethod
-    def _get_F():
+    def _sample_F(F_low, F_high):
         """Returns a random scaling factor for the heuristic search operator, particularly for the differential variant."""
-        return np.random.uniform(low=0.0, high=0.5)
+        return np.random.uniform(low=F_low, high=F_high)
 
     def _hs_differential(self, dim, var):
-        """Differential heuristic search operator for perturbation-based nheuristics."""
+        """Differential heuristic search operator for perturbation-based nheuristics.
+
+        Variants (set via self.hs_variant):
+            - "rand"                : uses random neighbours for the perturbation
+            - "current"             : uses the current position as a reference
+            - "pbest"               : uses the personal best (pbest) position
+            - "best"|"gbest"     : uses the global best (gbest) position
+            - "current-to-rand"     : pulls towards a random point from the current position
+            - "best-to-rand"        : pulls towards a random point from the global best position
+            - "pbest-to-rand"       : pulls towards a random point from the personal best position
+            - "current-to-best"     : pulls towards the global best from the current position
+            - "current-to-pbest"    : pulls towards the personal best from the current position
+            - "rand-to-best"        : pulls towards the global best from a random point
+            - "rand-to-pbest"       : pulls towards the personal best from a random point
+        """
         # Get from neighbours
         if self.num_neighbours > 3:
             ind1, ind2, ind3  = self.neighbour_indices_cache[dim]
-            pre_sum = self.vn[ind1, dim]
+            pre_sum_1 = self.vn[ind1, dim]
             the_sum = self.vn[ind2, dim] - self.vn[ind3, dim]
         else:
-            pre_sum = np.random.normal(0, self.noise_std)
+            pre_sum_1 = np.random.normal(0, self.noise_std)
             the_sum = np.random.normal(0, self.noise_std)
-        pre_sum_2 = pre_sum + np.random.normal(0, self.noise_std)
+        pre_sum_2 = pre_sum_1 + np.random.normal(0, self.noise_std)
 
         match self.hs_variant:
             case "rand":
-                new_var1 = pre_sum
+                new_var1 = pre_sum_1
                 new_var2 = pre_sum_2
             case "current":
                 new_var1 = var[0]
@@ -366,44 +510,185 @@ class PyTwoDimSpikingCoreModel(AbstractPerturbationNHeuristicModel):
             case "pbest":
                 new_var1 = self.v1_pbest[dim]
                 new_var2 = self.v2_pbest[dim]
-            case "best":
+            case "best": # "gbest"
                 new_var1 = self.v1_gbest[dim]
                 new_var2 = self.v2_gbest[dim]
             case "current-to-rand":
-                new_var1 = var[0] + self._get_F() * (pre_sum - var[0])
+                new_var1 = var[0] + self._get_F() * (pre_sum_1 - var[0])
                 new_var2 = var[1] + self._get_F() * (pre_sum_2 - var[1])
             case "best-to-rand":
-                new_var1 = self.v1_gbest[dim] + self._get_F() * (pre_sum - self.v1_gbest[dim])
+                new_var1 = self.v1_gbest[dim] + self._get_F() * (pre_sum_1 - self.v1_gbest[dim])
                 new_var2 = self.v2_gbest[dim] + self._get_F() * (pre_sum_2 - self.v2_gbest[dim])
             case "pbest-to-rand":
-                new_var1 = self.v1_pbest[dim] + self._get_F() * (pre_sum - self.v1_pbest[dim])
+                new_var1 = self.v1_pbest[dim] + self._get_F() * (pre_sum_1 - self.v1_pbest[dim])
                 new_var2 = self.v2_pbest[dim] + self._get_F() * (pre_sum_2 - self.v2_pbest[dim])
-            case "current-to-best":
-                new_var1 = var[0] + self._get_F() * (self.v1_gbest[dim] - var[0])
-                new_var2 = var[1] + self._get_F() * (self.v2_gbest[dim] - var[1])
             case "current-to-pbest":
                 new_var1 = var[0] + self._get_F() * (self.v1_pbest[dim]- var[0])
                 new_var2 = var[1] + self._get_F() * (self.v2_pbest[dim] - var[1])
             case "rand-to-best":
-                new_var1 = pre_sum + self._get_F() * (self.v1_gbest[dim] - pre_sum)
-                new_var2 = pre_sum_2 + self._get_F() * (self.v2_gbest[dim] - pre_sum)
+                new_var1 = pre_sum_1 + self._get_F() * (self.v1_gbest[dim] - pre_sum_1)
+                new_var2 = pre_sum_2 + self._get_F() * (self.v2_gbest[dim] - pre_sum_1)
             case "rand-to-pbest":
-                new_var1 = pre_sum + self._get_F() * (self.v1_pbest[dim] - pre_sum)
-                new_var2 = pre_sum_2 + self._get_F() * (self.v2_pbest[dim] - pre_sum)
-            case _:
-                raise ValueError(f"Unknown hs_variant: {self.hs_variant}")
+                new_var1 = pre_sum_1 + self._get_F() * (self.v1_pbest[dim] - pre_sum_1)
+                new_var2 = pre_sum_2 + self._get_F() * (self.v2_pbest[dim] - pre_sum_1)
+            case _: # "current-to-best"
+                new_var1 = var[0] + self._get_F() * (self.v1_gbest[dim] - var[0])
+                new_var2 = var[1] + self._get_F() * (self.v2_gbest[dim] - var[1])
 
         new_var1 += self._get_F() * the_sum
         new_var2 += self._get_F() * the_sum
-        new_var = np.array([new_var1, new_var2])
+        new_var = np.array([new_var1, new_var2]) + np.random.normal(
+            scale=self._hs_params["jitter_scale"], size=2)
         return new_var
 
+    def _hs_swarm(self, dim, var):
+        """Swarm-style heuristic search operator (PSO-inspired).
+
+        Variants (set via self.hs_variant):
+            - "cognitive"         : pull towards personal best (pbest)
+            - "social"            : pull towards global best (gbest)
+            - "cogsocial" (default): combine cognitive + social
+            - "neighbourhood"     : pull towards neighbourhood mean (if available, else gbest)
+        """
+        v1, v2 = var[0], var[1]
+
+        # Cognitive (self) and social (global) directions
+        pdir1 = self.v1_pbest[dim] - v1
+        pdir2 = self.v2_pbest[dim] - v2
+        gdir1 = self.v1_gbest[dim] - v1
+        gdir2 = self.v2_gbest[dim] - v2
+
+        # Neighbourhood signal (scalar per dim; it mirrors how differential uses vn)
+        if self.num_neighbours > 0:
+            nbar = float(np.mean(self.vn[:, dim]))
+        else:
+            nbar = self.v1_gbest[dim]  # sensible fallback
+
+        # Random coefficients
+        r1 = np.random.uniform(0.0, 1.0)
+        r2 = np.random.uniform(0.0, 1.0)
+        r3 = np.random.uniform(0.0, 1.0)
+
+        # Coefficients
+        phi1    = self._hs_params["phi1"]
+        phi2    = self._hs_params["phi2"]
+        phi3    = self._hs_params["phi3"]
+        w       =   self._hs_params["w"]
+
+        match self.hs_variant:
+            case "cognitive":
+                dv1 = phi1 * r1 * pdir1
+                dv2 = phi1 * r1 * pdir2
+            case "social":
+                dv1 = phi2 * r2 * gdir1
+                dv2 = phi2 * r2 * gdir2
+            case "neighbourhood":
+                # pull both components towards the same neighbourhood scalar
+                dv1 = phi3 * r3 * (nbar - v1)
+                dv2 = phi3 * r3 * (nbar - v2)
+            case _:  # "cogsocial" by default
+                dv1 = phi1 * r1 * pdir1 + phi2 * r2 * gdir1
+                dv2 = phi1 * r1 * pdir2 + phi2 * r2 * gdir2
+
+        # Mild inertia-like nudge towards staying close to current state
+        dv1 += w * (v1 - 0.0)
+        dv2 += w * (v2 - 0.0)
+
+        # Assemble update with small scalar noise (same flavour as _hs_directional)
+        new_var = np.array([v1 + dv1, v2 + dv2]) + np.random.normal(
+            scale=self._hs_params["jitter_scale"], size=2)
+        return new_var
+
+    def _hs_cma(self, dim, var):
+        """CMA-ES lite heuristic search operator (CMA-ES inspired).
+        """
+        if not self._cma_initialised[dim]:
+            self._cma_m[dim]        = np.array([var[0], var[1]], dtype=float)
+            self._cma_C[dim]        = np.eye(2, dtype=float)
+            self._cma_sigma[dim]    = self._hs_params["sigma_init"]
+            self._cma_pc[dim]       = np.zeros(2, dtype=float)
+            self._cma_ps[dim]       = np.zeros(2, dtype=float)
+            self._cma_initialised[dim] = True
+
+        m       = self._cma_m[dim].copy()
+        C       = self._cma_C[dim].copy()
+        sigma   = self._cma_sigma[dim]
+        pc      = self._cma_pc[dim].copy()
+        ps      = self._cma_ps[dim].copy()
+
+        # Find Cholesky of C (with tiny jitter for numerical stability)
+        C       = 0.5 * (C + C.T)     # For symmetry (should be already)
+        try:
+            A = np.linalg.cholesky(C + _EPS * np.eye(2))
+        except np.linalg.LinAlgError:
+            C = np.eye(2)
+            A = np.eye(2)
+
+        # Sample new point in 2D
+        z       = np.random.normal(size=2)
+        x_prop  = m + sigma * (A @ z)
+
+        # Build guidance point (pseudo-population) from pbest, gbest, and neighbourhood positions
+        # Todo: consider adding variants for this guidance construction
+        x_p = np.array([self.v1_pbest[dim], self.v2_pbest[dim]])
+        x_g = np.array([self.v1_gbest[dim], self.v2_gbest[dim]])
+        if self.num_neighbours > 0:
+            nbar = float(np.median(self.vn[:, dim]))
+        else:
+            nbar = self.v1_gbest[dim]
+        x_n = np.array([nbar, nbar])
+
+        w_g, w_p, w_n   = 0.3, 0.3, 0.4
+        wsum            = max(1e-12, w_p + w_g + w_n)
+        x_mu            = (w_g * x_g + w_p * x_p + w_n * x_n) / wsum
+
+        # Cumulation for sigma (ps) and covariance (pc) updates
+        c_sigma     = self._hs_params["c_sigma"]
+        ps          = (1.0 - c_sigma) * ps + np.sqrt(c_sigma * (2.0 - c_sigma)) * z
+        hsig        = float(np.linalg.norm(ps) / np.sqrt(1.0 - (1.0 - c_sigma) ** (
+                (self._cma_countiter[dim] + 1.0) / 3.0)) < (31.0 / 15.0))
+        y_w         = (x_mu - m) / (sigma + _EPS)
+        pc          = ((1.0 - self._hs_params["c_c"]) * pc
+                       + hsig * np.sqrt(self._hs_params["c_c"] * (2.0 - self._hs_params["c_c"])) * y_w)
+
+        # Adapt covariance matrix towards pseudo-µ direction
+        C           = ((1.0 - self._hs_params["c1"] - self._hs_params["c_mu"]) * C       # considering the old matrix
+                       + self._hs_params["c1"] * (np.outer(pc, pc)                       # plus rank-one update
+                        + (1.0 - hsig) * self._hs_params["c_c"] * (2.0 - self._hs_params["c_c"]) * C) # with hsig correction
+                       + self._hs_params["c_mu"] * np.outer(y_w, y_w))               # plus rank-mu update
+
+        # Adapt step-size sigma
+        sigma *= float(np.exp((c_sigma / self._hs_params["d_sigma"]) * (np.linalg.norm(ps) / _E_norm - 1.0)))
+        sigma = float(np.clip(sigma, self._hs_params["min_sigma"], self._hs_params["max_sigma"]))
+
+        # Mean update towards pseudo-µ and the counteriter
+        m                        += self._hs_params["eta_m"] * (x_mu - m)
+        self._cma_countiter[dim] += 1
+
+        # persist
+        self._cma_m[dim]        = m
+        self._cma_C[dim]        = C
+        self._cma_sigma[dim]    = sigma
+        self._cma_pc[dim]       = pc
+        self._cma_ps[dim]       = ps
+
+        # Render proposed point with small jitter
+        new_var = x_prop + np.random.normal(scale=self._hs_params["jitter_scale"], size=2)
+        return new_var
 
     # DYNAMIC HEURISTIC
     def _apply_hd(self, dim, var):
         """Applies the selected approximation to the dynamic system for a given dimension."""
         # Apply the model using an approximation, if so
         new_var = self.approx_method(self.models[dim], var, dt=self.dt)
+
+        # WIP: Add assistive nudge from network activity like a reward sharing
+        a = float(self.compulsory_fire[dim])
+        if a > 0.0:
+            v_ref = np.array([self.v1_gbest[dim], self.v2_gbest[dim]])
+
+            # TODO: Add 'beta  = self._hs_params.get("nudging_beta", 0.05)'
+            new_var += 0.05 * (v_ref - var)
 
         # Post-processing
         return new_var
@@ -523,6 +808,12 @@ class PyTwoDimSpikingCoreModel(AbstractPerturbationNHeuristicModel):
         """Generalised L2 norm spiking condition based on a threshold."""
         return (v1 ** 2 + self.spk_alpha * v2 ** 2) > thr ** 2
 
+    # WIP: Weighted Lq norm (q=2) spiking condition
+    # Future: Remove l1, l2, l2_gen and only use wlq
+    def _spike_wlq(self, v1: float, v2: float, thr: float, dim: int):
+        """Weighted Lq norm (q=2) spiking condition based on a threshold."""
+        return np.linalg.norm(self.spk_weights * np.array([v1, v2]), ord=self.spk_q_ord) > thr
+
     def _spike_random(self, v1: float, v2: float, thr: float, dim: int):
         """Random spiking condition based on a threshold."""
         magnitude = np.linalg.norm([v1, v2])
@@ -544,12 +835,14 @@ class PyTwoDimSpikingCoreModel(AbstractPerturbationNHeuristicModel):
         """Initialises the spiking condition based on the specified spiking condition type."""
         if self.spk_cond == "fixed":
             return self._spike_fixed
-        elif self.spk_cond == "l1":
+        elif self.spk_cond == "l1":         # Future: Remove it and only use wlq
             return self._spike_l1
-        elif self.spk_cond == "l2":
+        elif self.spk_cond == "l2":         # Future: Remove it and only use wlq
             return self._spike_l2
-        elif self.spk_cond == "l2_gen":
+        elif self.spk_cond == "l2_gen":     # Future: Remove it and only use wlq
             return self._spike_l2_gen
+        elif self.spk_cond == "wlq":        # Weighted Lq norm (q=2) spiking condition
+            return self._spike_wlq
         elif self.spk_cond == "random":
             return self._spike_random
         elif self.spk_cond == "adaptive":
@@ -584,14 +877,23 @@ class PyTwoDimSpikingCoreModel(AbstractPerturbationNHeuristicModel):
 
         else:
             s_in        = self.s_in.recv()
-            self.g      = self.g_in.recv()
-            fg_in       = self.fg_in.recv()
+            self.fx     = self.fx_in.recv()
             self.p      = self.p_in.recv()
-            fp_in       = self.fp_in.recv()
+            self.fp     = self.fp_in.recv()
+            self.g      = self.g_in.recv()
+            self.fg     = self.fg_in.recv()
             self.xn     = self.xn_in.recv()
-            fxn_in      = self.fxn_in.recv()
+            self.fxn    = self.fxn_in.recv()
 
             self.compulsory_fire = s_in.astype(bool)
+
+            # WIP: If any neighbour has a better fitness, propagate the spike
+            # First check: it is actually working pretty fine !!!
+            if self.num_neighbours > 0:
+                is_better = np.any(self.fxn[:] < (self.fp[0] - _EPS))
+                if is_better:
+                    self.compulsory_fire[:] = True
+
             self._transform_variables()
             self._update_threshold()
             self._run_core_process()
@@ -616,10 +918,13 @@ class PySelectorModel(PyLoihiProcessModel):
     x_in:   PyInPort        = LavaPyType(PyInPort.VEC_DENSE, _POS_FLOAT_)
 
     # Variables
+    x:      np.ndarray      = LavaPyType(np.ndarray, _POS_FLOAT_)
+    fx:     np.ndarray      = LavaPyType(np.ndarray, _FIT_FLOAT_)
     p:      np.ndarray      = LavaPyType(np.ndarray, _POS_FLOAT_)
     fp:     np.ndarray      = LavaPyType(np.ndarray, _FIT_FLOAT_)
 
     # Outputs
+    fx_out: PyOutPort       = LavaPyType(PyOutPort.VEC_DENSE, _FIT_FLOAT_)
     p_out:  PyOutPort       = LavaPyType(PyOutPort.VEC_DENSE, _POS_FLOAT_)
     fp_out: PyOutPort       = LavaPyType(PyOutPort.VEC_DENSE, _FIT_FLOAT_)
 
@@ -672,10 +977,12 @@ class PySelectorModel(PyLoihiProcessModel):
             4. Sends the updated-best position and fitness to the outports.
         """
         # Read the input position
-        x       = self.x_in.recv()
+        x           = self.x_in.recv()
+        self.x[:]   = x
 
         # Evaluate the function
-        fx      = self.funct(x.flatten())
+        fx          = self.funct(x.flatten())
+        self.fx[:] = fx
 
         # Update the particular position
         if not self.initialised or self._selection(fx, x=x):
@@ -684,6 +991,7 @@ class PySelectorModel(PyLoihiProcessModel):
             self.fp[:]          = fx
 
         # Send the updated position
+        self.fx_out.send(self.fx)
         self.p_out.send(self.p)
         self.fp_out.send(self.fp)
 
@@ -881,6 +1189,8 @@ class SubNeuroHeuristicUnitModel(AbstractSubProcessModel):
         self.spiking_handler.out_ports.a_out.connect(
             self.perturbator.in_ports.s_in)
 
+        self.selector.out_ports.fx_out.connect(
+            self.perturbator.in_ports.fx_in)
         self.selector.out_ports.p_out.connect(
             self.perturbator.in_ports.p_in)
         self.selector.out_ports.fp_out.connect(

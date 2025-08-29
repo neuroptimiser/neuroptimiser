@@ -3,12 +3,21 @@ package-dir = {"" = "src"}
 
 [tool.setuptools.packages.find]
 where = ["src"]
-include = ["neuroptimiser"]
+include = ["neuroptimiser*"]
 exclude = ["tests"]
+
+[build-system]
+requires = ["setuptools>=75.7.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project.urls]
+"Homepage" = "https://neuroptimiser.github.io"
+"Documentation" = "https://neuroptimiser.github.io"
+"Source" = "https://github.com/neuroptimiser/neuroptimiser"
 
 [project]
 name = "neuroptimiser"
-version = "1.0.1.dev0"
+version = "1.0.1"
 description = "A modular and asynchronous framework for neuromorphic optimisation using spike-driven metaheuristics and heuristic-controlled spiking dynamics."
 readme = "README.md"
 authors = [
@@ -59,12 +68,3 @@ docs = [
     "sphinx-panels>=0.4.1",
     "sphinx-design>=0.6.1",
 ]
-
-[build-system]
-requires = ["setuptools>=75.7.0", "wheel"]
-build-backend = "setuptools.build_meta"
-
-[project.urls]
-"Homepage" = "https://neuroptimiser.github.io"
-"Documentation" = "https://neuroptimiser.github.io"
-"Source" = "https://github.com/neuroptimiser/neuroptimiser"

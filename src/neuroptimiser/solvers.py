@@ -648,7 +648,7 @@ class NeurOptimiser(AbstractSolver):
         g_original, p_original = self._process_positions(p, g)
 
         best_position   = g_original[-1]
-        best_fitness    = fg[-1]
+        best_fitness    = np.asarray(fg, dtype=float).ravel()[-1].item()
 
         # Prepare the results dictionary
         self.results = {

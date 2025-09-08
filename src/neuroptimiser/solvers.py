@@ -337,6 +337,9 @@ class NeurOptimiser(AbstractSolver):
             Optional("hs_variant", default="rand"):
                 And(lambda n: isinstance(n, str),
                     error="hs_variant must be a string"),
+            Optional("hs_params", default={}):
+                And(lambda n: isinstance(n, dict),
+                    error="hs_params must be a dictionary and depends on the hs_operator"),
             Optional("is_bounded", default=False):
                 And(lambda n: isinstance(n, bool),
                     error="is_bounded must be a boolean"),

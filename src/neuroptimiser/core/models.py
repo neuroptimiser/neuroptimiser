@@ -4,7 +4,6 @@ This module contains the core process models for the Neuroptimiser framework bas
 """
 __author__ = "Jorge M. Cruz-Duarte"
 __email__ = "jorge.cruz-duarte@univ-lille.fr"
-__version__ = "1.0.0"
 __all__ = ["AbstractPerturbationNHeuristicModel", "PyTwoDimSpikingCoreModel",
            "PySelectorModel", "PyHighLevelSelectionModel",
            "SubNeuroHeuristicUnitModel", "PyTensorContractionLayerModel",
@@ -120,13 +119,16 @@ HS_DEFAULT_PARAMS = {
         "jitter_scale": 0.0,          # add small noise after selecting point
     },
     "cma": {
-        "sigma_init": 0.3,     # initial global step-size
-        "eta_m": 0.25,         # mean drift rate towards guidance
-        "c1": 0.2,             # rank-1 covariance update weight
-        "c_sigma": 0.3,        # step-size adaptation rate
-        "d_sigma": 1.0,        # damping factor for step-size adaptation
-        "c_c": 0.3,            # time horizon for cumulation for covariance
-        "c_mu": 0.0,           # mean update rate (0 = only rank-1 update)
+        "sigma_init": 0.3,      # initial global step-size
+        "eta_m": 0.25,          # mean drift rate towards guidance
+        "c1": 0.2,              # rank-1 covariance update weight
+        "c_sigma": 0.3,         # step-size adaptation rate
+        "d_sigma": 1.0,         # damping factor for step-size adaptation
+        "c_c": 0.3,             # time horizon for cumulation for covariance
+        "c_mu": 0.0,            # mean update rate (0 = only rank-1 update)
+        "w_g": 0.3,             # weight for global best position
+        "w_p": 0.3,             # weight for particular best position
+        "w_n": 0.4,             # weight for neighbours' particular best position
         "min_sigma": 1e-4,
         "max_sigma": 3.0,
         # "target_success": 0.2, # (1+1) success rule target
@@ -272,6 +274,11 @@ class PyTwoDimSpikingCoreModel(AbstractPerturbationNHeuristicModel):
                 self._cma_pc            = np.zeros((self.num_dimensions, 2)).astype(float)  # evolution path for covariance
                 self._cma_ps            = np.zeros((self.num_dimensions, 2)).astype(float)  # evolution path for sigma
 
+                # Verify weights
+                sum_weights             = self._hs_params["w_g"] + self._hs_params["w_p"] + self._hs_params["w_n"]
+                self._hs_params["w_g"]  /= sum_weights
+                self._hs_params["w_p"]  /= sum_weights
+                self._hs_params["w_n"]  /= sum_weights
             case _:
                 raise ValueError(f"Unknown hs_operator: {self.hs_operator}")
 
@@ -638,9 +645,10 @@ class PyTwoDimSpikingCoreModel(AbstractPerturbationNHeuristicModel):
             nbar = self.v1_gbest[dim]
         x_n = np.array([nbar, nbar])
 
-        w_g, w_p, w_n   = 0.3, 0.3, 0.4
-        wsum            = max(1e-12, w_p + w_g + w_n)
-        x_mu            = (w_g * x_g + w_p * x_p + w_n * x_n) / wsum
+        # w_g, w_p, w_n   = 0.3, 0.3, 0.4
+        # w_g, w_p, w_n   = self._hs_params["w_g"], self._hs_params["w_p"], self._hs_params["w_n"]
+        # wsum            = max(1e-12, w_p + w_g + w_n)
+        x_mu            = (self._hs_params["w_g"] * x_g + self._hs_params["w_p"] * x_p + self._hs_params["w_n"] * x_n)
 
         # Cumulation for sigma (ps) and covariance (pc) updates
         c_sigma     = self._hs_params["c_sigma"]
@@ -965,7 +973,7 @@ class PySelectorModel(PyLoihiProcessModel):
 
     def _sel_metropolis(self, fx, **kwargs):
         """Metropolis selection strategy: accepts a new position with a probability based on the fitness difference."""
-        return np.random.rand() < np.exp(- (fx - self.fp[0]))
+        return np.random.rand() < np.exp(- max(1e-12, fx - self.fp[0]))
 
     def run_spk(self):
         """Runs the selector process model.

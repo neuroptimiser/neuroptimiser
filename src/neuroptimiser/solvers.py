@@ -337,9 +337,15 @@ class NeurOptimiser(AbstractSolver):
             Optional("hs_variant", default="rand"):
                 And(lambda n: isinstance(n, str),
                     error="hs_variant must be a string"),
+            Optional("hs_params", default={}):
+                And(lambda n: isinstance(n, dict),
+                    error="hs_params must be a dictionary and depends on the hs_operator"),
             Optional("is_bounded", default=False):
                 And(lambda n: isinstance(n, bool),
                     error="is_bounded must be a boolean"),
+            Optional("sel_mode", default="greedy"):
+                And(lambda n: n in ["greedy", "metropolis", "all", "random"],
+                    error="sel_mode must be either 'greedy', 'metropolis', 'all' or 'random'"),
         }
 
         if core_params is None:
@@ -362,10 +368,16 @@ class NeurOptimiser(AbstractSolver):
             for sub_core_params in repeated_core_params
         ]
 
-        # TODO: Verify the selector_params
+        # Validate the configuration parameters for the high-level selector
+        hl_sel_params_schema = {
+        Optional("mode", default="greedy"):
+            And(lambda n: n in ["greedy", "metropolis", "all", "random"],
+                error="mode must be either 'greedy', 'metropolis', 'all' or 'random"),
+        }
+
         if selector_params is None:
             selector_params = {}
-        self.selector_params = selector_params
+        self.selector_params = self.validate_params(hl_sel_params_schema, selector_params)
 
     def get_default_params(self) -> tuple[list[dict], dict]:
         """
@@ -431,7 +443,8 @@ class NeurOptimiser(AbstractSolver):
         # 1.3. Instantiate the high-level selection unit
         self.selection = HighLevelSelection(
             num_dimensions=self._num_dimensions,
-            num_agents=self._num_agents
+            num_agents=self._num_agents,
+            **self.selector_params
         )
 
         if self.debug_mode:
@@ -444,14 +457,12 @@ class NeurOptimiser(AbstractSolver):
             agent_config = deepcopy(self.config_params)
             agent_config["num_neighbours"] = self.neighbourhood.p_out.shape[0]
             agent_config["core_params"] = self.core_params[agent_id]
-            agent_config["selector_params"] = self.selector_params
             agent_config["core_params"]["init_position"] = initial_positions[agent_id, :]
             agent_config["core_params"]["seed"] = agent_id + 69
 
             unit = NeuroHeuristicUnit(
                 agent_id=agent_id,
                 name=f"nhu_{agent_id}",
-                # SpikingCore=self.config_params["spiking_core"],
                 **agent_config
             )
             self.nhus.append(unit)

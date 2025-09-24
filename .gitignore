@@ -10,3 +10,4 @@ docs/source/examples/figures/
 /figures/*
 tests/__*
 /exp/
+/experiments/

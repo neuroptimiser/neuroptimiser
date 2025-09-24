@@ -10,6 +10,7 @@ __all__ = [
     "IZHIKEVICH_MODELS_KIND", "DYN_MODELS_KIND", "ADJ_MAT_OPTIONS"
 ]
 
+import json
 from copy import deepcopy
 
 import numpy as np
@@ -415,3 +416,137 @@ def from_yaml(yaml_path: str, disp: bool = False) -> tuple[dict, dict, dict]:
         print("=" * 40)
 
     return experiment_params, config_params, core_params
+
+_DEFAULT_CORE_PARAMS = dict(
+    alpha       = 1.0,
+    dt          = 0.01,
+    max_steps   = 100,
+    noise_std   = (0.0, 0.3),
+    ref_mode    = "pgn",
+    is_bounded  = True,
+    name        = "linear",
+    coeffs      = "random",
+    approx      = "rk4",
+    thr_mode    = "fixed",
+    thr_alpha   = 1.0,
+    thr_min     = 1e-6,
+    thr_max     = 1.0,
+    thr_k       = 0.05,
+    spk_cond    = "fixed",
+    spk_alpha   = 0.25,
+    hs_operator = "fixed",
+    hs_variant  = "current-to-rand",
+)
+
+_DEFAULT_CONFIG_PARAMS = dict(
+    num_iterations=100,
+    num_agents=30,
+    spiking_core="TwoDimSpikingCore",
+    num_neighbours=10,
+    neuron_topology="2dr",
+    unit_topology="random",
+)
+
+
+def from_optuna_json(json_path: str, disp: bool = False) -> tuple[dict, dict, dict, list]:
+    """Load an Optuna JSON file and return its contents as a dictionary.
+
+    Arguments:
+        json_path: Path to the JSON file.
+        disp: If True, print the loaded configuration for debugging purposes.
+    Returns:
+    A tuple containing:
+        - config_params: Dictionary of configuration parameters.
+        - core_params: List of dictionaries for each unit's core parameters.
+        - raw_params: Original parameters from the JSON file.
+        - full_core_cfg: Full core configuration including defaults and custom cores.
+    """
+    if not json_path.endswith(".json"):
+        raise ValueError("The file must have a .json extension.")
+    with open(json_path, 'r') as file:
+        trial_data = json.load(file)
+
+    params = trial_data.get("params", {})
+
+    # Remove all keys that do not start with "core*"
+    config_params      = {k: v for k, v in params.items() if not k.startswith("core")}
+
+    # For each core parameter, create a dictionary
+    _core_params        = {k: v for k, v in params.items() if k.startswith("core")}
+    num_custom_cores    = len(set([k.split('_')[0] for k in _core_params.keys()]))
+
+    # Normalize the weights because they might not sum to 1, optuna does not enforce that but during experiment we do internally
+    custom_core_weights = np.array([_core_params[f"core{i+1}_weight"]
+                                    for i in range(num_custom_cores)])
+    sum_core_weights    = np.sum(custom_core_weights)
+    proportion_dist     = custom_core_weights / sum_core_weights
+
+    full_core_cfg = {"default": {}}
+    for i in range(num_custom_cores):
+        full_core_cfg[f"core_{i+1}"] = {
+            "weight": proportion_dist[i]
+        }
+        for key, value in _core_params.items():
+            if key.startswith(f"core{i+1}_") and key != f"core{i+1}_weight":
+                param_key = key.replace(f"core{i+1}_", "")
+
+                register = True
+
+                if param_key == "hd_operator":
+                    param_key = "name"
+                if param_key.startswith("coeffs_"):
+                    param_key = "coeffs"
+                if param_key == "izh_small_var":
+                    full_core_cfg[f"core_{i + 1}"]["coeffs"] += "r"
+                    register = False
+                if param_key == "coeff_all":
+                    full_core_cfg[f"core_{i + 1}"]["coeffs"] += "_all"
+                    register = False
+                if param_key.startswith("hs_variant_"):
+                    param_key = "hs_variant"
+
+                if register:
+                    full_core_cfg[f"core_{i+1}"][param_key] = value
+
+    # Print the loaded configuration for debugging purposes
+    if disp:
+        print(f"\nLoaded experiment configuration from Optuna JSON: {json_path}")
+        print("=" * 40)
+        print("Config parameters:")
+        print("-" * 40)
+        for key, value in config_params.items():
+            print(f"  {key}: {value}")
+        print("\nDefault Core parameters:")
+        print("-" * 40)
+        for key, value in full_core_cfg["default"].items():
+            print(f"  {key}: {value}")
+        print("\nFull core parameters for each kind of unit:")
+        print("-" * 40)
+        for i in range(num_custom_cores):
+            cp = full_core_cfg[f"core_{i+1}"]
+            print(f" NHU {i+1}:")
+            for key, value in cp.items():
+                print(f"    {key}: {value}")
+        print("=" * 40)
+
+    # Ensure all core parameters have a value, if not use the default one
+    proc_config_params = deepcopy(_DEFAULT_CONFIG_PARAMS)
+    proc_config_params.update(config_params)
+
+    # Define the kind of core parameters
+    num_agents              = proc_config_params["num_agents"]
+    custom_params_indices   = np.random.choice(
+        a=range(num_custom_cores), size=num_agents, p=proportion_dist)
+
+    # Assign the core parameters to each unit
+    proc_core_params = []
+    for i in range(num_agents):
+        dcp = deepcopy(_DEFAULT_CORE_PARAMS)
+
+        idx = custom_params_indices[i] + 1
+        ccp = full_core_cfg.get(f"core_{idx}", {})
+        dcp.update(ccp)
+
+        proc_core_params.append(dcp)
+
+    return proc_config_params, proc_core_params, config_params, full_core_cfg

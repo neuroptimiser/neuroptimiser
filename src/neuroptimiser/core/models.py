@@ -908,6 +908,75 @@ class PyTwoDimSpikingCoreModel(AbstractPerturbationNHeuristicModel):
 
         self._send_to_ports()
 
+class _Selector():
+    def __init__(self, selection_mode: str ='greedy', **kwargs):
+        """Initialises the selector process with the given selection mode.
+
+        Arguments
+        ---------
+            selection_mode : str
+                The selection mode to use. Options are:
+                    - 'direct' or 'accept_all' or 'all': always accepts the new position
+                    - 'random' or 'probabilistic': randomly accepts the new position with a probability of 0.5
+                    - 'metropolis': accepts the new position based on the Metropolis criterion
+                    - 'greedy' (default): accepts the new position if it has a better fitness than the current best
+        """
+        match selection_mode:
+            case 'direct'|'accept_all'|'all':
+                self._selection = self._sel_direct
+            case 'random'|'probabilistic':
+                self._selection = self._sel_random
+            case 'metropolis':
+                self._selection = self._sel_metropolis
+            case _: # Default to greedy selection
+                self._selection = self._sel_greedy
+
+        self.selection_mode = selection_mode
+
+    def select(self, fx_new, fx_current=None, **kwargs):
+        """Performs selection based on the initialized selection mode.
+
+        Arguments
+        ---------
+            fx_new : float
+                Fitness of the new position
+            fx_current : float, optional
+                Fitness of the current position
+            **kwargs : dict
+                Additional arguments for specific selection methods
+
+        Returns
+        -------
+            bool
+                True if the new position should be accepted, False otherwise
+        """
+        return self._selection(fx_new, fx_current, **kwargs)
+
+    def get_selection_function(self):
+        """Returns the current selection function.
+
+        Returns
+        -------
+            callable
+                The current selection function
+        """
+        return self._selection
+
+    def _sel_direct(self, fx_new, fx_current=None, **kwargs):
+        """Direct selection strategy: always accepts the new position."""
+        return True
+
+    def _sel_greedy(self, fx_new, fx_current=None, **kwargs):
+        """Greedy selection strategy: always selects the best position."""
+        return fx_new < fx_current
+
+    def _sel_random(self, fx_new, fx_current=None, **kwargs):
+        """Random selection strategy: randomly accepts the new position with 50% probability."""
+        return self._sel_greedy(fx_new, fx_current, **kwargs) or (np.random.rand() < 0.5)
+
+    def _sel_metropolis(self, fx_new, fx_current=None, **kwargs):
+        """Metropolis selection strategy: accepts a new position with a probability based on the fitness difference."""
+        return np.random.rand() < np.exp(- max(1e-12, fx_new - fx_current))
 
 @implements(proc=Selector, protocol=LoihiProtocol)
 @requires(CPU)
@@ -952,28 +1021,12 @@ class PySelectorModel(PyLoihiProcessModel):
         self.num_agents = proc_params['num_agents']
 
         self.funct      = proc_params['function']
-        self.sel_mode   = proc_params.get('sel_mode', 'greedy')
 
-        match self.sel_mode:
-            case 'random':
-                self._selection = self._sel_random
-            case 'metropolis':
-                self._selection = self._sel_metropolis
-            case _: # Default to greedy selection
-                self._selection = self._sel_greedy
+        self.sel_mode   = proc_params.get('sel_mode', 'greedy')
+        selector        = _Selector(selection_mode=self.sel_mode)
+        self._selection = selector.get_selection_function()
 
         self.initialised = False
-
-    def _sel_greedy(self, fx, **kwargs):
-        """Greedy selection strategy: always selects the best position."""
-        return fx < self.fp[0]
-
-    def _sel_random(self, fx, **kwargs):
-        return np.random.rand() < 0.5
-
-    def _sel_metropolis(self, fx, **kwargs):
-        """Metropolis selection strategy: accepts a new position with a probability based on the fitness difference."""
-        return np.random.rand() < np.exp(- max(1e-12, fx - self.fp[0]))
 
     def run_spk(self):
         """Runs the selector process model.
@@ -988,12 +1041,14 @@ class PySelectorModel(PyLoihiProcessModel):
         x           = self.x_in.recv()
         self.x[:]   = x
 
-        # Evaluate the function
+        # Evaluate and verify the function
         fx          = self.funct(x.flatten())
+        # Clip the fitness to avoid overflow issues
+        if not np.isfinite(fx) or np.abs(fx) > np.finfo(np.float32).max:
+            fx = np.sign(fx) * np.finfo(np.float32).max if fx != 0 else 0
         self.fx[:] = fx
 
-        # Update the particular position
-        if not self.initialised or self._selection(fx, x=x):
+        if not self.initialised or self._selection(fx_new=fx, fx_current=self.fp[0]):  #, x_new=x, x_current=self.p):
             self.initialised    = True
             self.p[:]           = x
             self.fp[:]          = fx
@@ -1042,6 +1097,11 @@ class PyHighLevelSelectionModel(PyLoihiProcessModel):
         """
         super().__init__(proc_params)
         self.num_agents     = proc_params['num_agents']
+
+        self.sel_mode       = proc_params.get('sel_mode', 'greedy')
+        selector            = _Selector(selection_mode=self.sel_mode)
+        self._selection     = selector.get_selection_function()
+
         self.initialised    = False
 
 
@@ -1072,7 +1132,7 @@ class PyHighLevelSelectionModel(PyLoihiProcessModel):
         new_fg              = fg_candidates[best_candidate]
 
         # Compare and update the global best
-        if not self.initialised or new_fg < self.fg[0]:
+        if not self.initialised or self._selection(fx_new=new_fg, fx_current=self.fg[0]):  #, x_new=new_g, x_current=self.g):
             self.initialised    = True
             self.g[:]           = new_g
             self.fg[:]          = new_fg
@@ -1145,7 +1205,6 @@ class SubNeuroHeuristicUnitModel(AbstractSubProcessModel):
         function        = proc.proc_params.get("function", lambda x: np.linalg.norm(x))
 
         core_params     = proc.proc_params.get("core_params", {})
-        selector_params = proc.proc_params.get("selector_params", {})
 
         # BUILDING BLOCKS
         # Spiking Core or PerturbationNHeuristic
@@ -1162,7 +1221,7 @@ class SubNeuroHeuristicUnitModel(AbstractSubProcessModel):
             num_agents=num_agents,
             function=function,
             num_dimensions=num_dimensions,
-            **selector_params
+            **core_params
         )
         proc.selector_ref = self.selector
 

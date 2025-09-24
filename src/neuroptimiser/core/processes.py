@@ -444,8 +444,9 @@ class HighLevelSelection(AbstractProcess):
         self.g_out  = OutPort(shape=(num_dimensions,))
         self.fg_out = OutPort(shape=(1,))
 
-        self.proc_params["num_agents"] = num_agents
-        self.proc_params["num_dimensions"] = num_dimensions
+        self.proc_params["num_agents"]      = num_agents
+        self.proc_params["num_dimensions"]  = num_dimensions
+        self.proc_params["sel_mode"]        = kwargs.get("sel_mode", "greedy")
 
     def reset(self) -> None:
         """Reset the HighLevelSelection to its initial state."""
@@ -500,7 +501,6 @@ class NeuroHeuristicUnit(AbstractProcess):
                  spiking_core: AbstractProcess = None,
                  function=None,
                  core_params=None,
-                 selector_params=None,
                  **kwargs):
         """Initialise the NeuroHeuristicUnit with the given parameters.
 
@@ -539,7 +539,6 @@ class NeuroHeuristicUnit(AbstractProcess):
         self.proc_params["num_neighbours"]  = num_neighbours
         self.proc_params["function"]        = function
         self.proc_params["core_params"]     = core_params
-        self.proc_params["selector_params"] = selector_params
 
         self.proc_params["spiking_core"]    = spiking_core
 
@@ -564,7 +563,6 @@ class NeuroHeuristicUnit(AbstractProcess):
             self.fpn_in = InPort(shape=(num_neighbours, num_agents))
 
         self.core_ref       = core_params.get("core_ref", None)
-        self.selector_ref   = selector_params.get("selector_ref", None)
 
     def reset(self) -> None:
         """Reset the NeuroHeuristicUnit to its initial state."""
@@ -575,10 +573,6 @@ class NeuroHeuristicUnit(AbstractProcess):
         if self.core_ref and hasattr(
                 self.core_ref, "reset"):
             self.core_ref.reset()
-
-        if self.selector_ref and hasattr(
-                self.selector_ref, "reset"):
-            self.selector_ref.reset()
 
 
 class TensorContractionLayer(AbstractProcess):

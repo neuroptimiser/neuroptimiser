@@ -2,7 +2,7 @@
 
 ## Sync the environment and reinstall editable package
 sync:
-	uv sync
+	uv sync --all-extras
 	uv pip install -e ".[dev]"
 
 ## Install just the editable package

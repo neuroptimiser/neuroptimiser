@@ -49,6 +49,10 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+nengo = [
+    "nengo>=4.1.0",
+    "nengo-gui",
+]
 dev = [
     "pytest>=8.3.4",
     "build>=1.0.0",

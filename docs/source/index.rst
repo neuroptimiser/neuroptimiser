@@ -59,6 +59,13 @@ If you are new to neuromorphic computing or metaheuristic optimisation, we recom
    api
 
 .. toctree::
+    :maxdepth: 2
+    :caption: Events
+    :hidden:
+
+    events/index
+
+.. toctree::
    :maxdepth: 2
    :caption: Contribution Guide
    :hidden:

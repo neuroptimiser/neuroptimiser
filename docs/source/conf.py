@@ -41,7 +41,7 @@ extensions = [
 add_module_names = False
 nb_execution_mode = "off"
 
-myst_enable_extensions = ["colon_fence", "dollarmath", "html_image"]
+myst_enable_extensions = ["colon_fence", "dollarmath", "html_image", "html_admonition"]
 myst_fence_as_directive = ["mermaid"]
 
 copybutton_prompt_text = ">>> "

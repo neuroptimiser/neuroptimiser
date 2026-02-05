@@ -84,7 +84,7 @@ Neuroptimiser has been validated over the [BBOB suite](https://github.com/numbbo
 * 🧪 [COCO Platform](https://github.com/numbbo/coco)
 
 ## 🛠️ License
-MIT License — [see LICENSE](LICENSE)
+BSD-3-Clause License — [see LICENSE](LICENSE)
 
 ## 🧑‍💻 Authors
 * [Jorge M. Cruz-Duarte](https://github.com/jcrvz) — University of Lille

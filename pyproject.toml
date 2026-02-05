@@ -17,7 +17,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "neuroptimiser"
-version = "1.0.2"
+version = "1.0.3"
 description = "A modular and asynchronous framework for neuromorphic optimisation using spike-driven metaheuristics and heuristic-controlled spiking dynamics."
 readme = "README.md"
 authors = [
@@ -25,7 +25,7 @@ authors = [
     {name = "El-Ghazali Talbi", email = "el-ghazali.talbi@univ-lille.fr"},
 ]
 keywords = ["neuromorphic", "spiking", "optimisation", "lava-nc"]
-license = "MIT"
+license = "BSD-3-Clause"
 license-files = ["LICENSE"]
 classifiers = [
     "Programming Language :: Python :: 3",

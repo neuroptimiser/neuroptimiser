@@ -32,17 +32,53 @@ For detailed documentation, examples, and API reference, please visit the [Neuro
 
 ## 📦 Installation
 
-```bash
-pip install -e .
-```
-Ensure you have Python ≥ 3.10 and the Lava-NC environment configured.
+### Requirements
+- **Python 3.10** (tested and recommended version)
+- Lava-NC environment configured
 
-You can also clone the repository and install it. Check the Makefile for additional options.
+### Install with pip
+```bash
+# After cloning the repository and navigating to the project directory
+pip install -e .
+# or just install from PyPI
+pip install neuroptimiser
+```
+
+### Install with uv
+```bash
+# After cloning the repository and navigating to the project directory
+uv pip install -e .
+# or just install from PyPI
+uv pip install neuroptimiser
+```
+
+You can also use the provided `Makefile` for additional installation options and commands.
+
+### Known Issues
+
+**"Too many open files" error**: On some systems, you may encounter this error during execution. To fix it:
+
+**Unix/Linux/macOS:**
+```bash
+ulimit -n 65536
+```
+
+**Windows (PowerShell):**
+```powershell
+# No direct equivalent - typically not needed on Windows
+# If issues persist, check system file handle limits via registry
+```
+
+**Windows (Command Prompt):**
+```cmd
+REM Windows typically has higher default limits
+REM If needed, adjust via Registry Editor or contact system administrator
+```
 
 
 ## 🚀 Example Usage
 ```python
-from neuroptimiser import NeuroOptimiser
+from neuroptimiser import NeurOptimiser
 import numpy as np
 
 problem_function    = lambda x: np.linalg.norm(x)

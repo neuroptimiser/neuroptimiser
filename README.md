@@ -115,7 +115,8 @@ Neuroptimiser has been validated over the [BBOB suite](https://github.com/numbbo
 
 ## 🔗 Resources
 * 📘 [Documentation](https://neuroptimiser.github.io)
-* 📜 [Paper](https://doi.org/10.48550/arXiv.2507.08320)
+* 📜 [Main Paper](https://doi.org/10.1109/TEVC.2026.3723682)
+* 📜 [ArXiv Paper](https://doi.org/10.48550/arXiv.2507.08320)
 * 🧠 [Intel Lava-NC](https://github.com/lava-nc/lava)
 * 🧪 [COCO Platform](https://github.com/numbbo/coco)
 
